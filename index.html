@@ -6,167 +6,292 @@
   <title>꽃을만지는 누나가 도와드림</title>
   <style>
     :root{
-      --bg:#0b0c10;
-      --card:#12141a;
-      --muted:#9aa4b2;
-      --text:#e8eef7;
-      --line:#232734;
-      --accent:#7aa2ff;
-      --accent2:#8dffcf;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      /* 밝은 원톤 */
+      --bg:#f4f5f7;
+
+      /* 카드/텍스트 */
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+
+      /* 라인/그림자 */
+      --line:#e5e7eb;
+      --ink:#111827;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+
+      /* 포인트(그린) */
+      --accent:#22c55e; /* green */
+      --accentDark:#16a34a;
+
       --radius: 18px;
       --pad: 18px;
       --max: 760px;
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic", sans-serif;
-      background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,.18), transparent 60%),
-                  radial-gradient(1000px 500px at 80% 10%, rgba(141,255,207,.12), transparent 55%),
-                  var(--bg);
+      background: var(--bg);          /* ✅ 그라데이션 제거 */
       color:var(--text);
-      line-height:1.5;
+      line-height:1.45;
     }
+
     .wrap{max-width:var(--max); margin:0 auto; padding:24px 16px 60px;}
+
     .card{
       border:1px solid var(--line);
       border-radius:var(--radius);
-      background: rgba(18,20,26,.86);
+      background: var(--card);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
     .hd{
       padding:14px var(--pad);
       border-bottom:1px solid var(--line);
       display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background: #fff;
     }
-    .hd h1, .hd h2{margin:0; font-size:16px; letter-spacing:-.2px;}
+
+    .hd h1, .hd h2{margin:0; font-size:16px; letter-spacing:-.2px; color: var(--text);}
+
     .bd{padding: var(--pad);}
+
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding:8px 10px; border:1px solid var(--line); border-radius:999px;
       color:var(--muted); font-size:12px;
-      background: rgba(255,255,255,.03);
+      background: #fff;
       user-select:none;
       white-space:nowrap;
     }
+
     .muted{color:var(--muted)}
+
     .hero{
       padding:22px 18px;
       border:1px solid var(--line);
       border-radius: var(--radius);
-      background: rgba(255,255,255,.03);
+      background: #fff;
     }
-    .hero h1{font-size:22px; margin:0 0 8px; letter-spacing:-.3px;}
-    .hero p{margin:0 0 10px; color:var(--muted)}
+
+    .hero h1{
+      font-size:22px;
+      margin:0 0 8px;
+      letter-spacing:-.4px;
+      font-weight:900;
+      color:var(--text);
+    }
+
+    .hero p{margin:0 0 10px; color:var(--muted); font-size:14px;}
+
     .hero .mini{
-      margin-top:10px; font-size:13px; color: rgba(232,238,247,.92);
+      margin-top:10px;
+      font-size:13px;
+      color: var(--text);
+      opacity:.9;
     }
+
     .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+
     button{
       appearance:none;
-      border:1px solid rgba(122,162,255,.55);
-      background: rgba(122,162,255,.10);
-      color: var(--text);
+      border:1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
       padding: 12px 14px;
       border-radius: 14px;
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
       letter-spacing:-.1px;
       transition: transform .08s ease, background .15s ease, border-color .15s ease;
     }
-    button:hover{transform: translateY(-1px); background: rgba(122,162,255,.16); border-color: rgba(122,162,255,.75);}
+    button:hover{transform: translateY(-1px); background: var(--accentDark); border-color: var(--accentDark);}
+
     button.secondary{
-      border-color: rgba(255,255,255,.16);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      font-weight:650;
+      border:1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-weight:800;
     }
-    button.secondary:hover{background: rgba(255,255,255,.06);}
+    button.secondary:hover{background:#f8fafc; border-color:#d1d5db;}
+
     .screen{display:none;}
     .screen.active{display:block;}
+
     .progressWrap{
       margin: 0 0 14px;
       padding: 10px 12px;
       border:1px solid var(--line);
       border-radius: 14px;
-      background: rgba(255,255,255,.03);
+      background: #fff;
     }
+
     .progressTop{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       font-size:12px; color:var(--muted);
       margin-bottom:8px;
+      font-weight:700;
     }
+
     .bar{
       height:10px;
       border-radius:999px;
-      background: rgba(255,255,255,.08);
+      background: #eef2f7;
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
+      border:1px solid #e5e7eb;
     }
+
     .bar > div{
       height:100%;
       width:0%;
-      background: linear-gradient(90deg, rgba(122,162,255,.9), rgba(141,255,207,.85));
+      background: var(--accent); /* ✅ 그린 */
+      transition: width .25s ease;
     }
+
+    /* ✅ Q 폰트(사진 느낌: 굵고 크게, 가운데) */
     .q{
-      margin:0 0 6px;
-      font-size:18px;
-      letter-spacing:-.2px;
+      margin: 6px 0 10px;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: -0.6px;
+      font-weight: 900;
+      text-align:center;
+      color: var(--text);
     }
+
     .sub{
-      margin:0 0 14px;
+      margin:0 0 16px;
       color:var(--muted);
       font-size:13px;
+      text-align:center;
+      font-weight:650;
     }
+
     .options{
       display:grid;
       grid-template-columns: 1fr;
-      gap:10px;
+      gap:12px;
     }
-    @media (min-width: 520px){
-      .options.two{grid-template-columns: 1fr 1fr;}
+
+    /* ✅ AB는 항상 2칸(폰에서도) */
+    .options.two{
+      grid-template-columns: 1fr 1fr;
     }
+
+    @media (max-width: 360px){
+      .options.two{ grid-template-columns: 1fr; } /* 너무 좁으면 1칸 */
+    }
+
+    /* ✅ 선택 박스: 기본 흰색, 두꺼운 테두리, 그림자 */
     .opt{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      padding:14px 14px;
-      border-radius: 16px;
+      border:2px solid var(--ink);
+      background: #fff;
+      padding:16px 14px;
+      border-radius: 18px;
       cursor:pointer;
-      transition: transform .08s ease, border-color .15s ease, background .15s ease;
-      display:flex; align-items:flex-start; gap:10px;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease, color .15s ease;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+
+      /* 사진처럼 살짝 뜬 느낌 */
+      box-shadow: 0 8px 0 rgba(17,24,39,.10);
     }
-    .opt:hover{transform: translateY(-1px); border-color: rgba(122,162,255,.55);}
-    .opt .title{font-weight:800; letter-spacing:-.1px;}
-    .opt .desc{font-size:12px; color:var(--muted); margin-top:4px;}
+
+    .opt:hover{transform: translateY(-1px); border-color: var(--accent);}
+
+    /* ✅ 선택 후 그린 */
     .opt[data-selected="true"]{
-      border-color: rgba(141,255,207,.60);
-      background: rgba(141,255,207,.08);
+      border-color: var(--accent);
+      background: var(--accent);
+      color:#fff;
     }
-    .footnote{margin-top:12px; font-size:12px; color:var(--muted);}
+
+    .opt .title{
+      font-weight: 900;
+      letter-spacing:-.2px;
+      color: inherit;
+      font-size: 15px;
+    }
+
+    .opt .desc{
+      font-size:12px;
+      color: var(--muted);
+      margin-top:6px;
+      font-weight:650;
+    }
+
+    .opt[data-selected="true"] .desc{
+      color: rgba(255,255,255,.92);
+    }
+
+    /* ✅ AB 박스 스타일 (A./B. 라벨 크게) */
+    .opt.abOpt{
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align:center;
+      padding:18px 14px;
+      min-height: 120px;
+      gap:8px;
+    }
+
+    .abBadge{
+      font-weight: 1000;
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing:-.2px;
+      color: inherit;
+    }
+
+    .abTitle{
+      font-weight: 950;
+      font-size: 16px;
+      letter-spacing:-.3px;
+      color: inherit;
+    }
+
+    .abDesc{
+      font-size:12px;
+      font-weight:700;
+      color: var(--muted);
+    }
+    .opt[data-selected="true"] .abDesc{
+      color: rgba(255,255,255,.92);
+    }
+
+    .footnote{margin-top:12px; font-size:12px; color:var(--muted); font-weight:600;}
+
     .box{
       border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
+      background: #fff;
       border-radius: 16px;
       padding: 14px;
       margin-top: 12px;
     }
-    .box h3{margin:0 0 8px; font-size:14px;}
+
+    .box h3{margin:0 0 8px; font-size:14px; font-weight:900; letter-spacing:-.2px;}
+
     .chips{display:flex; flex-wrap:wrap; gap:8px;}
     .chip{
-      font-size:12px; color: rgba(255,255,255,.92);
+      font-size:12px; color: var(--text);
       padding:6px 10px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      background: #f8fafc;
+      font-weight:800;
     }
-    .list{margin:8px 0 0; padding-left: 18px; font-size:13px;}
+
+    .list{margin:8px 0 0; padding-left: 18px; font-size:13px; color: var(--text); font-weight:650;}
     .list li{margin:4px 0;}
+
     .toast{
       position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
-      background: rgba(18,20,26,.92);
-      border: 1px solid rgba(255,255,255,.14);
-      color: var(--text);
+      background: rgba(17,24,39,.92);
+      border: 1px solid rgba(255,255,255,.18);
+      color: #fff;
       padding: 10px 12px;
       border-radius: 14px;
       box-shadow: var(--shadow);
@@ -174,12 +299,15 @@
       opacity: 0; pointer-events:none;
       transition: opacity .15s ease;
       z-index: 9999;
+      font-weight:700;
     }
     .toast.show{opacity:1;}
-    .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
+
+    .divider{height:1px; background: #eef2f7; margin:12px 0;}
+
     .ctaPro{
-      border: 1px dashed rgba(122,162,255,.55);
-      background: rgba(122,162,255,.08);
+      border: 1px dashed rgba(34,197,94,.55);
+      background: rgba(34,197,94,.06);
     }
   </style>
 </head>
@@ -195,7 +323,7 @@
         <div class="bd">
           <div class="hero">
             <h1>그녀의 취향, 꽃 골라드려요</h1>
-            <p>10년차 꽃집누나가 <b>어울리는 꽃 컨셉 +꽃 의미+ 멘트</b> 까지 싸악 한 번에 정리해줄게.</p>
+            <p>10년차 꽃집누나가 <b>어울리는 꽃 컨셉 + 꽃 의미 + 멘트</b>까지 싸악 한 번에 정리해줄게.</p>
             <div class="mini">✅ 30초 선택 · ✅ 결과 링크 공유 · ✅ 멘트 복사</div>
             <div class="btnrow">
               <button id="btnStart">시작하기</button>
@@ -222,7 +350,7 @@
             <div class="bar"><div id="barFill"></div></div>
           </div>
 
-          <h2 class="q" id="qText">질문</h2>
+          <h2 class="q" id="qText">Q. 질문</h2>
           <p class="sub" id="qSub">설명</p>
 
           <div class="options" id="options"></div>
@@ -351,10 +479,10 @@
         id:'brightness',
         type:'ab',
         title:'분위기 먼저 골라. 둘 중 하나!',
-        sub:'이제부터 누나가 취향 좁혀줄게.',
+        sub:'여기부터 누나가 취향 좁혀줄게.',
         options:[
-          {value:'bright', title:'화사하게 🌞', desc:'밝고 기분 좋아지는 느낌'},
-          {value:'calm', title:'차분하게 🌙', desc:'톤다운, 편안하고 고급스럽게'}
+          {value:'bright', title:'화사하게', desc:'밝고 기분 좋아지는 느낌'},
+          {value:'calm', title:'차분하게', desc:'톤다운, 편안하고 고급스럽게'}
         ]
       },
       {
@@ -363,8 +491,8 @@
         title:'느낌은 어떤 쪽이 더 그 사람 같아?',
         sub:'감으로 고르면 돼.',
         options:[
-          {value:'cute', title:'귀엽게 🧸', desc:'발랄/러블리 계열'},
-          {value:'chic', title:'세련되게 🖤', desc:'깔끔/도시적 계열'}
+          {value:'cute', title:'귀엽게', desc:'발랄/러블리 계열'},
+          {value:'chic', title:'세련되게', desc:'깔끔/도시적 계열'}
         ]
       },
       {
@@ -373,8 +501,8 @@
         title:'볼륨은?',
         sub:'심플 vs 풍성, 여기서 확 갈려요.',
         options:[
-          {value:'simple', title:'심플하게 ✨', desc:'정돈된 느낌'},
-          {value:'lush', title:'풍성하게 🎀', desc:'존재감 있는 느낌'}
+          {value:'simple', title:'심플하게', desc:'정돈된 느낌'},
+          {value:'lush', title:'풍성하게', desc:'존재감 있는 느낌'}
         ]
       },
       {
@@ -397,9 +525,9 @@
         title:'언제 필요해?',
         sub:'급하면 “재고 위주 + 무드 유지”가 답이야.',
         options:[
-          {value:'오늘(당일)', title:'오늘(당일) ⚡', desc:'빠르게 제작 가능한 조합'},
-          {value:'내일', title:'내일 ⏰', desc:'원하는 톤은 가능, 품절 대체는 필요'},
-          {value:'여유(2–7일)', title:'여유(2–7일) 🌿', desc:'원하는 꽃 반영 가능'}
+          {value:'오늘(당일)', title:'오늘(당일)', desc:'빠르게 제작 가능한 조합'},
+          {value:'내일', title:'내일', desc:'원하는 톤은 가능, 품절 대체는 필요'},
+          {value:'여유(2–7일)', title:'여유(2–7일)', desc:'원하는 꽃 반영 가능'}
         ]
       }
     ];
@@ -440,7 +568,7 @@
     }
 
     const sisterLines = [
-      '오케이, 결론부터 말할게. ‘예쁘게’ 말고 ‘성향’이야.',
+      '오케이, 결론부터 말할게. “예쁘게” 말고 “성향”이야.',
       '디테일 욕심 금지. 무드만 맞추면 반은 먹고 들어가.',
       '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
     ];
@@ -466,7 +594,6 @@
     }
 
     let stepIdx = 0;
-
     function currentStep(){ return steps[stepIdx]; }
 
     function setAnswer(stepId, value){
@@ -514,7 +641,7 @@
       const s = currentStep();
 
       $('quizTitle').textContent = `Q${stepIdx+1}`;
-      $('qText').textContent = s.title;
+      $('qText').textContent = `Q. ${s.title}`;   // ✅ Q. 붙이기
       $('qSub').textContent = s.sub || '';
       $('quizFootnote').textContent = s.footnote || '';
 
@@ -529,26 +656,37 @@
 
       const selected = getAnswer(s.id);
 
-      s.options.forEach(opt=>{
+      s.options.forEach((opt, idx)=>{
         const div = document.createElement('div');
         div.className = 'opt';
+
         const isSelected = (s.type === 'multi')
           ? (selected || []).includes(opt.value)
           : (selected === opt.value);
 
         div.dataset.selected = isSelected ? 'true' : 'false';
 
-        div.innerHTML = `
-          <div>
-            <div class="title">${escapeHtml(opt.title)}</div>
-            ${opt.desc ? `<div class="desc">${escapeHtml(opt.desc)}</div>` : ''}
-          </div>
-        `;
+        // ✅ AB는 사진처럼 A./B. 라벨 + 가운데 정렬 박스
+        if(s.type === 'ab'){
+          const letter = (idx === 0) ? 'A' : 'B';
+          div.classList.add('abOpt');
+          div.innerHTML = `
+            <div class="abBadge">${letter}.</div>
+            <div class="abTitle">${escapeHtml(opt.title)}</div>
+            ${opt.desc ? `<div class="abDesc">${escapeHtml(opt.desc)}</div>` : ''}
+          `;
+        } else {
+          div.innerHTML = `
+            <div>
+              <div class="title">${escapeHtml(opt.title)}</div>
+              ${opt.desc ? `<div class="desc">${escapeHtml(opt.desc)}</div>` : ''}
+            </div>
+          `;
+        }
 
         div.addEventListener('click', ()=>{
           setAnswer(s.id, opt.value);
           renderStep();
-
           if(s.type !== 'multi') setTimeout(()=>goNext(), 120);
         });
 
@@ -583,17 +721,14 @@
       showScreen('screenStart');
     }
 
+    /* ===== 아래 로직(결과 생성)은 너 코드 그대로 유지 ===== */
     const profiles = {
       '러블리': {
         concept: '핑크 무드 러블리',
         mood: ['따뜻', '사랑스러움', '부드러움'],
         tone: '핑크/크림/연한 코랄 중심',
         wrap: '파스텔 포장 + 얇은 리본(과하지 않게)',
-        flowers: {
-          main: ['튤립', '라넌큘러스', '리시안셔스(유스토마)', '거베라(핑크)'],
-          sub: ['스프레이 카네이션', '알스트로메리아'],
-          texture: ['유칼립투스', '왁스플라워']
-        },
+        flowers: { main: ['튤립','라넌큘러스','리시안셔스(유스토마)','거베라(핑크)'], sub: ['스프레이 카네이션','알스트로메리아'], texture: ['유칼립투스','왁스플라워'] },
         meaning: '‘다정함’과 ‘설렘’ 무드'
       },
       '세련됨': {
@@ -601,11 +736,7 @@
         mood: ['깔끔', '세련', '정돈'],
         tone: '화이트/그린 + 톤다운 포인트',
         wrap: '무광 종이 + 톤다운 포장(정돈된 느낌)',
-        flowers: {
-          main: ['리시안셔스(화이트)', '카라(칼라)', '아네모네', '튤립(화이트)'],
-          sub: ['알스트로메리아', '스카비오사'],
-          texture: ['유칼립투스', '러스커스(그린)']
-        },
+        flowers: { main: ['리시안셔스(화이트)','카라(칼라)','아네모네','튤립(화이트)'], sub: ['알스트로메리아','스카비오사'], texture: ['유칼립투스','러스커스(그린)'] },
         meaning: '‘존중’과 ‘센스’ 무드'
       },
       '귀여움': {
@@ -613,11 +744,7 @@
         mood: ['발랄', '명랑', '귀여움'],
         tone: '밝은 컬러(옐로/핑크/라이트 오렌지) 1~2색',
         wrap: '컬러 포인트 포장(과하지 않게)',
-        flowers: {
-          main: ['거베라', '튤립', '라넌큘러스'],
-          sub: ['알스트로메리아', '스프레이 카네이션'],
-          texture: ['유칼립투스', '왁스플라워']
-        },
+        flowers: { main: ['거베라','튤립','라넌큘러스'], sub: ['알스트로메리아','스프레이 카네이션'], texture: ['유칼립투스','왁스플라워'] },
         meaning: '‘기분 업’과 ‘응원’ 무드'
       },
       '미니멀': {
@@ -625,11 +752,7 @@
         mood: ['심플', '담백', '차분'],
         tone: '원톤(화이트/크림/연핑크 중 1) + 그린 최소',
         wrap: '무광/크라프트 계열 + 리본 최소',
-        flowers: {
-          main: ['리시안셔스(유스토마)', '튤립', '아네모네'],
-          sub: ['알스트로메리아'],
-          texture: ['유칼립투스', '러스커스(그린)']
-        },
+        flowers: { main: ['리시안셔스(유스토마)','튤립','아네모네'], sub: ['알스트로메리아'], texture: ['유칼립투스','러스커스(그린)'] },
         meaning: '‘편안함’과 ‘정성’ 무드'
       },
       '우아함': {
@@ -637,11 +760,7 @@
         mood: ['우아', '차분', '고급'],
         tone: '크림/화이트/톤다운 핑크 + 그린',
         wrap: '톤다운 포장 + 고급스러운 리본(과하지 않게)',
-        flowers: {
-          main: ['리시안셔스(유스토마)', '라넌큘러스', '튤립'],
-          sub: ['스카비오사', '알스트로메리아'],
-          texture: ['유칼립투스', '왁스플라워']
-        },
+        flowers: { main: ['리시안셔스(유스토마)','라넌큘러스','튤립'], sub: ['스카비오사','알스트로메리아'], texture: ['유칼립투스','왁스플라워'] },
         meaning: '‘품격’과 ‘존중’ 무드'
       },
       '활기': {
@@ -649,40 +768,36 @@
         mood: ['에너지', '밝음', '활기'],
         tone: '옐로/라이트 오렌지 + 화이트로 정리',
         wrap: '밝은 포인트 포장 + 깔끔한 마감',
-        flowers: {
-          main: ['해바라기', '거베라', '튤립'],
-          sub: ['알스트로메리아', '스프레이 카네이션'],
-          texture: ['유칼립투스', '러스커스(그린)']
-        },
+        flowers: { main: ['해바라기','거베라','튤립'], sub: ['알스트로메리아','스프레이 카네이션'], texture: ['유칼립투스','러스커스(그린)'] },
         meaning: '‘응원’과 ‘기분전환’ 무드'
       }
     };
 
     const tabooBans = {
-      '향 강한 꽃은 싫어함': ['백합', '프리지아', '히아신스', '스톡'],
-      '장미는 싫어함': ['장미', '스프레이장미']
+      '향 강한 꽃은 싫어함': ['백합','프리지아','히아신스','스톡'],
+      '장미는 싫어함': ['장미','스프레이장미']
     };
 
     const occasionReason = {
-      '생일': '생일은 ‘축하’가 중심. 밝고 기분 좋아지는 무드가 안전해요.',
-      '기념일': '기념일은 ‘관계의 확신’이 포인트. 과하지 않게 센스가 좋아요.',
-      '사과(미안해)': '사과는 ‘부담’보다 ‘진심’. 톤다운 + 담백이 제일 안정적이에요.',
-      '축하(합격/승진/새출발)': '축하는 ‘응원/자부심’. 깔끔한데 힘 있는 조합이 좋아요.',
-      '첫 선물': '첫 선물은 ‘안전하게 호감’. 취향 존중 톤이 답이에요.',
-      '그냥(고맙고 응원)': '그냥 주는 건 ‘일상에 정성’. 멘트 한 줄이면 센스 완성.'
+      '생일':'생일은 ‘축하’가 중심. 밝고 기분 좋아지는 무드가 안전해요.',
+      '기념일':'기념일은 ‘관계의 확신’이 포인트. 과하지 않게 센스가 좋아요.',
+      '사과(미안해)':'사과는 ‘부담’보다 ‘진심’. 톤다운 + 담백이 제일 안정적이에요.',
+      '축하(합격/승진/새출발)':'축하는 ‘응원/자부심’. 깔끔한데 힘 있는 조합이 좋아요.',
+      '첫 선물':'첫 선물은 ‘안전하게 호감’. 취향 존중 톤이 답이에요.',
+      '그냥(고맙고 응원)':'그냥 주는 건 ‘일상에 정성’. 멘트 한 줄이면 센스 완성.'
     };
 
     function mapPersonality(brightness, style, volume){
       const key = `${brightness}|${style}|${volume}`;
       const table = {
-        'bright|cute|lush': '귀여움',
-        'bright|cute|simple': '러블리',
-        'bright|chic|simple': '세련됨',
-        'bright|chic|lush': '활기',
-        'calm|chic|simple': '미니멀',
-        'calm|chic|lush': '우아함',
-        'calm|cute|simple': '러블리',
-        'calm|cute|lush': '우아함'
+        'bright|cute|lush':'귀여움',
+        'bright|cute|simple':'러블리',
+        'bright|chic|simple':'세련됨',
+        'bright|chic|lush':'활기',
+        'calm|chic|simple':'미니멀',
+        'calm|chic|lush':'우아함',
+        'calm|cute|simple':'러블리',
+        'calm|cute|lush':'우아함'
       };
       return table[key] || '세련됨';
     }
@@ -696,9 +811,9 @@
       const subCandidates = profile.flowers.sub.filter(f => !banned.some(b => f.includes(b)));
       const texCandidates = profile.flowers.texture.filter(f => !banned.some(b => f.includes(b)));
 
-      const fallbackMain = ['리시안셔스(유스토마)', '튤립', '라넌큘러스', '거베라'].filter(f => !banned.some(b => f.includes(b)));
-      const fallbackSub = ['알스트로메리아', '스프레이 카네이션'].filter(f => !banned.some(b => f.includes(b)));
-      const fallbackTex = ['유칼립투스', '러스커스(그린)', '왁스플라워'].filter(f => !banned.some(b => f.includes(b)));
+      const fallbackMain = ['리시안셔스(유스토마)','튤립','라넌큘러스','거베라'].filter(f => !banned.some(b => f.includes(b)));
+      const fallbackSub = ['알스트로메리아','스프레이 카네이션'].filter(f => !banned.some(b => f.includes(b)));
+      const fallbackTex = ['유칼립투스','러스커스(그린)','왁스플라워'].filter(f => !banned.some(b => f.includes(b)));
 
       const main = (mainCandidates.length ? mainCandidates : fallbackMain).slice(0,2);
       const sub = (subCandidates.length ? subCandidates : fallbackSub).slice(0,2);
@@ -732,36 +847,12 @@
       };
 
       const tails = {
-        '생일': {
-          simple: ' 오늘은 너 주인공.',
-          sense: ' 네 날이니까 챙겨야지 🙂',
-          sincere: ' 올 한 해도 좋은 일만 가득하길!'
-        },
-        '기념일': {
-          simple: ' 그냥 넘어가면 섭하지.',
-          sense: ' 기념일이라 확실히 챙김 🙂',
-          sincere: ' 우리 앞으로도 계속 잘 지내자.'
-        },
-        '사과(미안해)': {
-          simple: ' 내가 좀 더 신경 쓸게.',
-          sense: ' 말로만 말고 행동으로 보여줄게 🙂',
-          sincere: ' 미안해. 마음 풀렸으면 좋겠다.'
-        },
-        '축하(합격/승진/새출발)': {
-          simple: ' 진짜 멋졌다.',
-          sense: ' 이런 날은 꽃이 국룰 🙂',
-          sincere: ' 앞으로 더 잘 될 거야. 진심으로 축하해.'
-        },
-        '첫 선물': {
-          simple: ' 첫 꽃이라 무난하게 시작!',
-          sense: ' 처음이라 더 고민했어 🙂',
-          sincere: ' 부담은 말고, 그냥 내 마음이라고 생각해줘.'
-        },
-        '그냥(고맙고 응원)': {
-          simple: ' 이유 없어도 되는 날이잖아.',
-          sense: ' 그냥 주고 싶어서 들고 왔지 🙂',
-          sincere: ' 요즘 고생 많아서, 기분 전환 했으면!'
-        }
+        '생일': { simple:' 오늘은 너 주인공.', sense:' 네 날이니까 챙겨야지 🙂', sincere:' 올 한 해도 좋은 일만 가득하길!' },
+        '기념일': { simple:' 그냥 넘어가면 섭하지.', sense:' 기념일이라 확실히 챙김 🙂', sincere:' 우리 앞으로도 계속 잘 지내자.' },
+        '사과(미안해)': { simple:' 내가 좀 더 신경 쓸게.', sense:' 말로만 말고 행동으로 보여줄게 🙂', sincere:' 미안해. 마음 풀렸으면 좋겠다.' },
+        '축하(합격/승진/새출발)': { simple:' 진짜 멋졌다.', sense:' 이런 날은 꽃이 국룰 🙂', sincere:' 앞으로 더 잘 될 거야. 진심으로 축하해.' },
+        '첫 선물': { simple:' 첫 꽃이라 무난하게 시작!', sense:' 처음이라 더 고민했어 🙂', sincere:' 부담은 말고, 그냥 내 마음이라고 생각해줘.' },
+        '그냥(고맙고 응원)': { simple:' 이유 없어도 되는 날이잖아.', sense:' 그냥 주고 싶어서 들고 왔지 🙂', sincere:' 요즘 고생 많아서, 기분 전환 했으면!' }
       };
 
       const rel = base[relation] || base['여자친구(연인)'];
@@ -778,36 +869,21 @@
       const t = (taboos || []).filter(x => x !== '없음');
       const cautions = [];
 
-      if(t.includes('향 강한 꽃은 싫어함')){
-        cautions.push('향이 강한 꽃(예: 백합/프리지아 등)은 피하는 방향으로 요청하면 좋아요.');
-      }
-      if(t.includes('장미는 싫어함')){
-        cautions.push('장미/스프레이장미는 제외 요청을 꼭 넣어주세요.');
-      }
-      if(t.includes('화려한 건 부담')){
-        cautions.push('색을 1~2톤으로 제한하고, 포장도 과하지 않게 요청하는 게 안전해요.');
-      }
-      if(t.includes('알레르기/민감 있음')){
-        cautions.push('민감/알레르기 있으면 꽃가루·향 최소 구성으로 요청하는 게 좋아요.');
-      }
+      if(t.includes('향 강한 꽃은 싫어함')) cautions.push('향이 강한 꽃(예: 백합/프리지아 등)은 피하는 방향으로 요청하면 좋아요.');
+      if(t.includes('장미는 싫어함')) cautions.push('장미/스프레이장미는 제외 요청을 꼭 넣어주세요.');
+      if(t.includes('화려한 건 부담')) cautions.push('색을 1~2톤으로 제한하고, 포장도 과하지 않게 요청하는 게 안전해요.');
+      if(t.includes('알레르기/민감 있음')) cautions.push('민감/알레르기 있으면 꽃가루·향 최소 구성으로 요청하는 게 좋아요.');
 
-      if(urgency === '오늘(당일)'){
-        cautions.push('오늘이면 디테일보다 ‘무드 유지 + 재고 위주’가 현실적인 답이에요.');
-      } else if(urgency === '내일'){
-        cautions.push('내일이면 원하는 톤은 가능하지만, 품절 시 대체 가능 문장을 넣어주세요.');
-      } else {
-        cautions.push('여유 있으면 원하는 꽃을 ‘가능하면’ 포함해달라고 부드럽게 요청해도 좋아요.');
-      }
+      if(urgency === '오늘(당일)') cautions.push('오늘이면 디테일보다 “무드 유지 + 재고 위주”가 현실적인 답이에요.');
+      else if(urgency === '내일') cautions.push('내일이면 원하는 톤은 가능하지만, 품절 시 대체 가능 문장을 넣어주세요.');
+      else cautions.push('여유 있으면 원하는 꽃을 “가능하면” 포함해달라고 부드럽게 요청해도 좋아요.');
 
-      if(cautions.length === 0){
-        cautions.push('금기만 없으면 무드/톤만 잘 잡아도 실패 확률이 확 낮아져요.');
-      }
+      if(cautions.length === 0) cautions.push('금기만 없으면 무드/톤만 잘 잡아도 실패 확률이 확 낮아져요.');
       return cautions;
     }
 
     function showResult(){
       const taboos = (state.taboos || []).includes('없음') ? [] : (state.taboos || []);
-
       const personality = mapPersonality(state.brightness, state.style, state.volume);
       const profile = profiles[personality];
       const line = sisterLines[Math.floor(Math.random() * sisterLines.length)];
@@ -938,6 +1014,7 @@
       };
 
       $('btnHome').onclick = resetAll;
+
       showScreen('screenResult');
     }
 
