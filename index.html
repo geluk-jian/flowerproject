@@ -591,22 +591,26 @@
       },
       {
         id:'brightness',
-        type:'ab',
+        type:'single',
         title:'느낌 하나만 골라줘',
-        sub:'A/B 중에서 더 끌리는 걸 누르면 돼.',
+        sub:'더 끌리는 느낌을 골라줘.',
         options:[
           {value:'bright', title:'화사하게', desc:'밝고 생기 있는 느낌'},
-          {value:'calm', title:'차분하게', desc:'잔잔하고 깔끔한 느낌'}
+          {value:'calm', title:'차분하게', desc:'잔잔하고 깔끔한 느낌'},
+          {value:'vivid', title:'선명하게', desc:'색감이 또렷한 느낌'},
+          {value:'soft', title:'은은하게', desc:'부드럽고 은은한 느낌'}
         ]
       },
       {
         id:'style',
-        type:'ab',
+        type:'single',
         title:'그 사람 스타일은 어느 쪽?',
         sub:'딱 봤을 때 어울리는 쪽 고르면 돼.',
         options:[
           {value:'cute', title:'귀엽게', desc:'부드럽고 사랑스럽게'},
-          {value:'chic', title:'세련되게', desc:'심플하고 도시적으로'}
+          {value:'chic', title:'세련되게', desc:'심플하고 도시적으로'},
+          {value:'romantic', title:'러블리하게', desc:'달콤하고 따뜻하게'},
+          {value:'minimal', title:'미니멀하게', desc:'담백하고 절제되게'}
         ]
       },
       {
@@ -984,8 +988,22 @@
       '그냥(고맙고 응원)':'그냥 주는 건 ‘일상에 정성’. 멘트 한 줄이면 센스 완성.'
     };
 
+    function normalizeBrightness(brightness){
+      if(brightness === 'bright' || brightness === 'vivid') return 'bright';
+      if(brightness === 'calm' || brightness === 'soft') return 'calm';
+      return 'bright';
+    }
+
+    function normalizeStyle(style){
+      if(style === 'cute' || style === 'romantic') return 'cute';
+      if(style === 'chic' || style === 'minimal') return 'chic';
+      return 'chic';
+    }
+
     function mapPersonality(brightness, style, volume){
-      const key = `${brightness}|${style}|${volume}`;
+      const b = normalizeBrightness(brightness);
+      const s = normalizeStyle(style);
+      const key = `${b}|${s}|${volume}`;
       const table = {
         'bright|cute|lush':'귀여움',
         'bright|cute|simple':'러블리',
@@ -1140,11 +1158,27 @@
         wrap += ' (포장/리본 최소화 추천)';
       }
 
+      const brightnessLabel = {
+        bright:'화사',
+        calm:'차분',
+        vivid:'선명',
+        soft:'은은'
+      }[state.brightness] || '화사';
+
+      const styleLabel = {
+        cute:'귀여움',
+        chic:'세련',
+        romantic:'러블리',
+        minimal:'미니멀'
+      }[state.style] || '세련';
+
+      const volumeLabel = (state.volume === 'simple') ? '심플' : '풍성';
+
       const reasonParts = [
         `관계: ${state.relation || '미선택'}`,
         `상황: ${state.occasion || '미선택'}`,
         occasionReason[state.occasion] || '',
-        `선택한 무드는 “${state.brightness === 'bright' ? '화사' : '차분'} / ${state.style === 'cute' ? '귀여움' : '세련'} / ${state.volume === 'simple' ? '심플' : '풍성'}” 쪽!`
+        `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}” 쪽!`
       ].filter(Boolean);
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
@@ -1153,7 +1187,7 @@
       const sampleImage = pickConceptPreviewPhoto(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const moodText = `${state.style === 'cute' ? '러블리/발랄' : '깔끔/세련'} · ${state.volume === 'simple' ? '심플' : '풍성'}`;
+      const moodText = `${(styleLabel === '귀여움' || styleLabel === '러블리') ? '러블리/발랄' : '깔끔/세련'} · ${volumeLabel}`;
       const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const priceInfo = estimatePrice(personality, state.volume);
