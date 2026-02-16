@@ -596,13 +596,30 @@
     ];
 
     const sampleImageByPersonality = {
-      '러블리': 'https://source.unsplash.com/1200x800/?pink,flower,bouquet',
-      '세련됨': 'https://source.unsplash.com/1200x800/?white,green,floral,arrangement',
-      '귀여움': 'https://source.unsplash.com/1200x800/?colorful,flower,bouquet',
-      '미니멀': 'https://source.unsplash.com/1200x800/?minimal,white,flower',
-      '우아함': 'https://source.unsplash.com/1200x800/?elegant,flower,bouquet',
-      '활기': 'https://source.unsplash.com/1200x800/?sunny,yellow,flowers'
+      '러블리': 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80',
+      '세련됨': 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80',
+      '귀여움': 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=1200&q=80',
+      '미니멀': 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80',
+      '우아함': 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80',
+      '활기': 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=1200&q=80'
     };
+
+    function fallbackSampleImage(concept){
+      const safe = escapeHtml(concept || '추천 컨셉');
+      const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dcfce7"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <text x="50%" y="48%" text-anchor="middle" font-size="44" font-family="sans-serif" fill="#166534">샘플 사진 준비중</text>
+  <text x="50%" y="56%" text-anchor="middle" font-size="34" font-family="sans-serif" fill="#166534">${safe}</text>
+</svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
 
     const state = {
       relation:null,
@@ -940,7 +957,8 @@
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
-      const sampleImage = sampleImageByPersonality[personality] || 'https://source.unsplash.com/1200x800/?flower,bouquet';
+      const sampleImage = sampleImageByPersonality[personality] || 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80';
+      const sampleImageFallback = fallbackSampleImage(profile.concept);
 
       const shareState = {...state, taboos};
       const code = base64UrlEncode(shareState);
@@ -958,7 +976,13 @@
         <div class="box">
           <h3>추천 컨셉</h3>
           <div class="samplePhoto">
-            <img src="${escapeHtml(sampleImage)}" alt="${escapeHtml(profile.concept)} 샘플 사진" loading="lazy" />
+            <img
+              src="${escapeHtml(sampleImage)}"
+              alt="${escapeHtml(profile.concept)} 샘플 사진"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              onerror="this.onerror=null;this.src='${escapeHtml(sampleImageFallback)}';"
+            />
             <div class="cap">샘플 사진: ${escapeHtml(profile.concept)} 무드 참고용</div>
           </div>
           <div class="chips">
