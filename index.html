@@ -297,6 +297,21 @@
       color:var(--muted);
       font-weight:700;
     }
+    .priceRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .priceBadge{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      background:#f8fafc;
+      font-size:12px;
+      font-weight:900;
+      color:var(--text);
+    }
     details.explain{
       border:1px solid var(--line);
       border-radius:12px;
@@ -1080,6 +1095,16 @@
       return `추천 멘트: "${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}"`;
     }
 
+    function estimatePrice(personality, volume){
+      if (volume === 'lush' || personality === '우아함') {
+        return { tier:'$$$', label:'우아함/풍성', range:'약 8만~13만 원' };
+      }
+      if (personality === '러블리' || personality === '활기') {
+        return { tier:'$$', label:'러블리/활기', range:'약 5만~8만 원' };
+      }
+      return { tier:'$', label:'심플/미니멀', range:'약 3만~5만 원' };
+    }
+
     function buildCautions({taboos, urgency}){
       const t = (taboos || []).filter(x => x !== '없음');
       const cautions = [];
@@ -1131,6 +1156,7 @@
       const moodText = `${state.style === 'cute' ? '러블리/발랄' : '깔끔/세련'} · ${state.volume === 'simple' ? '심플' : '풍성'}`;
       const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
+      const priceInfo = estimatePrice(personality, state.volume);
       const storyTip = buildStoryTip({
         personality,
         relation: state.relation,
@@ -1155,6 +1181,15 @@
           <div class="top3">
             <div class="topItem">✅ 오늘은 이 컨셉: ${escapeHtml(profile.concept)}</div>
             <div class="topItem">✅ 색감: ${escapeHtml(tone)} / 느낌: ${escapeHtml(moodText)}</div>
+            <div class="topItem">
+              ✅ 예상 가격대: ${escapeHtml(priceInfo.tier)} (${escapeHtml(priceInfo.label)})
+              <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
+              <div class="priceRow">
+                <span class="priceBadge">심플/미니멀: $ (약 3만~5만)</span>
+                <span class="priceBadge">러블리/활기: $$ (약 5만~8만)</span>
+                <span class="priceBadge">우아함/풍성: $$$ (약 8만~13만)</span>
+              </div>
+            </div>
             <div class="topItem">
               ✅ 바로 주문: 꽃집에 보내기
               <small>버튼 누르면 주문 문장을 복사해줘요.</small>
