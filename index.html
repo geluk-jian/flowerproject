@@ -1,14 +1,980 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>꽃을만지는 누나가 도와드림</title>
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#12141a;
+      --muted:#9aa4b2;
+      --text:#e8eef7;
+      --line:#232734;
+      --accent:#7aa2ff;
+      --accent2:#8dffcf;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --pad: 18px;
+      --max: 760px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic", sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,.18), transparent 60%),
+                  radial-gradient(1000px 500px at 80% 10%, rgba(141,255,207,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    .wrap{max-width:var(--max); margin:0 auto; padding:24px 16px 60px;}
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background: rgba(18,20,26,.86);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .hd{
+      padding:14px var(--pad);
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .hd h1, .hd h2{margin:0; font-size:16px; letter-spacing:-.2px;}
+    .bd{padding: var(--pad);}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border:1px solid var(--line); border-radius:999px;
+      color:var(--muted); font-size:12px;
+      background: rgba(255,255,255,.03);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .muted{color:var(--muted)}
+    .hero{
+      padding:22px 18px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+    }
+    .hero h1{font-size:22px; margin:0 0 8px; letter-spacing:-.3px;}
+    .hero p{margin:0 0 10px; color:var(--muted)}
+    .hero .mini{
+      margin-top:10px; font-size:13px; color: rgba(232,238,247,.92);
+    }
+    .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+    button{
+      appearance:none;
+      border:1px solid rgba(122,162,255,.55);
+      background: rgba(122,162,255,.10);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:-.1px;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    button:hover{transform: translateY(-1px); background: rgba(122,162,255,.16); border-color: rgba(122,162,255,.75);}
+    button.secondary{
+      border-color: rgba(255,255,255,.16);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-weight:650;
+    }
+    button.secondary:hover{background: rgba(255,255,255,.06);}
+    .screen{display:none;}
+    .screen.active{display:block;}
+    .progressWrap{
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+    .progressTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size:12px; color:var(--muted);
+      margin-bottom:8px;
+    }
+    .bar{
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(122,162,255,.9), rgba(141,255,207,.85));
+    }
+    .q{
+      margin:0 0 6px;
+      font-size:18px;
+      letter-spacing:-.2px;
+    }
+    .sub{
+      margin:0 0 14px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .options{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    @media (min-width: 520px){
+      .options.two{grid-template-columns: 1fr 1fr;}
+    }
+    .opt{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      padding:14px 14px;
+      border-radius: 16px;
+      cursor:pointer;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+      display:flex; align-items:flex-start; gap:10px;
+    }
+    .opt:hover{transform: translateY(-1px); border-color: rgba(122,162,255,.55);}
+    .opt .title{font-weight:800; letter-spacing:-.1px;}
+    .opt .desc{font-size:12px; color:var(--muted); margin-top:4px;}
+    .opt[data-selected="true"]{
+      border-color: rgba(141,255,207,.60);
+      background: rgba(141,255,207,.08);
+    }
+    .footnote{margin-top:12px; font-size:12px; color:var(--muted);}
+    .box{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .box h3{margin:0 0 8px; font-size:14px;}
+    .chips{display:flex; flex-wrap:wrap; gap:8px;}
+    .chip{
+      font-size:12px; color: rgba(255,255,255,.92);
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+    }
+    .list{margin:8px 0 0; padding-left: 18px; font-size:13px;}
+    .list li{margin:4px 0;}
+    .toast{
+      position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+      background: rgba(18,20,26,.92);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      opacity: 0; pointer-events:none;
+      transition: opacity .15s ease;
+      z-index: 9999;
+    }
+    .toast.show{opacity:1;}
+    .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
+    .ctaPro{
+      border: 1px dashed rgba(122,162,255,.55);
+      background: rgba(122,162,255,.08);
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+  <div class="wrap">
+
+    <section class="screen active" id="screenStart">
+      <div class="card">
+        <div class="hd">
+          <h2>🌷 꽃을만지는 누나가 도와드림</h2>
+          <span class="pill">무료 테스트</span>
+        </div>
+        <div class="bd">
+          <div class="hero">
+            <h1>꽃을만지는 누나가 도와드림</h1>
+            <p>10년차 꽃집 사장 누나가 <b>꽃 컨셉 + 꽃 의미 + 보내면 되는 멘트</b>까지 한 번에 정리해줄게.</p>
+            <div class="mini">✅ 30초 선택 · ✅ 결과 링크 공유 · ✅ 멘트 복사</div>
+            <div class="btnrow">
+              <button id="btnStart">시작하기</button>
+              <button class="secondary" id="btnLoadExample" type="button">예시 결과 보기</button>
+            </div>
+            <div class="footnote">※ 꽃말/의미는 자료·문화권에 따라 해석이 다를 수 있어요. (출처 없음)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screenQuiz">
+      <div class="card">
+        <div class="hd">
+          <h2 id="quizTitle">선택</h2>
+          <span class="pill" id="quizPill">친한 누나 모드</span>
+        </div>
+        <div class="bd">
+          <div class="progressWrap">
+            <div class="progressTop">
+              <span id="stepText">1/7</span>
+              <span id="stepHint">선택하면 다음으로 넘어가요</span>
+            </div>
+            <div class="bar"><div id="barFill"></div></div>
+          </div>
+
+          <h2 class="q" id="qText">질문</h2>
+          <p class="sub" id="qSub">설명</p>
+
+          <div class="options" id="options"></div>
+
+          <div class="btnrow">
+            <button class="secondary" id="btnBack" type="button">이전</button>
+            <button id="btnNext" type="button" style="display:none;">다음</button>
+            <button class="secondary" id="btnRestart" type="button">처음으로</button>
+          </div>
+
+          <div class="footnote" id="quizFootnote"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screenResult">
+      <div class="card">
+        <div class="hd">
+          <h2>무료 결과</h2>
+          <span class="pill">꽃+멘트 완성</span>
+        </div>
+        <div class="bd" id="resultArea"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="toast" class="toast">복사했어!</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function toast(msg){
+      const el = $('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(()=> el.classList.remove('show'), 1200);
+    }
+
+    async function copyText(text){
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      }catch(e){}
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      }catch(e){
+        return false;
+      }
+    }
+
+    function base64UrlEncode(obj){
+      const json = JSON.stringify(obj);
+      const bytes = new TextEncoder().encode(json);
+      let bin = '';
+      for (const b of bytes) bin += String.fromCharCode(b);
+      const b64 = btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      return b64;
+    }
+
+    function base64UrlDecode(str){
+      const b64 = str.replace(/-/g,'+').replace(/_/g,'/');
+      const pad = b64 + '==='.slice((b64.length + 3) % 4);
+      const bin = atob(pad);
+      const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+      const json = new TextDecoder().decode(bytes);
+      return JSON.parse(json);
+    }
+
+    function showScreen(which){
+      ['screenStart','screenQuiz','screenResult'].forEach(id=>{
+        $(id).classList.toggle('active', id === which);
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    const steps = [
+      {
+        id:'relation',
+        type:'single',
+        title:'누구한테 주는 거야?',
+        sub:'관계에 따라 멘트 톤이 달라져요.',
+        options:[
+          {value:'썸/소개팅', title:'썸/소개팅', desc:'가볍게 센스만'},
+          {value:'여자친구(연인)', title:'여자친구(연인)', desc:'설렘 + 다정'},
+          {value:'아내/배우자', title:'아내/배우자', desc:'고마움 + 존중'},
+          {value:'친구/동료', title:'친구/동료', desc:'담백 + 응원'}
+        ]
+      },
+      {
+        id:'occasion',
+        type:'single',
+        title:'오늘은 어떤 날이야?',
+        sub:'상황이 “왜 이 꽃인지” 이유를 만들어줘요.',
+        options:[
+          {value:'생일', title:'생일', desc:'축하 무드'},
+          {value:'기념일', title:'기념일', desc:'관계의 확신'},
+          {value:'사과(미안해)', title:'사과(미안해)', desc:'부담 말고 진심'},
+          {value:'축하(합격/승진/새출발)', title:'축하(합격/승진/새출발)', desc:'응원/자부심'},
+          {value:'첫 선물', title:'첫 선물', desc:'안전하게 호감'},
+          {value:'그냥(고맙고 응원)', title:'그냥(고맙고 응원)', desc:'일상 속 정성'}
+        ]
+      },
+      {
+        id:'brightness',
+        type:'ab',
+        title:'분위기 먼저 골라. 둘 중 하나!',
+        sub:'이제부터 누나가 취향 좁혀줄게.',
+        options:[
+          {value:'bright', title:'화사하게 🌞', desc:'밝고 기분 좋아지는 느낌'},
+          {value:'calm', title:'차분하게 🌙', desc:'톤다운, 편안하고 고급스럽게'}
+        ]
+      },
+      {
+        id:'style',
+        type:'ab',
+        title:'느낌은 어떤 쪽이 더 그 사람 같아?',
+        sub:'감으로 고르면 돼.',
+        options:[
+          {value:'cute', title:'귀엽게 🧸', desc:'발랄/러블리 계열'},
+          {value:'chic', title:'세련되게 🖤', desc:'깔끔/도시적 계열'}
+        ]
+      },
+      {
+        id:'volume',
+        type:'ab',
+        title:'볼륨은?',
+        sub:'심플 vs 풍성, 여기서 확 갈려요.',
+        options:[
+          {value:'simple', title:'심플하게 ✨', desc:'정돈된 느낌'},
+          {value:'lush', title:'풍성하게 🎀', desc:'존재감 있는 느낌'}
+        ]
+      },
+      {
+        id:'taboos',
+        type:'multi',
+        title:'피해야 할 거 있어?',
+        sub:'없으면 “없음” 누르고 다음!',
+        footnote:'※ “없음”을 고르면 다른 금기는 자동 해제돼요.',
+        options:[
+          {value:'향 강한 꽃은 싫어함', title:'향 강한 꽃은 싫어해요', desc:'향 민감'},
+          {value:'장미는 싫어함', title:'장미는 싫어해요', desc:'취향/기억'},
+          {value:'화려한 건 부담', title:'화려한 건 부담스러워요', desc:'톤을 줄이면 안전'},
+          {value:'알레르기/민감 있음', title:'알레르기/민감 있어요', desc:'꽃가루/향 최소'},
+          {value:'없음', title:'없음', desc:'특별한 금기 없음'}
+        ]
+      },
+      {
+        id:'urgency',
+        type:'single',
+        title:'언제 필요해?',
+        sub:'급하면 “재고 위주 + 무드 유지”가 답이야.',
+        options:[
+          {value:'오늘(당일)', title:'오늘(당일) ⚡', desc:'빠르게 제작 가능한 조합'},
+          {value:'내일', title:'내일 ⏰', desc:'원하는 톤은 가능, 품절 대체는 필요'},
+          {value:'여유(2–7일)', title:'여유(2–7일) 🌿', desc:'원하는 꽃 반영 가능'}
+        ]
+      }
+    ];
+
+    const allowedValues = steps.reduce((acc, step) => {
+      acc[step.id] = new Set(step.options.map(o => o.value));
+      return acc;
+    }, {});
+
+    function sanitizeLoadedState(raw){
+      const normalized = {
+        relation: null,
+        occasion: null,
+        brightness: null,
+        style: null,
+        volume: null,
+        taboos: [],
+        urgency: null
+      };
+
+      if (!raw || typeof raw !== 'object') return normalized;
+
+      ['relation', 'occasion', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
+        const value = raw[key];
+        normalized[key] = allowedValues[key].has(value) ? value : null;
+      });
+
+      if (Array.isArray(raw.taboos)) {
+        const cleaned = raw.taboos.filter(v => allowedValues.taboos.has(v));
+        normalized.taboos = Array.from(new Set(cleaned));
+      }
+
+      if (normalized.taboos.includes('없음')) {
+        normalized.taboos = ['없음'];
+      }
+
+      return normalized;
+    }
+
+    const sisterLines = [
+      '오케이, 결론부터 말할게. ‘예쁘게’ 말고 ‘성향’이야.',
+      '디테일 욕심 금지. 무드만 맞추면 반은 먹고 들어가.',
+      '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
+    ];
+
+    const state = {
+      relation:null,
+      occasion:null,
+      brightness:null,
+      style:null,
+      volume:null,
+      taboos:[],
+      urgency:null
+    };
+
+    function clearState(){
+      state.relation = null;
+      state.occasion = null;
+      state.brightness = null;
+      state.style = null;
+      state.volume = null;
+      state.taboos = [];
+      state.urgency = null;
+    }
+
+    let stepIdx = 0;
+
+    function currentStep(){ return steps[stepIdx]; }
+
+    function setAnswer(stepId, value){
+      if(stepId === 'taboos'){
+        const v = value;
+        const has = state.taboos.includes(v);
+
+        if(v === '없음'){
+          state.taboos = has ? [] : ['없음'];
+          return;
+        }
+
+        state.taboos = state.taboos.filter(x => x !== '없음');
+
+        if(has) state.taboos = state.taboos.filter(x => x !== v);
+        else state.taboos.push(v);
+        return;
+      }
+      state[stepId] = value;
+    }
+
+    function getAnswer(stepId){
+      if(stepId === 'taboos') return state.taboos;
+      return state[stepId];
+    }
+
+    function canGoNext(){
+      const s = currentStep();
+      const ans = getAnswer(s.id);
+      if(s.type === 'multi') return true;
+      return !!ans;
+    }
+
+    function updateProgress(){
+      $('stepText').textContent = `${stepIdx+1}/${steps.length}`;
+      const pct = Math.round((stepIdx / (steps.length - 1)) * 100);
+      $('barFill').style.width = `${pct}%`;
+
+      $('stepHint').textContent = (currentStep().type === 'multi')
+        ? '복수 선택 후 “다음”'
+        : '선택하면 다음으로 넘어가요';
+    }
+
+    function renderStep(){
+      const s = currentStep();
+
+      $('quizTitle').textContent = `Q${stepIdx+1}`;
+      $('qText').textContent = s.title;
+      $('qSub').textContent = s.sub || '';
+      $('quizFootnote').textContent = s.footnote || '';
+
+      updateProgress();
+
+      $('btnBack').style.visibility = (stepIdx === 0) ? 'hidden' : 'visible';
+      $('btnNext').style.display = (s.type === 'multi') ? 'inline-flex' : 'none';
+
+      const opts = $('options');
+      opts.innerHTML = '';
+      opts.className = 'options ' + ((s.type === 'ab') ? 'two' : '');
+
+      const selected = getAnswer(s.id);
+
+      s.options.forEach(opt=>{
+        const div = document.createElement('div');
+        div.className = 'opt';
+        const isSelected = (s.type === 'multi')
+          ? (selected || []).includes(opt.value)
+          : (selected === opt.value);
+
+        div.dataset.selected = isSelected ? 'true' : 'false';
+
+        div.innerHTML = `
+          <div>
+            <div class="title">${escapeHtml(opt.title)}</div>
+            ${opt.desc ? `<div class="desc">${escapeHtml(opt.desc)}</div>` : ''}
+          </div>
+        `;
+
+        div.addEventListener('click', ()=>{
+          setAnswer(s.id, opt.value);
+          renderStep();
+
+          if(s.type !== 'multi') setTimeout(()=>goNext(), 120);
+        });
+
+        opts.appendChild(div);
+      });
+    }
+
+    function goNext(){
+      if(!canGoNext()){
+        alert('이 질문에서 하나를 선택해줘!');
+        return;
+      }
+      if(stepIdx < steps.length - 1){
+        stepIdx += 1;
+        renderStep();
+      }else{
+        showResult();
+      }
+    }
+
+    function goBack(){
+      if(stepIdx > 0){
+        stepIdx -= 1;
+        renderStep();
+      }
+    }
+
+    function resetAll(){
+      clearState();
+      stepIdx = 0;
+      history.replaceState(null, '', location.pathname);
+      showScreen('screenStart');
+    }
+
+    const profiles = {
+      '러블리': {
+        concept: '핑크 무드 러블리',
+        mood: ['따뜻', '사랑스러움', '부드러움'],
+        tone: '핑크/크림/연한 코랄 중심',
+        wrap: '파스텔 포장 + 얇은 리본(과하지 않게)',
+        flowers: {
+          main: ['튤립', '라넌큘러스', '리시안셔스(유스토마)', '거베라(핑크)'],
+          sub: ['스프레이 카네이션', '알스트로메리아'],
+          texture: ['유칼립투스', '왁스플라워']
+        },
+        meaning: '‘다정함’과 ‘설렘’ 무드'
+      },
+      '세련됨': {
+        concept: '도시적 미니 시크',
+        mood: ['깔끔', '세련', '정돈'],
+        tone: '화이트/그린 + 톤다운 포인트',
+        wrap: '무광 종이 + 톤다운 포장(정돈된 느낌)',
+        flowers: {
+          main: ['리시안셔스(화이트)', '카라(칼라)', '아네모네', '튤립(화이트)'],
+          sub: ['알스트로메리아', '스카비오사'],
+          texture: ['유칼립투스', '러스커스(그린)']
+        },
+        meaning: '‘존중’과 ‘센스’ 무드'
+      },
+      '귀여움': {
+        concept: '상큼 발랄 팝',
+        mood: ['발랄', '명랑', '귀여움'],
+        tone: '밝은 컬러(옐로/핑크/라이트 오렌지) 1~2색',
+        wrap: '컬러 포인트 포장(과하지 않게)',
+        flowers: {
+          main: ['거베라', '튤립', '라넌큘러스'],
+          sub: ['알스트로메리아', '스프레이 카네이션'],
+          texture: ['유칼립투스', '왁스플라워']
+        },
+        meaning: '‘기분 업’과 ‘응원’ 무드'
+      },
+      '미니멀': {
+        concept: '심플 담백 원톤',
+        mood: ['심플', '담백', '차분'],
+        tone: '원톤(화이트/크림/연핑크 중 1) + 그린 최소',
+        wrap: '무광/크라프트 계열 + 리본 최소',
+        flowers: {
+          main: ['리시안셔스(유스토마)', '튤립', '아네모네'],
+          sub: ['알스트로메리아'],
+          texture: ['유칼립투스', '러스커스(그린)']
+        },
+        meaning: '‘편안함’과 ‘정성’ 무드'
+      },
+      '우아함': {
+        concept: '차분한 고급 무드',
+        mood: ['우아', '차분', '고급'],
+        tone: '크림/화이트/톤다운 핑크 + 그린',
+        wrap: '톤다운 포장 + 고급스러운 리본(과하지 않게)',
+        flowers: {
+          main: ['리시안셔스(유스토마)', '라넌큘러스', '튤립'],
+          sub: ['스카비오사', '알스트로메리아'],
+          texture: ['유칼립투스', '왁스플라워']
+        },
+        meaning: '‘품격’과 ‘존중’ 무드'
+      },
+      '활기': {
+        concept: '밝은 에너지 업',
+        mood: ['에너지', '밝음', '활기'],
+        tone: '옐로/라이트 오렌지 + 화이트로 정리',
+        wrap: '밝은 포인트 포장 + 깔끔한 마감',
+        flowers: {
+          main: ['해바라기', '거베라', '튤립'],
+          sub: ['알스트로메리아', '스프레이 카네이션'],
+          texture: ['유칼립투스', '러스커스(그린)']
+        },
+        meaning: '‘응원’과 ‘기분전환’ 무드'
+      }
+    };
+
+    const tabooBans = {
+      '향 강한 꽃은 싫어함': ['백합', '프리지아', '히아신스', '스톡'],
+      '장미는 싫어함': ['장미', '스프레이장미']
+    };
+
+    const occasionReason = {
+      '생일': '생일은 ‘축하’가 중심. 밝고 기분 좋아지는 무드가 안전해요.',
+      '기념일': '기념일은 ‘관계의 확신’이 포인트. 과하지 않게 센스가 좋아요.',
+      '사과(미안해)': '사과는 ‘부담’보다 ‘진심’. 톤다운 + 담백이 제일 안정적이에요.',
+      '축하(합격/승진/새출발)': '축하는 ‘응원/자부심’. 깔끔한데 힘 있는 조합이 좋아요.',
+      '첫 선물': '첫 선물은 ‘안전하게 호감’. 취향 존중 톤이 답이에요.',
+      '그냥(고맙고 응원)': '그냥 주는 건 ‘일상에 정성’. 멘트 한 줄이면 센스 완성.'
+    };
+
+    function mapPersonality(brightness, style, volume){
+      const key = `${brightness}|${style}|${volume}`;
+      const table = {
+        'bright|cute|lush': '귀여움',
+        'bright|cute|simple': '러블리',
+        'bright|chic|simple': '세련됨',
+        'bright|chic|lush': '활기',
+        'calm|chic|simple': '미니멀',
+        'calm|chic|lush': '우아함',
+        'calm|cute|simple': '러블리',
+        'calm|cute|lush': '우아함'
+      };
+      return table[key] || '세련됨';
+    }
+
+    function pickFlowers(profile, taboos){
+      let banned = [];
+      (taboos || []).forEach(t => { if(tabooBans[t]) banned = banned.concat(tabooBans[t]); });
+      banned = Array.from(new Set(banned));
+
+      const mainCandidates = profile.flowers.main.filter(f => !banned.some(b => f.includes(b)));
+      const subCandidates = profile.flowers.sub.filter(f => !banned.some(b => f.includes(b)));
+      const texCandidates = profile.flowers.texture.filter(f => !banned.some(b => f.includes(b)));
+
+      const fallbackMain = ['리시안셔스(유스토마)', '튤립', '라넌큘러스', '거베라'].filter(f => !banned.some(b => f.includes(b)));
+      const fallbackSub = ['알스트로메리아', '스프레이 카네이션'].filter(f => !banned.some(b => f.includes(b)));
+      const fallbackTex = ['유칼립투스', '러스커스(그린)', '왁스플라워'].filter(f => !banned.some(b => f.includes(b)));
+
+      const main = (mainCandidates.length ? mainCandidates : fallbackMain).slice(0,2);
+      const sub = (subCandidates.length ? subCandidates : fallbackSub).slice(0,2);
+      const tex = (texCandidates.length ? texCandidates : fallbackTex).slice(0,2);
+
+      return { main, sub, tex };
+    }
+
+    function buildMessages({relation, occasion}){
+      const base = {
+        '썸/소개팅': {
+          simple: '너한테 어울릴 것 같아서 들고 왔어.',
+          sense: '무드가 딱 너라서 골라봤어 🙂',
+          sincere: '부담 없이 받아줘. 기분 좋아졌으면!'
+        },
+        '여자친구(연인)': {
+          simple: '네 취향 쪽으로 챙겨왔어.',
+          sense: '이 느낌, 너한테 꽤 잘 어울릴 듯 🙂',
+          sincere: '요즘 고마운 게 많아서, 이렇게 전하고 싶었어.'
+        },
+        '아내/배우자': {
+          simple: '이걸로 고마움 전할게.',
+          sense: '당신 스타일로 정리해서 부탁해봤어 🙂',
+          sincere: '늘 든든하고 고마워. 꽃으로 마음 전할게.'
+        },
+        '친구/동료': {
+          simple: '수고했어. 이거 받아!',
+          sense: '요즘 분위기랑 맞춰서 픽했어 🙂',
+          sincere: '응원하는 마음이야. 잘 풀리길!'
+        }
+      };
+
+      const tails = {
+        '생일': {
+          simple: ' 오늘은 너 주인공.',
+          sense: ' 네 날이니까 챙겨야지 🙂',
+          sincere: ' 올 한 해도 좋은 일만 가득하길!'
+        },
+        '기념일': {
+          simple: ' 그냥 넘어가면 섭하지.',
+          sense: ' 기념일이라 확실히 챙김 🙂',
+          sincere: ' 우리 앞으로도 계속 잘 지내자.'
+        },
+        '사과(미안해)': {
+          simple: ' 내가 좀 더 신경 쓸게.',
+          sense: ' 말로만 말고 행동으로 보여줄게 🙂',
+          sincere: ' 미안해. 마음 풀렸으면 좋겠다.'
+        },
+        '축하(합격/승진/새출발)': {
+          simple: ' 진짜 멋졌다.',
+          sense: ' 이런 날은 꽃이 국룰 🙂',
+          sincere: ' 앞으로 더 잘 될 거야. 진심으로 축하해.'
+        },
+        '첫 선물': {
+          simple: ' 첫 꽃이라 무난하게 시작!',
+          sense: ' 처음이라 더 고민했어 🙂',
+          sincere: ' 부담은 말고, 그냥 내 마음이라고 생각해줘.'
+        },
+        '그냥(고맙고 응원)': {
+          simple: ' 이유 없어도 되는 날이잖아.',
+          sense: ' 그냥 주고 싶어서 들고 왔지 🙂',
+          sincere: ' 요즘 고생 많아서, 기분 전환 했으면!'
+        }
+      };
+
+      const rel = base[relation] || base['여자친구(연인)'];
+      const tail = tails[occasion] || {simple:'', sense:'', sincere:''};
+
+      return {
+        simple: rel.simple + (tail.simple || ''),
+        sense: rel.sense + (tail.sense || ''),
+        sincere: rel.sincere + (tail.sincere || '')
+      };
+    }
+
+    function buildCautions({taboos, urgency}){
+      const t = (taboos || []).filter(x => x !== '없음');
+      const cautions = [];
+
+      if(t.includes('향 강한 꽃은 싫어함')){
+        cautions.push('향이 강한 꽃(예: 백합/프리지아 등)은 피하는 방향으로 요청하면 좋아요.');
+      }
+      if(t.includes('장미는 싫어함')){
+        cautions.push('장미/스프레이장미는 제외 요청을 꼭 넣어주세요.');
+      }
+      if(t.includes('화려한 건 부담')){
+        cautions.push('색을 1~2톤으로 제한하고, 포장도 과하지 않게 요청하는 게 안전해요.');
+      }
+      if(t.includes('알레르기/민감 있음')){
+        cautions.push('민감/알레르기 있으면 꽃가루·향 최소 구성으로 요청하는 게 좋아요.');
+      }
+
+      if(urgency === '오늘(당일)'){
+        cautions.push('오늘이면 디테일보다 ‘무드 유지 + 재고 위주’가 현실적인 답이에요.');
+      } else if(urgency === '내일'){
+        cautions.push('내일이면 원하는 톤은 가능하지만, 품절 시 대체 가능 문장을 넣어주세요.');
+      } else {
+        cautions.push('여유 있으면 원하는 꽃을 ‘가능하면’ 포함해달라고 부드럽게 요청해도 좋아요.');
+      }
+
+      if(cautions.length === 0){
+        cautions.push('금기만 없으면 무드/톤만 잘 잡아도 실패 확률이 확 낮아져요.');
+      }
+      return cautions;
+    }
+
+    function showResult(){
+      const taboos = (state.taboos || []).includes('없음') ? [] : (state.taboos || []);
+
+      const personality = mapPersonality(state.brightness, state.style, state.volume);
+      const profile = profiles[personality];
+      const line = sisterLines[Math.floor(Math.random() * sisterLines.length)];
+
+      const { main, sub, tex } = pickFlowers(profile, taboos);
+      const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
+      const cautions = buildCautions({taboos, urgency: state.urgency});
+
+      let tone = profile.tone;
+      let wrap = profile.wrap;
+
+      if(taboos.includes('화려한 건 부담')){
+        tone += ' (톤 1~2개로 제한 추천)';
+        wrap += ' (포장/리본 최소화 추천)';
+      }
+
+      const reasonParts = [
+        `관계: ${state.relation || '미선택'}`,
+        `상황: ${state.occasion || '미선택'}`,
+        occasionReason[state.occasion] || '',
+        `선택한 무드는 “${state.brightness === 'bright' ? '화사' : '차분'} / ${state.style === 'cute' ? '귀여움' : '세련'} / ${state.volume === 'simple' ? '심플' : '풍성'}” 쪽!`
+      ].filter(Boolean);
+
+      const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
+      const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
+
+      const shareState = {...state, taboos};
+      const code = base64UrlEncode(shareState);
+      const url = new URL(location.href);
+      url.searchParams.set('r', code);
+      history.replaceState(null, '', url.toString());
+
+      const resultHtml = `
+        <div class="hero">
+          <h1>꽃을만지는 누나의 결론</h1>
+          <p class="muted">${escapeHtml(line)}</p>
+          <div class="mini">결과 성향: <b>${escapeHtml(personality)}</b></div>
+        </div>
+
+        <div class="box">
+          <h3>추천 컨셉</h3>
+          <div class="chips">
+            <span class="chip">컨셉: <b>${escapeHtml(profile.concept)}</b></span>
+            ${profile.mood.map(m => `<span class="chip">${escapeHtml(m)}</span>`).join('')}
+          </div>
+          <div class="divider"></div>
+          <div class="muted" style="font-size:13px;">
+            톤/색감: <b>${escapeHtml(tone)}</b><br/>
+            포장: <b>${escapeHtml(wrap)}</b>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
+          <ul class="list">
+            <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
+            <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
+            <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
+          </ul>
+          <div class="divider"></div>
+          <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
+        </div>
+
+        <div class="box">
+          <h3>왜 이게 맞냐면</h3>
+          <p class="muted" style="margin:0; font-size:13px;">${reasonParts.map(escapeHtml).join(' ')}</p>
+        </div>
+
+        <div class="box">
+          <h3>꽃 의미 한 줄</h3>
+          <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
+          <div class="footnote">※ 꽃말/의미는 자료에 따라 해석이 다를 수 있어요. (출처 없음)</div>
+        </div>
+
+        <div class="box">
+          <h3>바로 써먹는 멘트 3개</h3>
+          <ol class="list">
+            <li>${escapeHtml(msgs.simple)}</li>
+            <li>${escapeHtml(msgs.sense)}</li>
+            <li>${escapeHtml(msgs.sincere)}</li>
+          </ol>
+          <div class="btnrow">
+            <button class="secondary" id="btnCopyMent">멘트 3개 복사</button>
+            <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
+          </div>
+          <div class="footnote">공유 문구 예: “이거 해보고 꽃 골라줘 😂” (출처 없음)</div>
+        </div>
+
+        <div class="box">
+          <h3>주의사항</h3>
+          <ul class="list">
+            ${cautions.map(c=>`<li>${escapeHtml(c)}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="box ctaPro">
+          <h3>PRO(예정): 꽃집 DM 주문서 + 멘트 10개</h3>
+          <p class="muted" style="margin:0; font-size:13px;">
+            다음 단계는 “꽃집에 그대로 보내면 제작되는 주문서”까지 뽑아주는 거야.
+          </p>
+        </div>
+
+        <div class="btnrow" style="margin-top:16px;">
+          <button id="btnAgain">다시 하기</button>
+          <button class="secondary" id="btnHome">처음으로</button>
+        </div>
+      `;
+
+      $('resultArea').innerHTML = resultHtml;
+
+      $('btnCopyMent').onclick = async ()=>{
+        const text = [msgs.simple, msgs.sense, msgs.sincere].join('\n');
+        const ok = await copyText(text);
+        toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      };
+
+      $('btnCopyLink').onclick = async ()=>{
+        const shareText = `꽃을만지는 누나 결과 링크: ${url.toString()}`;
+        const ok = await copyText(shareText);
+        toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      };
+
+      $('btnAgain').onclick = ()=>{
+        clearState();
+        stepIdx = 0;
+        showScreen('screenQuiz');
+        renderStep();
+      };
+
+      $('btnHome').onclick = resetAll;
+      showScreen('screenResult');
+    }
+
+    $('btnStart').addEventListener('click', ()=>{
+      showScreen('screenQuiz');
+      renderStep();
+    });
+
+    $('btnLoadExample').addEventListener('click', ()=>{
+      state.relation = '여자친구(연인)';
+      state.occasion = '기념일';
+      state.brightness = 'bright';
+      state.style = 'chic';
+      state.volume = 'simple';
+      state.taboos = ['없음'];
+      state.urgency = '내일';
+      showResult();
+    });
+
+    $('btnBack').addEventListener('click', goBack);
+    $('btnNext').addEventListener('click', goNext);
+    $('btnRestart').addEventListener('click', resetAll);
+
+    (function initFromUrl(){
+      const params = new URLSearchParams(location.search);
+      const r = params.get('r');
+      if(!r) return;
+
+      try{
+        const loaded = base64UrlDecode(r);
+        const safeLoaded = sanitizeLoadedState(loaded);
+        Object.assign(state, safeLoaded);
+        showResult();
+      }catch(e){
+        history.replaceState(null, '', location.pathname);
+      }
+    })();
+  </script>
 </body>
 </html>
