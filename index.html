@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>꽃을만지는 누나가 도와드림</title>
+  <title>꽃을 만지는 누나가 도와드림</title>
   <style>
     :root{
       /* 밝은 원톤 */
@@ -615,7 +615,7 @@
     }
 
     const sisterLines = [
-      '오케이, 결론부터 말할게. “예쁘게” 말고 “성향”이야.',
+      '자아! "알아서 그냥, 많이 팔리는 꽃 주세요.는 그만!"',
       '디테일 욕심 금지. 무드만 맞추면 반은 먹고 들어가.',
       '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
     ];
@@ -1053,7 +1053,7 @@
 
       const resultHtml = `
         <div class="hero">
-          <h1>꽃을만지는 누나의 결론</h1>
+          <h1>꽃을 만지는 누나의 결론</h1>
           <p class="muted">${escapeHtml(line)}</p>
           <div class="mini">결과 성향: <b>${escapeHtml(personality)}</b></div>
         </div>
@@ -1154,7 +1154,7 @@
       };
 
       $('btnCopyLink').onclick = async ()=>{
-        const shareText = `꽃을만지는 누나 결과 링크: ${url.toString()}`;
+        const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
         const ok = await copyText(shareText);
         toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
