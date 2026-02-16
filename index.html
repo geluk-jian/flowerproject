@@ -264,6 +264,12 @@
     }
 
     .footnote{margin-top:12px; font-size:12px; color:var(--muted); font-weight:600;}
+    .trustline{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--text);
+      font-weight:800;
+    }
 
     .box{
       border:1px solid var(--line);
@@ -274,6 +280,43 @@
     }
 
     .box h3{margin:0 0 8px; font-size:14px; font-weight:900; letter-spacing:-.2px;}
+    .top3{display:grid; gap:10px;}
+    .topItem{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:12px;
+      font-weight:900;
+      font-size:15px;
+      letter-spacing:-.2px;
+    }
+    .topItem small{
+      display:block;
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    details.explain{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff;
+    }
+    details.explain summary{
+      cursor:pointer;
+      font-weight:900;
+      font-size:13px;
+      color:var(--text);
+      list-style:none;
+    }
+    details.explain summary::-webkit-details-marker{display:none;}
+    details.explain p{
+      margin:8px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+    }
 
     .chips{display:flex; flex-wrap:wrap; gap:8px;}
     .chip{
@@ -370,13 +413,14 @@
         <div class="bd">
           <div class="hero">
             <h1>그녀의 취향, 꽃 골라드려요</h1>
-            <p>10년차 꽃집누나가 <b>어울리는 꽃 컨셉 + 꽃 의미 + 멘트</b>까지 싸악 한 번에 정리해줄게.</p>
+            <p>10년차 꽃집 사장 누나가 <b>어울리는 꽃 컨셉 + 꽃 의미 + 멘트</b>까지 싸악 한 번에 정리해줄게.</p>
+            <div class="trustline">10년간 남자 손님 ‘예쁘게요…’ 1만 번 듣고 만든 서비스</div>
             <div class="mini">✅ 30초 선택 · ✅ 결과 링크 공유 · ✅ 멘트 복사</div>
             <div class="btnrow">
               <button id="btnStart">시작하기</button>
               <button class="secondary" id="btnLoadExample" type="button">예시 결과 보기</button>
             </div>
-            <div class="footnote">※ 꽃말/의미는 자료·문화권에 따라 해석이 다를 수 있어요. (출처 없음)</div>
+            <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
           </div>
         </div>
       </div>
@@ -500,7 +544,7 @@
         id:'relation',
         type:'single',
         title:'누구한테 주는 거야?',
-        sub:'관계에 따라 멘트 톤이 달라져요.',
+        sub:'관계만 고르면 멘트 톤이 바로 맞춰져요.',
         options:[
           {value:'썸/소개팅', title:'썸/소개팅', desc:'가볍게 센스만'},
           {value:'여자친구(연인)', title:'여자친구(연인)', desc:'설렘 + 다정'},
@@ -512,7 +556,7 @@
         id:'occasion',
         type:'single',
         title:'오늘은 어떤 날이야?',
-        sub:'상황이 “왜 이 꽃인지” 이유를 만들어줘요.',
+        sub:'오늘 상황에 맞는 이유와 무드를 정해요.',
         options:[
           {value:'생일', title:'생일', desc:'축하 무드'},
           {value:'기념일', title:'기념일', desc:'관계의 확신'},
@@ -526,7 +570,7 @@
         id:'brightness',
         type:'ab',
         title:'분위기 먼저 골라. 둘 중 하나!',
-        sub:'여기부터 누나가 취향 좁혀줄게.',
+        sub:'밝게 갈지, 차분하게 갈지 먼저 정해요.',
         options:[
           {value:'bright', title:'화사하게', desc:'밝고 기분 좋아지는 느낌'},
           {value:'calm', title:'차분하게', desc:'톤다운, 편안하고 고급스럽게'}
@@ -536,7 +580,7 @@
         id:'style',
         type:'ab',
         title:'느낌은 어떤 쪽이 더 그 사람 같아?',
-        sub:'감으로 고르면 돼.',
+        sub:'가볍게 직감대로 고르면 충분해요.',
         options:[
           {value:'cute', title:'귀엽게', desc:'발랄/러블리 계열'},
           {value:'chic', title:'세련되게', desc:'깔끔/도시적 계열'}
@@ -546,7 +590,7 @@
         id:'volume',
         type:'ab',
         title:'볼륨은?',
-        sub:'심플 vs 풍성, 여기서 확 갈려요.',
+        sub:'심플/풍성 선택으로 인상이 확 달라져요.',
         options:[
           {value:'simple', title:'심플하게', desc:'정돈된 느낌'},
           {value:'lush', title:'풍성하게', desc:'존재감 있는 느낌'}
@@ -556,7 +600,7 @@
         id:'taboos',
         type:'multi',
         title:'피해야 할 거 있어?',
-        sub:'없으면 “없음” 누르고 다음!',
+        sub:'없으면 “없음”만 누르고 넘어가면 돼요.',
         footnote:'※ “없음”을 고르면 다른 금기는 자동 해제돼요.',
         options:[
           {value:'향 강한 꽃은 싫어함', title:'향 강한 꽃은 싫어해요', desc:'향 민감'},
@@ -570,7 +614,7 @@
         id:'urgency',
         type:'single',
         title:'언제 필요해?',
-        sub:'급하면 “재고 위주 + 무드 유지”가 답이야.',
+        sub:'납기 기준으로 가능한 조합을 고를게요.',
         options:[
           {value:'오늘(당일)', title:'오늘(당일)', desc:'빠르게 제작 가능한 조합'},
           {value:'내일', title:'내일', desc:'원하는 톤은 가능, 품절 대체는 필요'},
@@ -1044,6 +1088,9 @@
       const sampleImage = pickSamplePhoto(personality, main);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
+      const moodText = `${state.style === 'cute' ? '러블리/발랄' : '깔끔/세련'} · ${state.volume === 'simple' ? '심플' : '풍성'}`;
+      const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
+      const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
 
       const shareState = {...state, taboos};
       const code = base64UrlEncode(shareState);
@@ -1056,6 +1103,20 @@
           <h1>꽃을 만지는 누나의 결론</h1>
           <p class="muted">${escapeHtml(line)}</p>
           <div class="mini">결과 성향: <b>${escapeHtml(personality)}</b></div>
+        </div>
+
+        <div class="box">
+          <div class="top3">
+            <div class="topItem">✅ 오늘은 이 컨셉: ${escapeHtml(profile.concept)}</div>
+            <div class="topItem">✅ 색감: ${escapeHtml(tone)} / 느낌: ${escapeHtml(moodText)}</div>
+            <div class="topItem">
+              ✅ 바로 주문: 꽃집에 보내기
+              <small>버튼 누르면 주문 문장을 복사해줘요.</small>
+              <div class="btnrow" style="margin-top:8px;">
+                <button id="btnCopyOrder">꽃집에 보내기(주문문장 복사)</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="box">
@@ -1102,13 +1163,24 @@
 
         <div class="box">
           <h3>왜 이게 맞냐면</h3>
-          <p class="muted" style="margin:0; font-size:13px;">${reasonParts.map(escapeHtml).join(' ')}</p>
+          <details class="explain">
+            <summary>접기/펼치기</summary>
+            <p>${reasonParts.map(escapeHtml).join(' ')}</p>
+          </details>
         </div>
 
         <div class="box">
           <h3>꽃 의미 한 줄</h3>
           <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
-          <div class="footnote">※ 꽃말/의미는 자료에 따라 해석이 다를 수 있어요. (출처 없음)</div>
+          <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
+        </div>
+
+        <div class="box">
+          <h3>꽃집 DM용 주문문장(무료 1개)</h3>
+          <p style="margin:0; font-size:13px; font-weight:700;">${escapeHtml(floristOrder)}</p>
+          <div class="btnrow">
+            <button class="secondary" id="btnCopyOrderInline">주문문장 복사</button>
+          </div>
         </div>
 
         <div class="box">
@@ -1121,6 +1193,7 @@
           <div class="btnrow">
             <button class="secondary" id="btnCopyMent">멘트 3개 복사</button>
             <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
+            <button class="secondary" id="btnCopyShareForHer">여친한테 공유문구 복사</button>
           </div>
           <div class="footnote">공유 문구 예: “이거 해보고 꽃 골라줘 😂” (출처 없음)</div>
         </div>
@@ -1152,11 +1225,23 @@
         const ok = await copyText(text);
         toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
+      $('btnCopyOrder').onclick = async ()=>{
+        const ok = await copyText(floristOrder);
+        toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      };
+      $('btnCopyOrderInline').onclick = async ()=>{
+        const ok = await copyText(floristOrder);
+        toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      };
 
       $('btnCopyLink').onclick = async ()=>{
         const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
         const ok = await copyText(shareText);
         toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      };
+      $('btnCopyShareForHer').onclick = async ()=>{
+        const ok = await copyText(shareForGirlfriend);
+        toast(ok ? '공유문구를 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
 
       $('btnAgain').onclick = ()=>{
