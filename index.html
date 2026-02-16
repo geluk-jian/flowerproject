@@ -682,7 +682,7 @@
     }
 
     const sisterLines = [
-      '자아! "알아서 그냥, 많이 팔리는 꽃 주세요.는 그만!"',
+      'NO! "알아서주세요. 많이 팔리는 꽃 주세요."',
       '디테일 욕심 금지. 무드만 맞추면 반은 먹고 들어가.',
       '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
     ];
@@ -1097,12 +1097,12 @@
 
     function estimatePrice(personality, volume){
       if (volume === 'lush' || personality === '우아함') {
-        return { tier:'$$$', label:'우아함/풍성', range:'약 8만~13만 원' };
+        return { label:'우아함/풍성', range:'약 8만~13만원' };
       }
       if (personality === '러블리' || personality === '활기') {
-        return { tier:'$$', label:'러블리/활기', range:'약 5만~8만 원' };
+        return { label:'러블리/활기', range:'약 5만~8만원' };
       }
-      return { tier:'$', label:'심플/미니멀', range:'약 3만~5만 원' };
+      return { label:'심플/미니멀', range:'약 3만~5만원' };
     }
 
     function buildCautions({taboos, urgency}){
@@ -1182,12 +1182,12 @@
             <div class="topItem">✅ 오늘은 이 컨셉: ${escapeHtml(profile.concept)}</div>
             <div class="topItem">✅ 색감: ${escapeHtml(tone)} / 느낌: ${escapeHtml(moodText)}</div>
             <div class="topItem">
-              ✅ 예상 가격대: ${escapeHtml(priceInfo.tier)} (${escapeHtml(priceInfo.label)})
+              ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
               <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
               <div class="priceRow">
-                <span class="priceBadge">심플/미니멀: $ (약 3만~5만)</span>
-                <span class="priceBadge">러블리/활기: $$ (약 5만~8만)</span>
-                <span class="priceBadge">우아함/풍성: $$$ (약 8만~13만)</span>
+                <span class="priceBadge">심플/미니멀: 약 3만~5만원</span>
+                <span class="priceBadge">러블리/활기: 약 5만~8만원</span>
+                <span class="priceBadge">우아함/풍성: 약 8만~13만원</span>
               </div>
             </div>
             <div class="topItem">
