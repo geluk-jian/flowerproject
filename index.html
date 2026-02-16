@@ -348,6 +348,14 @@
       border-top:1px solid var(--line);
       background:#fff;
     }
+    .samplePhoto .title{
+      padding:10px 12px;
+      font-size:13px;
+      color:var(--text);
+      font-weight:900;
+      border-bottom:1px solid var(--line);
+      background:#f8fafc;
+    }
 
     .palette{
       margin-top:10px;
@@ -742,9 +750,8 @@
       return null;
     }
 
-    function pickSamplePhoto(personality, mainList){
+    function pickConceptPreviewPhoto(personality){
       return bouquetPhotoByPersonality[personality]
-        || pickFlowerPhoto(mainList)
         || 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80';
     }
 
@@ -1085,7 +1092,7 @@
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
-      const sampleImage = pickSamplePhoto(personality, main);
+      const sampleImage = pickConceptPreviewPhoto(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
       const moodText = `${state.style === 'cute' ? '러블리/발랄' : '깔끔/세련'} · ${state.volume === 'simple' ? '심플' : '풍성'}`;
@@ -1122,6 +1129,7 @@
         <div class="box">
           <h3>추천 컨셉</h3>
           <div class="samplePhoto">
+            <div class="title">컨셉 대표 이미지: ${escapeHtml(personality)} 무드</div>
             <img
               src="${escapeHtml(sampleImage)}"
               alt="${escapeHtml(profile.concept)} 샘플 사진"
@@ -1129,7 +1137,7 @@
               referrerpolicy="no-referrer"
               onerror="if(!this.dataset.err1){this.dataset.err1='1';this.src='${escapeHtml(sampleImageFallback)}';}else{this.onerror=null;this.src='${escapeHtml(sampleImageFallbackFinal)}';}"
             />
-            <div class="cap">샘플 사진: ${escapeHtml(profile.concept)} 실제 꽃다발/꽃 참고용</div>
+            <div class="cap">이런 느낌으로 최종 꽃다발이 나와요. (실제 제작 시 계절/재고에 따라 유사 톤으로 조정)</div>
           </div>
           <div class="palette">
             ${palette.map(p => `
