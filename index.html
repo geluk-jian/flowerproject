@@ -566,64 +566,64 @@
       {
         id:'relation',
         type:'single',
-        title:'누구한테 주는 거야?',
-        sub:'관계만 고르면 멘트 톤이 바로 맞춰져요.',
+        title:'누구에게 줄 거야?',
+        sub:'누구한테 줄지만 고르면 돼.',
         options:[
-          {value:'썸/소개팅', title:'썸/소개팅', desc:'가볍게 센스만'},
-          {value:'여자친구(연인)', title:'여자친구(연인)', desc:'설렘 + 다정'},
-          {value:'아내/배우자', title:'아내/배우자', desc:'고마움 + 존중'},
-          {value:'친구/동료', title:'친구/동료', desc:'담백 + 응원'}
+          {value:'썸/소개팅', title:'썸/소개팅', desc:'가볍고 센스 있게'},
+          {value:'여자친구(연인)', title:'여자친구', desc:'다정하고 설레게'},
+          {value:'아내/배우자', title:'아내', desc:'고맙고 든든하게'},
+          {value:'친구/동료', title:'친구/직장동료', desc:'편하고 깔끔하게'}
         ]
       },
       {
         id:'occasion',
         type:'single',
-        title:'오늘은 어떤 날이야?',
-        sub:'오늘 상황에 맞는 이유와 무드를 정해요.',
+        title:'무슨 일로 주는 거야?',
+        sub:'주는 이유만 고르면 맞춰줄게.',
         options:[
-          {value:'생일', title:'생일', desc:'축하 무드'},
-          {value:'기념일', title:'기념일', desc:'관계의 확신'},
-          {value:'사과(미안해)', title:'사과(미안해)', desc:'부담 말고 진심'},
-          {value:'축하(합격/승진/새출발)', title:'축하(합격/승진/새출발)', desc:'응원/자부심'},
-          {value:'첫 선물', title:'첫 선물', desc:'안전하게 호감'},
-          {value:'그냥(고맙고 응원)', title:'그냥(고맙고 응원)', desc:'일상 속 정성'}
+          {value:'생일', title:'생일 축하', desc:'기분 좋게 축하'},
+          {value:'기념일', title:'기념일', desc:'특별한 날 챙기기'},
+          {value:'사과(미안해)', title:'미안해서', desc:'부담 없이 진심 전달'},
+          {value:'축하(합격/승진/새출발)', title:'합격/승진 축하', desc:'응원과 축하 전달'},
+          {value:'첫 선물', title:'처음 주는 꽃', desc:'안전하게 시작'},
+          {value:'그냥(고맙고 응원)', title:'그냥 고마워서', desc:'편하게 마음 전달'}
         ]
       },
       {
         id:'brightness',
         type:'ab',
-        title:'분위기 먼저 골라. 둘 중 하나!',
-        sub:'밝게 갈지, 차분하게 갈지 먼저 정해요.',
+        title:'느낌 하나만 골라줘',
+        sub:'A/B 중에서 더 끌리는 걸 누르면 돼.',
         options:[
-          {value:'bright', title:'화사하게', desc:'밝고 기분 좋아지는 느낌'},
-          {value:'calm', title:'차분하게', desc:'톤다운, 편안하고 고급스럽게'}
+          {value:'bright', title:'화사하게', desc:'밝고 생기 있는 느낌'},
+          {value:'calm', title:'차분하게', desc:'잔잔하고 깔끔한 느낌'}
         ]
       },
       {
         id:'style',
         type:'ab',
-        title:'느낌은 어떤 쪽이 더 그 사람 같아?',
-        sub:'가볍게 직감대로 고르면 충분해요.',
+        title:'그 사람 스타일은 어느 쪽?',
+        sub:'딱 봤을 때 어울리는 쪽 고르면 돼.',
         options:[
-          {value:'cute', title:'귀엽게', desc:'발랄/러블리 계열'},
-          {value:'chic', title:'세련되게', desc:'깔끔/도시적 계열'}
+          {value:'cute', title:'귀엽게', desc:'부드럽고 사랑스럽게'},
+          {value:'chic', title:'세련되게', desc:'심플하고 도시적으로'}
         ]
       },
       {
         id:'volume',
         type:'ab',
-        title:'볼륨은?',
-        sub:'심플/풍성 선택으로 인상이 확 달라져요.',
+        title:'크기는 어느 쪽?',
+        sub:'작고 깔끔 vs 크고 풍성 중에서 골라줘.',
         options:[
-          {value:'simple', title:'심플하게', desc:'정돈된 느낌'},
-          {value:'lush', title:'풍성하게', desc:'존재감 있는 느낌'}
+          {value:'simple', title:'심플하게', desc:'작고 정돈된 느낌'},
+          {value:'lush', title:'풍성하게', desc:'크고 눈에 띄는 느낌'}
         ]
       },
       {
         id:'taboos',
         type:'multi',
-        title:'피해야 할 거 있어?',
-        sub:'없으면 “없음”만 누르고 넘어가면 돼요.',
+        title:'빼야 할 꽃 있어?',
+        sub:'없으면 “없음” 누르고 다음으로 가자.',
         footnote:'※ “없음”을 고르면 다른 금기는 자동 해제돼요.',
         options:[
           {value:'향 강한 꽃은 싫어함', title:'향 강한 꽃은 싫어해요', desc:'향 민감'},
@@ -637,11 +637,11 @@
         id:'urgency',
         type:'single',
         title:'언제 필요해?',
-        sub:'납기 기준으로 가능한 조합을 고를게요.',
+        sub:'필요한 날짜에 맞춰 가능한 걸로 추천할게.',
         options:[
-          {value:'오늘(당일)', title:'오늘(당일)', desc:'빠르게 제작 가능한 조합'},
-          {value:'내일', title:'내일', desc:'원하는 톤은 가능, 품절 대체는 필요'},
-          {value:'여유(2–7일)', title:'여유(2–7일)', desc:'원하는 꽃 반영 가능'}
+          {value:'오늘(당일)', title:'오늘', desc:'지금 가능한 꽃 위주'},
+          {value:'내일', title:'내일', desc:'대부분 가능, 일부 대체 가능'},
+          {value:'여유(2–7일)', title:'2~7일 여유', desc:'원하는 꽃 반영 쉬움'}
         ]
       }
     ];
@@ -682,7 +682,7 @@
     }
 
     const sisterLines = [
-      'NO! "알아서주세요. 많이 팔리는 꽃 주세요."',
+      'NO! 알아서주세요. 많이 팔리는 꽃 주세요.',
       '디테일 욕심 금지. 무드만 맞추면 반은 먹고 들어가.',
       '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
     ];
