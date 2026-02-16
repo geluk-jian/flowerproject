@@ -306,6 +306,31 @@
       background:#fff;
     }
 
+    .palette{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:8px;
+    }
+    .swatch{
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .swatchColor{
+      height:34px;
+      border-bottom:1px solid var(--line);
+    }
+    .swatchMeta{
+      padding:6px 8px;
+      font-size:11px;
+      color:var(--text);
+      font-weight:800;
+      text-align:center;
+      letter-spacing:-.1px;
+    }
+
     .list{margin:8px 0 0; padding-left: 18px; font-size:13px; color: var(--text); font-weight:650;}
     .list li{margin:4px 0;}
 
@@ -596,12 +621,45 @@
     ];
 
     const sampleImageByPersonality = {
-      '러블리': 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80',
-      '세련됨': 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80',
-      '귀여움': 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=1200&q=80',
-      '미니멀': 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80',
+      '러블리': 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=1200&q=80',
+      '세련됨': 'https://images.unsplash.com/photo-1526394931762-8a4116f7ff89?auto=format&fit=crop&w=1200&q=80',
+      '귀여움': 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80',
+      '미니멀': 'https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=1200&q=80',
       '우아함': 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80',
-      '활기': 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=1200&q=80'
+      '활기': 'https://images.unsplash.com/photo-1494972308805-463bc619d34e?auto=format&fit=crop&w=1200&q=80'
+    };
+
+    const paletteByPersonality = {
+      '러블리': [
+        { name:'Rose Quartz', hex:'#F7CAC9' },
+        { name:'Peach Echo', hex:'#F7B39B' },
+        { name:'Cream Tan', hex:'#F3E0BE' }
+      ],
+      '세련됨': [
+        { name:'Cloud Dancer', hex:'#F0EEE9' },
+        { name:'Harbor Mist', hex:'#BFC9C2' },
+        { name:'Urban Chic', hex:'#464646' }
+      ],
+      '귀여움': [
+        { name:'Lemon Zest', hex:'#F9E547' },
+        { name:'Bubblegum', hex:'#FF77A9' },
+        { name:'Apricot', hex:'#FFB482' }
+      ],
+      '미니멀': [
+        { name:'Snow White', hex:'#F8F7F2' },
+        { name:'Silk Gray', hex:'#D9D9D6' },
+        { name:'Sage Hint', hex:'#C9D4C5' }
+      ],
+      '우아함': [
+        { name:'Muted Blush', hex:'#D9A5A0' },
+        { name:'Champagne', hex:'#F3E5C8' },
+        { name:'Vintage Green', hex:'#708D81' }
+      ],
+      '활기': [
+        { name:'Sunflower', hex:'#FFD23F' },
+        { name:'Orange Pop', hex:'#FF8C42' },
+        { name:'Fresh Leaf', hex:'#7DBA3A' }
+      ]
     };
 
     function fallbackSampleImage(concept){
@@ -957,8 +1015,9 @@
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
-      const sampleImage = sampleImageByPersonality[personality] || 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80';
+      const sampleImage = sampleImageByPersonality[personality] || 'https://images.unsplash.com/photo-1526394931762-8a4116f7ff89?auto=format&fit=crop&w=1200&q=80';
       const sampleImageFallback = fallbackSampleImage(profile.concept);
+      const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
 
       const shareState = {...state, taboos};
       const code = base64UrlEncode(shareState);
@@ -984,6 +1043,14 @@
               onerror="this.onerror=null;this.src='${escapeHtml(sampleImageFallback)}';"
             />
             <div class="cap">샘플 사진: ${escapeHtml(profile.concept)} 무드 참고용</div>
+          </div>
+          <div class="palette">
+            ${palette.map(p => `
+              <div class="swatch">
+                <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
+                <div class="swatchMeta">${escapeHtml(p.name)}<br/>${escapeHtml(p.hex)}</div>
+              </div>
+            `).join('')}
           </div>
           <div class="chips">
             <span class="chip">컨셉: <b>${escapeHtml(profile.concept)}</b></span>
