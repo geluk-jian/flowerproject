@@ -1047,6 +1047,39 @@
       };
     }
 
+    function buildStoryTip({ personality, relation, occasion, tone }){
+      const openerByPersonality = {
+        '러블리': '부드럽고 사랑스러운 분위기가 너랑 잘 어울릴 것 같아서 골랐어.',
+        '세련됨': '도시적이고 깔끔한 무드가 너랑 잘 맞을 것 같아서 이 컨셉으로 골랐어.',
+        '귀여움': '밝고 발랄한 느낌이 너한테 잘 어울릴 것 같아서 이렇게 골랐어.',
+        '미니멀': '과하지 않게 정돈된 느낌이 더 멋있을 것 같아서 이 스타일로 골랐어.',
+        '우아함': '차분하고 우아한 분위기가 너한테 잘 어울릴 것 같아서 이렇게 준비했어.',
+        '활기': '에너지 있고 환한 느낌이 딱 너답다고 생각해서 이걸로 골랐어.'
+      };
+
+      const relationTail = {
+        '썸/소개팅': '부담 없이 받았으면 좋겠고, 네 반응이 궁금해.',
+        '여자친구(연인)': '네가 좋아해주면 그걸로 완전 성공이야.',
+        '아내/배우자': '늘 고마운 마음을 이렇게라도 전하고 싶었어.',
+        '친구/동료': '너답게 잘 어울리면 진짜 뿌듯할 것 같아.'
+      };
+
+      const occasionTail = {
+        '생일': '오늘 하루 기분 좋게 기억됐으면 좋겠어.',
+        '기념일': '우리한테 의미 있는 날이라 더 신경 써서 골랐어.',
+        '사과(미안해)': '말보다 진심이 먼저 전달됐으면 좋겠어.',
+        '축하(합격/승진/새출발)': '진심으로 축하하고, 시작이 더 빛났으면 좋겠어.',
+        '첫 선물': '첫 꽃 선물이라 더 조심스럽게 고른 거야.',
+        '그냥(고맙고 응원)': '특별한 이유 없어도 고마운 마음은 전하고 싶었어.'
+      };
+
+      const opener = openerByPersonality[personality] || openerByPersonality['세련됨'];
+      const rel = relationTail[relation] || '잘 어울리면 좋겠다는 마음으로 골랐어.';
+      const occ = occasionTail[occasion] || '';
+
+      return `추천 멘트: "${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}"`;
+    }
+
     function buildCautions({taboos, urgency}){
       const t = (taboos || []).filter(x => x !== '없음');
       const cautions = [];
@@ -1098,6 +1131,12 @@
       const moodText = `${state.style === 'cute' ? '러블리/발랄' : '깔끔/세련'} · ${state.volume === 'simple' ? '심플' : '풍성'}`;
       const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
+      const storyTip = buildStoryTip({
+        personality,
+        relation: state.relation,
+        occasion: state.occasion,
+        tone
+      });
 
       const shareState = {...state, taboos};
       const code = base64UrlEncode(shareState);
@@ -1192,6 +1231,14 @@
         </div>
 
         <div class="box">
+          <h3>선물 스토리/전달 메시지 팁</h3>
+          <p style="margin:0; font-size:13px; font-weight:700; color:var(--text);">${escapeHtml(storyTip)}</p>
+          <div class="btnrow">
+            <button class="secondary" id="btnCopyStoryTip">스토리 멘트 복사</button>
+          </div>
+        </div>
+
+        <div class="box">
           <h3>바로 써먹는 멘트 3개</h3>
           <ol class="list">
             <li>${escapeHtml(msgs.simple)}</li>
@@ -1246,6 +1293,10 @@
         const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
         const ok = await copyText(shareText);
         toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      };
+      $('btnCopyStoryTip').onclick = async ()=>{
+        const ok = await copyText(storyTip);
+        toast(ok ? '스토리 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
       $('btnCopyShareForHer').onclick = async ()=>{
         const ok = await copyText(shareForGirlfriend);
