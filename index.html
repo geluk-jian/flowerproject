@@ -653,6 +653,26 @@
       ]
     };
 
+    const bouquetPhotoByPersonality = {
+      '러블리': 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80',
+      '세련됨': 'https://images.unsplash.com/photo-1526394931762-8a4116f7ff89?auto=format&fit=crop&w=1200&q=80',
+      '귀여움': 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80',
+      '미니멀': 'https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=1200&q=80',
+      '우아함': 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80',
+      '활기': 'https://images.unsplash.com/photo-1494972308805-463bc619d34e?auto=format&fit=crop&w=1200&q=80'
+    };
+
+    const flowerPhotoByName = {
+      '튤립': 'https://images.unsplash.com/photo-1524594227088-274fdea6b5a4?auto=format&fit=crop&w=1200&q=80',
+      '라넌큘러스': 'https://images.unsplash.com/photo-1491591462767-3b5599491cf1?auto=format&fit=crop&w=1200&q=80',
+      '리시안셔스': 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80',
+      '거베라': 'https://images.unsplash.com/photo-1447875569765-2b3db822bec9?auto=format&fit=crop&w=1200&q=80',
+      '카라': 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=1200&q=80',
+      '아네모네': 'https://images.unsplash.com/photo-1494336934272-fd4f0f0c35b3?auto=format&fit=crop&w=1200&q=80',
+      '해바라기': 'https://images.unsplash.com/photo-1470509037663-253afd7f0f51?auto=format&fit=crop&w=1200&q=80',
+      '알스트로메리아': 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=1200&q=80'
+    };
+
     function fallbackSampleImage(concept){
       const safe = escapeHtml(concept || '추천 컨셉');
       const svg = `
@@ -670,38 +690,18 @@
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
-    function bouquetSvgByPalette(palette){
-      const p = (palette && palette.length >= 3) ? palette : [
-        { hex:'#F7CAC9' }, { hex:'#F3E0BE' }, { hex:'#BFC9C2' }
-      ];
-      const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f8fafc"/>
-      <stop offset="100%" stop-color="#ecfdf5"/>
-    </linearGradient>
-    <linearGradient id="wrap" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#dcfce7"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="800" fill="url(#bg)"/>
-  <g transform="translate(600,430)">
-    <polygon points="-250,140 0,-120 250,140" fill="url(#wrap)" stroke="#86efac" stroke-width="6"/>
-    <rect x="-35" y="110" width="70" height="220" rx="30" fill="#22c55e"/>
-    <circle cx="0" cy="95" r="42" fill="#16a34a"/>
-    <ellipse cx="-170" cy="-20" rx="90" ry="90" fill="${p[0].hex}" stroke="#111827" stroke-opacity=".2" stroke-width="4"/>
-    <ellipse cx="0" cy="-85" rx="90" ry="90" fill="${p[1].hex}" stroke="#111827" stroke-opacity=".2" stroke-width="4"/>
-    <ellipse cx="170" cy="-20" rx="90" ry="90" fill="${p[2].hex}" stroke="#111827" stroke-opacity=".2" stroke-width="4"/>
-    <ellipse cx="-80" cy="55" rx="78" ry="78" fill="${p[1].hex}" stroke="#111827" stroke-opacity=".2" stroke-width="4"/>
-    <ellipse cx="85" cy="55" rx="78" ry="78" fill="${p[0].hex}" stroke="#111827" stroke-opacity=".2" stroke-width="4"/>
-    <circle cx="-130" cy="-60" r="18" fill="#fff" fill-opacity=".6"/>
-    <circle cx="45" cy="-120" r="18" fill="#fff" fill-opacity=".6"/>
-    <circle cx="210" cy="-40" r="14" fill="#fff" fill-opacity=".6"/>
-  </g>
-</svg>`;
-      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    function pickFlowerPhoto(mainList){
+      for(const f of (mainList || [])){
+        const key = Object.keys(flowerPhotoByName).find(k => f.includes(k));
+        if(key) return flowerPhotoByName[key];
+      }
+      return null;
+    }
+
+    function pickSamplePhoto(personality, mainList){
+      return bouquetPhotoByPersonality[personality]
+        || pickFlowerPhoto(mainList)
+        || 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80';
     }
 
     const state = {
@@ -1041,7 +1041,9 @@
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
-      const sampleImage = bouquetSvgByPalette(palette);
+      const sampleImage = pickSamplePhoto(personality, main);
+      const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
+      const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
 
       const shareState = {...state, taboos};
       const code = base64UrlEncode(shareState);
@@ -1064,9 +1066,9 @@
               alt="${escapeHtml(profile.concept)} 샘플 사진"
               loading="lazy"
               referrerpolicy="no-referrer"
-              onerror="this.onerror=null;this.src='${escapeHtml(fallbackSampleImage(profile.concept))}';"
+              onerror="if(!this.dataset.err1){this.dataset.err1='1';this.src='${escapeHtml(sampleImageFallback)}';}else{this.onerror=null;this.src='${escapeHtml(sampleImageFallbackFinal)}';}"
             />
-            <div class="cap">샘플 사진: ${escapeHtml(profile.concept)} 무드 참고용</div>
+            <div class="cap">샘플 사진: ${escapeHtml(profile.concept)} 실제 꽃다발/꽃 참고용</div>
           </div>
           <div class="palette">
             ${palette.map(p => `
