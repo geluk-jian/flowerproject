@@ -65,6 +65,14 @@
       letter-spacing:.2px;
       color:#334155;
     }
+    .toneHandle a{
+      color: inherit;
+      text-decoration:none;
+    }
+    .toneHandle a:hover{
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
     .topInfoPanel{
       display:none;
       margin: 0 0 14px;
@@ -805,7 +813,7 @@
 
           <div class="startSlider">
             <div class="startSliderWrap">
-              <div class="speechBubble speechOwner">10년차 꽃집 사장</div>
+              <div class="speechBubble speechOwner">10년차<br/>꽃집사장</div>
               <div class="slideFrame" id="startSlideFrame">
                 <img class="slideItem active" src="./image/rose.png" alt="대표 꽃 장미" loading="eager" />
                 <img class="slideItem" src="./image/calla.png" alt="대표 꽃 카라" loading="lazy" />
@@ -814,12 +822,12 @@
                 <img class="slideItem" src="./image/ranunculus.png" alt="대표 꽃 라넌큘러스" loading="lazy" />
                 <img class="slideItem" src="./image/tulip.png" alt="대표 꽃 튤립" loading="lazy" />
               </div>
-              <div class="speechBubble speechNo">사진 업로드 없음</div>
-              <div class="speechBubble speechAny">복붙 주문문장 제공</div>
+              <div class="speechBubble speechNo">사진 업로드<br/>필요없음</div>
+              <div class="speechBubble speechAny">주문 문장<br/>복붙 제공</div>
               <div class="startBubbleRow" aria-hidden="true">
-                <div class="speechBubble">10년차 꽃집 사장</div>
-                <div class="speechBubble">사진 업로드 없음</div>
-                <div class="speechBubble">복붙 주문문장 제공</div>
+                <div class="speechBubble">10년차<br/>꽃집사장</div>
+                <div class="speechBubble">사진 업로드<br/>필요없음</div>
+                <div class="speechBubble">주문 문장<br/>복붙 제공</div>
               </div>
             </div>
           </div>
@@ -883,7 +891,7 @@
       </div>
     </section>
 
-    <div class="toneHandle">@tone_art</div>
+    <div class="toneHandle"><a href="http://instargram.com/tone_art" target="_blank" rel="noopener noreferrer">@tone_art</a></div>
     <nav class="topnav" aria-label="사이트 탐색">
       <a href="#" data-info="about">소개</a>
       <a href="#" data-info="how">이용방법</a>
