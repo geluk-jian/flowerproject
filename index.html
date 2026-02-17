@@ -1418,7 +1418,6 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const moodText = `${(styleLabel === '귀여움' || styleLabel === '러블리') ? '러블리/발랄' : '깔끔/세련'} · ${volumeLabel}`;
       const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const priceInfo = estimatePrice(personality, state.volume);
@@ -1469,15 +1468,11 @@
         </div>
 
         <div class="hero" style="margin-top:2px;">
-          <h1>꽃을 만지는 누나의 결론</h1>
-          <p class="muted">${escapeHtml(line)}</p>
           <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
         </div>
 
         <div class="box">
           <div class="top3">
-            <div class="topItem">✅ 오늘은 이 컨셉: ${escapeHtml(profile.concept)}</div>
-            <div class="topItem">✅ 색감: ${escapeHtml(tone)} / 느낌: ${escapeHtml(moodText)}</div>
             <div class="topItem">
               ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
               <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
