@@ -353,7 +353,9 @@
       display:block;
       width:100%;
       height:220px;
-      object-fit:cover;
+      object-fit:contain;
+      object-position:center;
+      background:#fff;
     }
     .samplePhoto .cap{
       padding:8px 10px;
@@ -1418,35 +1420,6 @@
       history.replaceState(null, '', url.toString());
 
       const resultHtml = `
-        <div class="hero">
-          <h1>꽃을 만지는 누나의 결론</h1>
-          <p class="muted">${escapeHtml(line)}</p>
-          <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
-        </div>
-
-        <div class="box">
-          <div class="top3">
-            <div class="topItem">✅ 오늘은 이 컨셉: ${escapeHtml(profile.concept)}</div>
-            <div class="topItem">✅ 색감: ${escapeHtml(tone)} / 느낌: ${escapeHtml(moodText)}</div>
-            <div class="topItem">
-              ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
-              <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
-              <div class="priceRow">
-                <span class="priceBadge">심플/미니멀: 약 3만~5만원</span>
-                <span class="priceBadge">러블리/활기: 약 5만~8만원</span>
-                <span class="priceBadge">우아함/풍성: 약 8만~13만원</span>
-              </div>
-            </div>
-            <div class="topItem">
-              ✅ 바로 주문: 꽃집에 보내기
-              <small>버튼 누르면 주문 문장을 복사해줘요.</small>
-              <div class="btnrow" style="margin-top:8px;">
-                <button id="btnCopyOrder">꽃집에 보내기(주문문장 복사)</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="box">
           <h3>추천 컨셉</h3>
           <div class="samplePhoto">
@@ -1476,6 +1449,35 @@
           <div class="muted" style="font-size:13px;">
             톤/색감: <b>${escapeHtml(tone)}</b><br/>
             포장: <b>${escapeHtml(wrap)}</b>
+          </div>
+        </div>
+
+        <div class="hero">
+          <h1>꽃을 만지는 누나의 결론</h1>
+          <p class="muted">${escapeHtml(line)}</p>
+          <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
+        </div>
+
+        <div class="box">
+          <div class="top3">
+            <div class="topItem">✅ 오늘은 이 컨셉: ${escapeHtml(profile.concept)}</div>
+            <div class="topItem">✅ 색감: ${escapeHtml(tone)} / 느낌: ${escapeHtml(moodText)}</div>
+            <div class="topItem">
+              ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
+              <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
+              <div class="priceRow">
+                <span class="priceBadge">심플/미니멀: 약 3만~5만원</span>
+                <span class="priceBadge">러블리/활기: 약 5만~8만원</span>
+                <span class="priceBadge">우아함/풍성: 약 8만~13만원</span>
+              </div>
+            </div>
+            <div class="topItem">
+              ✅ 바로 주문: 꽃집에 보내기
+              <small>버튼 누르면 주문 문장을 복사해줘요.</small>
+              <div class="btnrow" style="margin-top:8px;">
+                <button id="btnCopyOrder">꽃집에 보내기(주문문장 복사)</button>
+              </div>
+            </div>
           </div>
         </div>
 
