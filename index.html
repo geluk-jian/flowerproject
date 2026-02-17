@@ -41,6 +41,23 @@
       line-height:1.45;
     }
 
+    .topnav{
+      display:flex; flex-wrap:wrap; gap:10px;
+      padding: 6px 2px 14px;
+      align-items:center;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .topnav a{
+      color: var(--muted);
+      text-decoration:none;
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+    }
+    .topnav a:hover{color: var(--text); border-color: var(--accent);}
+
     .wrap{max-width:var(--max); margin:0 auto; padding:24px 16px 60px;}
 
     .card{
@@ -423,6 +440,27 @@
 
     .divider{height:1px; background: #eef2f7; margin:12px 0;}
 
+    .section{
+      margin-top:16px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+    }
+    .section h2{margin:0 0 10px; font-size:18px; letter-spacing:-.2px;}
+    .section p{margin:0 0 10px; font-size:14px;}
+    .section .small{font-size:12px; color: var(--muted);}
+
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    @media (min-width: 640px){
+      .twoCol{grid-template-columns: 1fr 1fr;}
+    }
+
     .ctaPro{
       border: 1px dashed rgba(34,197,94,.55);
       background: rgba(34,197,94,.06);
@@ -588,6 +626,14 @@
 </head>
 <body>
   <div class="wrap">
+    <nav class="topnav" aria-label="사이트 탐색">
+      <a href="#about">소개</a>
+      <a href="#how">이용방법</a>
+      <a href="#guide">가이드</a>
+      <a href="#faq">FAQ</a>
+      <a href="#policy">정책</a>
+      <a href="#contact">문의</a>
+    </nav>
 
     <section class="screen active" id="screenStart">
       <div class="startPoster">
@@ -662,6 +708,54 @@
         </div>
         <div class="bd" id="resultArea"></div>
       </div>
+    </section>
+
+    <section class="section" id="about">
+      <h2>서비스 소개</h2>
+      <p>이 사이트는 “꽃을 고르는 기준”을 짧은 질문으로 정리해주는 무료 가이드입니다. 결과는 실제 꽃집 주문에 바로 활용할 수 있는 톤/포장/멘트 힌트를 제공합니다.</p>
+      <p class="small">본 서비스는 특정 꽃집과 제휴/연결되지 않으며, 추천은 참고용입니다.</p>
+    </section>
+
+    <section class="section" id="how">
+      <h2>이용 방법</h2>
+      <div class="twoCol">
+        <div>
+          <p><b>1) 질문 30초</b> — 관계/상황/무드만 골라주세요.</p>
+          <p><b>2) 결과 확인</b> — 톤/포장/꽃 조합/멘트가 제공됩니다.</p>
+        </div>
+        <div>
+          <p><b>3) 꽃집 전달</b> — 복붙 문장으로 주문하면 정확도가 높아집니다.</p>
+          <p><b>4) 공유</b> — 결과 링크를 공유해 취향을 맞춰볼 수 있어요.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="guide">
+      <h2>고품질 주문 가이드</h2>
+      <p><b>핵심은 “무드 + 톤 + 금기”</b>입니다. 이 3가지를 정확히 말하면 꽃집이 빠르게 이해합니다.</p>
+      <p><b>금기가 있다면 먼저</b> 전달하세요(향, 알레르기, 특정 꽃). 그 다음 원하는 톤과 포장 느낌을 설명하는 것이 안전합니다.</p>
+      <p class="small">계절·재고에 따라 대체 꽃이 사용될 수 있습니다. 이때 “무드 유지” 문구를 넣으면 품질이 안정됩니다.</p>
+    </section>
+
+    <section class="section" id="faq">
+      <h2>FAQ</h2>
+      <p><b>Q. 결과는 항상 똑같나요?</b><br/>A. 기본 규칙은 같고, 상황/관계/금기에 따라 결과가 달라집니다.</p>
+      <p><b>Q. 이 결과만으로 바로 주문해도 되나요?</b><br/>A. 가능합니다. 다만 예산/픽업 시간/재고에 따라 조정이 필요할 수 있어요.</p>
+      <p><b>Q. 사진과 실제가 다를 수 있나요?</b><br/>A. 꽃은 자연물이라 계절에 따라 색감과 구성에 차이가 있습니다.</p>
+    </section>
+
+    <section class="section" id="policy">
+      <h2>정책 안내</h2>
+      <p><b>개인정보</b>: 이 사이트는 회원가입 없이 이용할 수 있으며, 입력값은 브라우저 내에서만 처리됩니다.</p>
+      <p><b>광고</b>: Google AdSense가 쿠키를 사용할 수 있습니다. 자세한 내용은 아래 정책 페이지를 확인하세요.</p>
+      <p class="small">관련 문서: <a href="privacy.html">개인정보처리방침</a> · <a href="terms.html">이용약관</a></p>
+    </section>
+
+    <section class="section" id="contact">
+      <h2>문의</h2>
+      <p>피드백/문의는 이메일로 연락해주세요.</p>
+      <p><b>contact@flowerproject.site</b></p>
+      <p class="small">실제 문의 메일로 교체가 필요하면 알려주세요.</p>
     </section>
 
   </div>
