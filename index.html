@@ -873,7 +873,6 @@
 
     const sisterLines = [
       'NO! 알아서주세요. 많이 팔리는 꽃 주세요.',
-      '디테일 욕심 금지. 무드만 맞추면 반은 먹고 들어가.',
       '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
     ];
 
@@ -1423,7 +1422,7 @@
         <div class="box">
           <h3>추천 컨셉</h3>
           <div class="samplePhoto">
-            <div class="title">컨셉 대표 이미지: ${escapeHtml(personality)} 무드</div>
+            <div class="title">컨셉 대표 꽃: ${escapeHtml(personality)} 무드</div>
             <img
               src="${escapeHtml(sampleImage)}"
               alt="${escapeHtml(profile.concept)} 샘플 사진"
@@ -1431,7 +1430,7 @@
               referrerpolicy="no-referrer"
               onerror="if(!this.dataset.err1){this.dataset.err1='1';this.src='${escapeHtml(sampleImageFallback)}';}else{this.onerror=null;this.src='${escapeHtml(sampleImageFallbackFinal)}';}"
             />
-            <div class="cap">이런 느낌으로 최종 꽃다발이 나와요. (실제 제작 시 계절/재고에 따라 유사 톤으로 조정)</div>
+            <div class="cap">위 꽃은 메인으로 추천드려요.</div>
           </div>
           <div class="palette">
             ${palette.map(p => `
@@ -1452,7 +1451,7 @@
           </div>
         </div>
 
-        <div class="hero">
+        <div class="hero" style="margin-top:2px;">
           <h1>꽃을 만지는 누나의 결론</h1>
           <p class="muted">${escapeHtml(line)}</p>
           <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
