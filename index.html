@@ -1363,6 +1363,14 @@
       return cautions;
     }
 
+    const sisterLines = [
+      '이렇게만 말하면 꽃집이 바로 이해할 거야.',
+      '무드만 딱 잡으면 절반은 성공이야.',
+      '깔끔하게 정리해줄게, 믿고 따라와.',
+      '센스는 디테일에서 나온다 🙂',
+      '취향만 확실하면 실패 확률 확 줄어.'
+    ];
+
     /* ===== FREE 대표 꽃 1송이 이미지 매핑 (너 레포 경로/파일명 기준) ===== */
     const mainFlowerByPersonality = {
       '러블리': { name: '라넌큘러스', img: 'image/ranunculus.png' },
@@ -1548,8 +1556,10 @@
 
     function showResult(){
       const taboos = (state.taboos || []).includes('없음') ? [] : (state.taboos || []);
+
       const personality = mapPersonality(state.brightness, state.style, state.volume);
       const profile = profiles[personality];
+      const line = sisterLines[Math.floor(Math.random() * sisterLines.length)];
 
       const { main, sub, tex } = pickFlowers(profile, taboos);
       const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
@@ -1571,6 +1581,36 @@
         wrap += ' (포장/리본 최소화 추천)';
       }
 
+      // ✅ 대표 꽃 1송이 (너 레포 image/ 경로 반영)
+      const mainFlowerAsset = getMainFlowerAsset(personality, taboos);
+
+      // ✅ 무료: 꽃집 DM 문장
+      const floristDM = buildFreeFloristDM({
+        relation: state.relation,
+        occasion: state.occasion,
+        urgency: state.urgency,
+        tone,
+        wrap,
+        concept: profile.concept,
+        mainFlowerName: mainFlowerAsset.name,
+        taboos,
+        cardText: msgs.sense
+      });
+
+      // ✅ PRO: 상세 주문서
+      const proOrderSheet = buildProOrderSheet({
+        relation: state.relation,
+        occasion: state.occasion,
+        urgency: state.urgency,
+        tone,
+        wrap,
+        concept: profile.concept,
+        moodTags: profile.mood,
+        mainFlowerName: mainFlowerAsset.name,
+        taboos,
+        cardText: msgs.sense
+      });
+
       const brightnessLabel = {
         bright:'화사',
         calm:'차분',
@@ -1586,23 +1626,11 @@
       }[state.style] || '세련';
 
       const volumeLabel = {
-        single:'한송이(1 flower)',
-        mini:'미니(S)',
-        basic:'기본(M)',
-        lush:'풍성(L)'
-      }[state.volume] || '기본(M)';
-
-      const personalitySentence = (() => {
-        const adj = {
-          '러블리':'부드럽고 사랑스러운',
-          '세련됨':'도시적이고 깔끔한',
-          '귀여움':'발랄하고 귀여운',
-          '미니멀':'담백하고 절제된',
-          '우아함':'차분하고 우아한',
-          '활기':'에너지 넘치는'
-        }[personality] || '깔끔한';
-        return `${adj} 그녀에겐 ${styleLabel} ${volumeLabel} 스타일을 추천드려요.`;
-      })();
+        single:'한송이',
+        mini:'미니',
+        basic:'기본',
+        lush:'풍성'
+      }[state.volume] || '기본';
 
       const reasonParts = [
         `관계: ${state.relation || '미선택'}`,
@@ -1614,90 +1642,85 @@
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
-      const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
-      const pickTitleColor = (palette[0] && palette[0].hex) ? palette[0].hex : '#166534';
-      const sampleImage = pickConceptPreviewPhoto(personality);
-      const conceptFlowerName = pickConceptFlowerName(personality);
-      const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
-      const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const floristOrder = `오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
-      const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
-      const priceInfo = estimatePrice(state.volume);
-      const storyTip = buildStoryTip({
-        personality,
-        relation: state.relation,
-        occasion: state.occasion,
-        tone
-      });
 
+      // 공유 링크
       const shareState = {...state, taboos};
       const code = base64UrlEncode(shareState);
       const url = new URL(location.href);
       url.searchParams.set('r', code);
       history.replaceState(null, '', url.toString());
 
+      const proUnlocked = isProUnlocked();
+
+      // PRO 레퍼런스 이미지(나중에 올리면 자동 표시)
+      // 파일을 올리고 싶으면: image/pro_ref_1.png ~ 3.png 로 업로드하면 됨
+      const proRefs = ['image/pro_ref_1.png','image/pro_ref_2.png','image/pro_ref_3.png'];
+
       const resultHtml = `
-        <div class="box">
-          <h3>추천 컨셉</h3>
-          <div class="samplePhoto">
-            <div class="title">컨셉 대표 꽃: ${escapeHtml(personality)} 무드 · ${escapeHtml(conceptFlowerName)}</div>
-            <img
-              src="${escapeHtml(sampleImage)}"
-              alt="${escapeHtml(profile.concept)} 샘플 사진"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-              onerror="if(!this.dataset.err1){this.dataset.err1='1';this.src='${escapeHtml(sampleImageFallback)}';}else{this.onerror=null;this.src='${escapeHtml(sampleImageFallbackFinal)}';}"
-            />
-            <div class="cap">위 꽃은 메인으로 추천드려요.</div>
-          </div>
-          <div class="palette">
-            ${palette.map(p => `
-              <div class="swatch">
-                <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
-                <div class="swatchMeta">${escapeHtml(p.name)}<br/>${escapeHtml(p.hex)}</div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="chips">
-            <span class="chip">컨셉: <b>${escapeHtml(profile.concept)}</b></span>
-            ${profile.mood.map(m => `<span class="chip">${escapeHtml(m)}</span>`).join('')}
-          </div>
-          <div class="divider"></div>
-          <div class="muted" style="font-size:13px;">
-            톤/색감: <b>${escapeHtml(tone)}</b><br/>
-            포장: <b>${escapeHtml(wrap)}</b>
-          </div>
-        </div>
+        <div class="hero">
+          <h1>꽃을만지는 누나의 결론</h1>
+          <p class="muted">${escapeHtml(line)}</p>
 
-        <div class="hero" style="margin-top:2px;">
-          <div style="font-size:24px; font-weight:900; color:${escapeHtml(pickTitleColor)}; margin-bottom:6px;">꽃집 누나 PICK</div>
-          <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
-        </div>
-
-        <div class="box">
-          <div class="top3">
-            <div class="topItem">
-              ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
-              <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
-              <div class="priceRow">
-                <span class="priceBadge">한송이(1 flower): 약 1만~2만원</span>
-                <span class="priceBadge">미니(S): 약 3만~5만원</span>
-                <span class="priceBadge">기본(M): 약 5만~8만원</span>
-                <span class="priceBadge">풍성(L): 약 8만~13만원</span>
-              </div>
+          <div class="resultTop">
+            <div class="oneFlowerBox">
+              <img class="oneFlowerImg" src="${escapeHtml(mainFlowerAsset.img)}"
+                   alt="${escapeHtml(mainFlowerAsset.name)} 한 송이"
+                   loading="lazy"
+                   onerror="this.style.display='none'">
+              <div class="oneFlowerName">${escapeHtml(mainFlowerAsset.name)}</div>
+              <div class="muted" style="font-size:12px; font-weight:700;">무료 결과는 ‘한 송이’로 취향만 딱 찍어줘</div>
             </div>
-            <div class="topItem">
-              ✅ 바로 주문: 꽃집에 보내기
-              <small>버튼 누르면 주문 문장을 복사해줘요.</small>
-              <div class="btnrow" style="margin-top:8px;">
-                <button id="btnCopyOrder">꽃집에 보내기(주문문장 복사)</button>
+
+            <div class="quickBox">
+              <div class="quickTitle">꽃집에 이렇게 말해(무료)</div>
+
+              <div class="kvRow">
+                <span class="kv">성향: ${escapeHtml(personality)}</span>
+                <span class="kv">컨셉: ${escapeHtml(profile.concept)}</span>
+                <span class="kv">일정: ${escapeHtml(state.urgency || '')}</span>
               </div>
+
+              <div style="margin-top:10px; font-size:13px; font-weight:900;">톤/마무리 가이드</div>
+              <div class="codeBox">${escapeHtml(`톤: ${tone}\n마무리: ${wrap}\n(가능하면) 메인: ${mainFlowerAsset.name}`)}</div>
+
+              <div style="margin-top:10px; font-size:13px; font-weight:900;">꽃집 DM 문장(복붙용)</div>
+              <div class="codeBox" id="dmText">${escapeHtml(floristDM)}</div>
+
+              <div class="actionRow">
+                <button class="secondary" id="btnCopyFlorist">꽃집 DM 문장 복사</button>
+                <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
+              </div>
+
+              <div class="footnote">※ 꽃말/의미는 해석이 다양할 수 있어요. (출처 없음)</div>
             </div>
           </div>
         </div>
 
         <div class="box">
-          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
+          <h3>그녀에게 보내는 멘트 3개</h3>
+          <ol class="list">
+            <li>${escapeHtml(msgs.simple)}</li>
+            <li>${escapeHtml(msgs.sense)}</li>
+            <li>${escapeHtml(msgs.sincere)}</li>
+          </ol>
+          <div class="actionRow">
+            <button class="secondary" id="btnCopyMent">멘트 3개 복사</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>왜 이게 맞냐면</h3>
+          <p class="muted" style="margin:0; font-size:13px;">${reasonParts.map(escapeHtml).join(' ')}</p>
+        </div>
+
+        <div class="box">
+          <h3>꽃 의미 한 줄</h3>
+          <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
+          <div class="footnote">※ 꽃말/의미는 해석이 다양할 수 있어요. (출처 없음)</div>
+        </div>
+
+        <div class="box">
+          <h3>추천 꽃 조합(참고)</h3>
           <ul class="list">
             <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
             <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
@@ -1708,62 +1731,48 @@
         </div>
 
         <div class="box">
-          <h3>왜 이게 맞냐면</h3>
-          <details class="explain">
-            <summary>접기/펼치기</summary>
-            <p>${reasonParts.map(escapeHtml).join(' ')}</p>
-          </details>
-        </div>
-
-        <div class="box">
-          <h3>꽃 의미 한 줄</h3>
-          <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
-          <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
-        </div>
-
-        <div class="box">
-          <h3>꽃집 DM용 주문문장(무료 1개)</h3>
-          <p style="margin:0; font-size:13px; font-weight:700;">${escapeHtml(floristOrder)}</p>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyOrderInline">주문문장 복사</button>
-          </div>
-        </div>
-
-        <div class="box">
-          <h3>선물 스토리/전달 메시지 팁</h3>
-          <p style="margin:0; font-size:13px; font-weight:700; color:var(--text);">${escapeHtml(storyTip)}</p>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyStoryTip">스토리 멘트 복사</button>
-          </div>
-        </div>
-
-        <div class="box">
-          <h3>바로 써먹는 멘트 3개</h3>
-          <ol class="list">
-            <li>${escapeHtml(msgs.simple)}</li>
-            <li>${escapeHtml(msgs.sense)}</li>
-            <li>${escapeHtml(msgs.sincere)}</li>
-          </ol>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyMent">멘트 3개 복사</button>
-            <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
-            <button class="secondary" id="btnCopyShareForHer">여친한테 공유문구 복사</button>
-          </div>
-          <div class="footnote">공유 문구 예: “이거 해보고 꽃 골라줘 😂” (출처 없음)</div>
-        </div>
-
-        <div class="box">
           <h3>주의사항</h3>
           <ul class="list">
             ${cautions.map(c=>`<li>${escapeHtml(c)}</li>`).join('')}
           </ul>
         </div>
 
-        <div class="box ctaPro">
-          <h3>PRO(예정): 꽃집 DM 주문서 + 멘트 10개</h3>
-          <p class="muted" style="margin:0; font-size:13px;">
-            다음 단계는 “꽃집에 그대로 보내면 제작되는 주문서”까지 뽑아주는 거야.
+        <div class="proBox">
+          <h3 style="margin:0; font-weight:900; letter-spacing:-.2px;">PRO(유료) — 꽃다발 이미지 + 주문서 디자인</h3>
+          <p class="muted" style="margin:8px 0 0; font-size:13px;">
+            PRO에서는 <b>꽃집이 그대로 만들 수 있는 주문서</b> + <b>꽃다발 레퍼런스 이미지 3안</b> + <b>멘트 10개</b>를 줘.
           </p>
+
+          ${
+            proUnlocked
+            ? `
+              <div class="proGrid">
+                ${proRefs.map(src => `
+                  <img class="refImg" src="${escapeHtml(src)}" alt="PRO 레퍼런스" loading="lazy"
+                       onerror="this.outerHTML='<div class=&quot;placeholder&quot;>PRO 레퍼런스 이미지<br>image/pro_ref_1~3.png 업로드하면 표시돼</div>'">
+                `).join('')}
+              </div>
+
+              <div style="margin-top:12px; font-weight:900;">PRO 주문서(복붙/저장)</div>
+              <div class="codeBox" id="proSheet">${escapeHtml(proOrderSheet)}</div>
+
+              <div class="actionRow">
+                <button class="secondary" id="btnCopyProSheet">PRO 주문서 복사</button>
+                <button class="secondary" id="btnDownloadTxt">TXT로 저장</button>
+                <button class="secondary" id="btnDownloadPng">PNG로 저장</button>
+                <button class="secondary" id="btnLockPro">PRO 닫기</button>
+              </div>
+            `
+            : `
+              <div class="actionRow">
+                <button id="btnUnlockPro">PRO 미리보기 열기(데모)</button>
+                <button class="secondary" id="btnHowPro">PRO에 뭐가 나와?</button>
+              </div>
+              <div class="footnote" style="margin-top:10px;">
+                ※ 지금은 결제 연동 전이라 데모 잠금/해제로도 해커톤 제출 충분. (출처 없음)
+              </div>
+            `
+          }
         </div>
 
         <div class="btnrow" style="margin-top:16px;">
@@ -1774,33 +1783,78 @@
 
       $('resultArea').innerHTML = resultHtml;
 
+      // 버튼 바인딩
       $('btnCopyMent').onclick = async ()=>{
         const text = [msgs.simple, msgs.sense, msgs.sincere].join('\n');
         const ok = await copyText(text);
         toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
-      $('btnCopyOrder').onclick = async ()=>{
-        const ok = await copyText(floristOrder);
-        toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
-      $('btnCopyOrderInline').onclick = async ()=>{
-        const ok = await copyText(floristOrder);
-        toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
+
+      $('btnCopyFlorist').onclick = async ()=>{
+        const ok = await copyText(floristDM);
+        toast(ok ? '꽃집 DM 문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
 
       $('btnCopyLink').onclick = async ()=>{
-        const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
+        const shareText = `꽃을만지는 누나 결과 링크: ${url.toString()}`;
         const ok = await copyText(shareText);
         toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
       };
-      $('btnCopyStoryTip').onclick = async ()=>{
-        const ok = await copyText(storyTip);
-        toast(ok ? '스토리 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
-      $('btnCopyShareForHer').onclick = async ()=>{
-        const ok = await copyText(shareForGirlfriend);
-        toast(ok ? '공유문구를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
+
+      // PRO 잠금/해제
+      const btnUnlock = document.getElementById('btnUnlockPro');
+      if(btnUnlock){
+        btnUnlock.onclick = ()=>{
+          setProUnlocked(true);
+          showResult();
+          toast('PRO 데모를 열었어!');
+        };
+      }
+
+      const btnHow = document.getElementById('btnHowPro');
+      if(btnHow){
+        btnHow.onclick = ()=>{
+          alert('PRO: 꽃다발 레퍼런스 이미지 3안 + 주문서(복붙/저장) + 멘트 10개가 나와요.');
+        };
+      }
+
+      const btnCopyPro = document.getElementById('btnCopyProSheet');
+      if(btnCopyPro){
+        btnCopyPro.onclick = async ()=>{
+          const ok = await copyText(proOrderSheet);
+          toast(ok ? 'PRO 주문서를 복사했어!' : '복사 실패');
+        };
+      }
+
+      const btnTxt = document.getElementById('btnDownloadTxt');
+      if(btnTxt){
+        btnTxt.onclick = ()=>{
+          downloadTextFile('order_sheet.txt', proOrderSheet);
+          toast('TXT로 저장했어!');
+        };
+      }
+
+      const btnPng = document.getElementById('btnDownloadPng');
+      if(btnPng){
+        btnPng.onclick = async ()=>{
+          const lines = proOrderSheet.split('\n').map(s=>s.trim()).filter(Boolean);
+          await downloadOrderSheetPng({
+            title: '꽃 주문서',
+            subtitle: `${state.occasion || ''} · ${state.relation || ''}`,
+            lines
+          });
+          toast('PNG로 저장했어!');
+        };
+      }
+
+      const btnLock = document.getElementById('btnLockPro');
+      if(btnLock){
+        btnLock.onclick = ()=>{
+          setProUnlocked(false);
+          showResult();
+          toast('PRO 닫았어!');
+        };
+      }
 
       $('btnAgain').onclick = ()=>{
         clearState();
