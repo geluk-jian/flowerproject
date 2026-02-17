@@ -626,6 +626,7 @@
 
           <div class="startCta">
             <button id="btnStart" type="button">시작하기</button>
+            <button class="secondary" id="btnShareSite" type="button">&lt;내 남친이 봤어면 하는 사이트&gt;</button>
             <div class="startMeta">※ 결과에서 멘트 복사 + 링크 공유 가능</div>
           </div>
         </div>
@@ -918,6 +919,15 @@
       '활기': './image/tulip.png'
     };
 
+    const flowerNameByPhotoKey = {
+      rose: '장미',
+      calla: '카라',
+      gerbera: '거베라',
+      lisianthus: '리시안셔스',
+      tulip: '튤립',
+      ranunculus: '라넌큘러스'
+    };
+
     const flowerPhotoByName = {
       '장미': './image/rose.png',
       '튤립': './image/tulip.png',
@@ -955,6 +965,12 @@
     function pickConceptPreviewPhoto(personality){
       return bouquetPhotoByPersonality[personality]
         || './image/rose.png';
+    }
+
+    function pickConceptFlowerName(personality){
+      const photo = pickConceptPreviewPhoto(personality);
+      const file = (photo.split('/').pop() || '').split('.')[0];
+      return flowerNameByPhotoKey[file] || '장미';
     }
 
     const state = {
@@ -1399,6 +1415,7 @@
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
       const sampleImage = pickConceptPreviewPhoto(personality);
+      const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
       const moodText = `${(styleLabel === '귀여움' || styleLabel === '러블리') ? '러블리/발랄' : '깔끔/세련'} · ${volumeLabel}`;
@@ -1422,7 +1439,7 @@
         <div class="box">
           <h3>추천 컨셉</h3>
           <div class="samplePhoto">
-            <div class="title">컨셉 대표 꽃: ${escapeHtml(personality)} 무드</div>
+            <div class="title">컨셉 대표 꽃: ${escapeHtml(personality)} 무드 · ${escapeHtml(conceptFlowerName)}</div>
             <img
               src="${escapeHtml(sampleImage)}"
               alt="${escapeHtml(profile.concept)} 샘플 사진"
@@ -1601,6 +1618,27 @@
     $('btnStart').addEventListener('click', ()=>{
       showScreen('screenQuiz');
       renderStep();
+    });
+    $('btnShareSite').addEventListener('click', async ()=>{
+      const shareUrl = `${location.origin}${location.pathname}`;
+      const shareText = `내 남친이 봤어면 하는 사이트: ${shareUrl}`;
+
+      if (navigator.share) {
+        try{
+          await navigator.share({
+            title: '꽃을 만지는 누나',
+            text: '내 남친이 봤어면 하는 사이트',
+            url: shareUrl
+          });
+          toast('공유창을 열었어!');
+          return;
+        }catch(e){
+          if (e && e.name === 'AbortError') return;
+        }
+      }
+
+      const ok = await copyText(shareText);
+      toast(ok ? '공유 문구를 복사했어!' : '복사 실패(브라우저 권한 확인)');
     });
 
     const btnLoadExample = $('btnLoadExample');
