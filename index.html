@@ -1363,6 +1363,189 @@
       return cautions;
     }
 
+    /* ===== FREE 대표 꽃 1송이 이미지 매핑 (너 레포 경로/파일명 기준) ===== */
+    const mainFlowerByPersonality = {
+      '러블리': { name: '라넌큘러스', img: 'image/ranunculus.png' },
+      '귀여움': { name: '거베라', img: 'image/gerbera.png' },
+      '활기':   { name: '튤립', img: 'image/tulip.png' },
+      '세련됨': { name: '카라(칼라)', img: 'image/calla.png' },
+      '미니멀': { name: '리시안셔스', img: 'image/lisianthus.png' },
+      '우아함': { name: '장미', img: 'image/rose.png' }
+    };
+
+    function getMainFlowerAsset(personality, taboos){
+      const chosen = mainFlowerByPersonality[personality] || { name:'튤립', img:'image/tulip.png' };
+
+      // 금기에서 장미 제외가 걸리면, 우아함이어도 장미는 피해서 대체
+      const t = (taboos || []);
+      if(chosen.name.includes('장미') && t.includes('장미는 싫어함')){
+        return { name:'리시안셔스', img:'image/lisianthus.png' };
+      }
+      return chosen;
+    }
+
+    /* ===== 꽃집 전달용: 금기 문장 정리 ===== */
+    function floristConstraintText(taboos){
+      const t = (taboos || []).filter(x => x !== '없음');
+      const parts = [];
+      if(t.includes('향 강한 꽃은 싫어함')) parts.push('향 강한 꽃(백합/프리지아 등) 제외');
+      if(t.includes('장미는 싫어함')) parts.push('장미(스프레이장미 포함) 제외');
+      if(t.includes('알레르기/민감 있음')) parts.push('꽃가루/향 최소 구성 요청');
+      if(t.includes('화려한 건 부담')) parts.push('색 1~2톤 + 포장 과하지 않게');
+      return parts;
+    }
+
+    /* ===== FREE: 꽃집 DM “짧은 주문문장 1개” ===== */
+    function buildFreeFloristDM({
+      relation, occasion, urgency,
+      tone, wrap, concept, mainFlowerName,
+      taboos, cardText
+    }){
+      const constraints = floristConstraintText(taboos);
+
+      const lines = [];
+      lines.push(`[꽃 주문 요청] ${occasion} / ${relation}`);
+      lines.push(`- 형태: 한 송이 포장(가능하면)`);
+      lines.push(`- 무드: ${concept}`);
+      lines.push(`- 톤: ${tone}`);
+      lines.push(`- 메인: ${mainFlowerName} (가능하면)`);
+      lines.push(`- 마무리: ${wrap}`);
+      if(constraints.length) lines.push(`- 제외/주의: ${constraints.join(', ')}`);
+      lines.push(`- 일정: ${urgency}`);
+      lines.push(`- 카드 문구: "${cardText}"`);
+      return lines.join('\\n');
+    }
+
+    /* ===== PRO: 꽃집 “상세 주문서(복붙용)” ===== */
+    function buildProOrderSheet({
+      relation, occasion, urgency,
+      tone, wrap, concept, moodTags,
+      mainFlowerName,
+      taboos,
+      cardText
+    }){
+      const constraints = floristConstraintText(taboos);
+
+      const lines = [];
+      lines.push(`(PRO) 꽃집 주문서`);
+      lines.push(`- 용도: ${occasion}`);
+      lines.push(`- 관계: ${relation}`);
+      lines.push(`- 형태: 꽃다발(부케) / 꽃박스 중 가능`);
+      lines.push(`- 컨셉: ${concept} (${(moodTags||[]).join(', ')})`);
+      lines.push(`- 컬러/톤: ${tone}`);
+      lines.push(`- 메인꽃: ${mainFlowerName} (가능하면)`);
+      lines.push(`- 대체: 메인 품절 시 비슷한 톤/결로 대체 가능`);
+      lines.push(`- 마무리(포장/리본): ${wrap}`);
+      if(constraints.length) lines.push(`- 제외/주의: ${constraints.join(', ')}`);
+      lines.push(`- 일정: ${urgency}`);
+      lines.push(`- 카드 문구: "${cardText}"`);
+      return lines.join('\\n');
+    }
+
+    /* ===== PRO 데모 잠금/해제 ===== */
+    function isProUnlocked(){
+      try{
+        const params = new URLSearchParams(location.search);
+        if(params.get('pro') === '1') return true;   // 시연용
+        return localStorage.getItem('pro_unlocked') === '1';
+      }catch(e){
+        return false;
+      }
+    }
+    function setProUnlocked(v){
+      try{
+        localStorage.setItem('pro_unlocked', v ? '1' : '0');
+      }catch(e){}
+    }
+
+    /* ===== 다운로드: TXT ===== */
+    function downloadTextFile(filename, text){
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 1000);
+    }
+
+    /* ===== 다운로드: PNG(주문서 이미지) ===== */
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = text.split(' ');
+      let line = '';
+      for(let n=0; n<words.length; n++){
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if(metrics.width > maxWidth && n > 0){
+          ctx.fillText(line.trim(), x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        }else{
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), x, y);
+      return y + lineHeight;
+    }
+
+    async function downloadOrderSheetPng({ title, subtitle, lines }){
+      const W = 1080, H = 1350;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,W,H);
+
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(0,0,W,160);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 54px ui-sans-serif, system-ui, -apple-system';
+      ctx.fillText(title || '꽃 주문서', 60, 95);
+
+      ctx.font = '700 28px ui-sans-serif, system-ui, -apple-system';
+      ctx.fillText(subtitle || '', 60, 135);
+
+      let y = 220;
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '800 30px ui-sans-serif, system-ui, -apple-system';
+      ctx.fillText('복붙해서 꽃집에 보내세요', 60, y);
+
+      y += 48;
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(W-60, y);
+      ctx.stroke();
+
+      y += 36;
+      ctx.font = '650 30px ui-sans-serif, system-ui, -apple-system';
+
+      const maxWidth = W - 120;
+      const lineHeight = 44;
+
+      for(const line of lines){
+        y = wrapCanvasText(ctx, line, 60, y, maxWidth, lineHeight);
+        if(y > H - 120) break;
+      }
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '700 24px ui-sans-serif, system-ui, -apple-system';
+      ctx.fillText('© TONE ART / flowerproject', 60, H - 60);
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'order_sheet.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
     function showResult(){
       const taboos = (state.taboos || []).includes('없음') ? [] : (state.taboos || []);
       const personality = mapPersonality(state.brightness, state.style, state.volume);
