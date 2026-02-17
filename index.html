@@ -689,15 +689,26 @@
       font-size: 16px;
     }
     .startGuide{
-      text-align:center;
-      font-size:13px;
-      font-weight:850;
       color:#111827;
-      background:rgba(255,255,255,.86);
-      border:1px solid rgba(255,255,255,.7);
-      border-radius:999px;
-      padding:8px 10px;
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(255,255,255,.75);
+      border-radius:16px;
+      padding:10px 12px;
     }
+    .startGuideTitle{
+      margin:0 0 6px;
+      font-size:13px;
+      font-weight:900;
+      text-align:left;
+    }
+    .startGuideItem{
+      margin:0 0 4px;
+      font-size:13px;
+      font-weight:760;
+      line-height:1.35;
+      text-align:left;
+    }
+    .startGuideItem:last-child{margin-bottom:0;}
     .examplePreviewLink{
       appearance:none;
       border:none;
@@ -796,13 +807,13 @@
           </div>
 
           <div class="startTitle">
-            <h1>그녀의 취향, 꽃 골라줄게</h1>
-            <p>부담 없이 30초만 고르면 끝.</p>
+            <h1>여친 꽃선물, “예쁘게요” 말고 30초로 끝내</h1>
+            <p>취향 몰라도 돼. 질문 몇 개만 고르면<br/><b>대표 꽃 1송이 + 꽃집 복붙 문장 + 카드/카톡 멘트</b>가 바로 나와.</p>
           </div>
 
           <div class="startSlider">
             <div class="startSliderWrap">
-              <div class="speechBubble speechOwner">10년차 꽃집 사장님 추천</div>
+              <div class="speechBubble speechOwner">10년차 꽃집 사장</div>
               <div class="slideFrame" id="startSlideFrame">
                 <img class="slideItem active" src="./image/rose.png" alt="대표 꽃 장미" loading="eager" />
                 <img class="slideItem" src="./image/calla.png" alt="대표 꽃 카라" loading="lazy" />
@@ -811,20 +822,26 @@
                 <img class="slideItem" src="./image/ranunculus.png" alt="대표 꽃 라넌큘러스" loading="lazy" />
                 <img class="slideItem" src="./image/tulip.png" alt="대표 꽃 튤립" loading="lazy" />
               </div>
-              <div class="speechBubble speechNo">NO! 예쁜거 그냥 주세요</div>
-              <div class="speechBubble speechAny">잘 팔리느거 아무거나요 Nope!</div>
+              <div class="speechBubble speechNo">사진 업로드 없음</div>
+              <div class="speechBubble speechAny">복붙 주문문장 제공</div>
               <div class="startBubbleRow" aria-hidden="true">
-                <div class="speechBubble">10년차 꽃집 사장님 추천</div>
-                <div class="speechBubble">NO! 예쁜거 그냥 주세요</div>
-                <div class="speechBubble">잘 팔리느거 아무거나요 Nope!</div>
+                <div class="speechBubble">10년차 꽃집 사장</div>
+                <div class="speechBubble">사진 업로드 없음</div>
+                <div class="speechBubble">복붙 주문문장 제공</div>
               </div>
             </div>
           </div>
 
           <div class="startCta">
-            <div class="startGuide">&lt;대표 꽃 1송이+이름,꽃집 전달용 톤/무드 가이드, 카드/카톡 멘트 3개&gt; 결과확인 가능</div>
-            <button id="btnStart" type="button">시작하기</button>
-            <button class="secondary" id="btnShareSite" type="button">그에게 공유하기(링크 복사)</button>
+            <div class="startGuide">
+              <p class="startGuideTitle">무료로 받는 결과</p>
+              <p class="startGuideItem">✅ 대표 꽃 1송이 + 꽃 이름</p>
+              <p class="startGuideItem">✅ 꽃집 전달용 톤/무드 가이드</p>
+              <p class="startGuideItem">✅ 꽃집 DM 복붙 문장 1개</p>
+              <p class="startGuideItem">✅ 그녀에게 보내는 멘트 3개(복사)</p>
+            </div>
+            <button id="btnStart" type="button">30초로 추천받기</button>
+            <button class="secondary" id="btnShareSite" type="button">남친에게 보내기(링크 복사)</button>
             <button id="btnLoadExample" class="examplePreviewLink" type="button">예시 결과 미리보기</button>
             <div class="startMeta">※ 결과에서 멘트 복사 + 링크 공유 가능</div>
             <div class="startBrand">© TONE ART</div>
@@ -2115,13 +2132,13 @@
     });
     $('btnShareSite').addEventListener('click', async ()=>{
       const shareUrl = `${location.origin}${location.pathname}`;
-      const shareText = `그에게 공유하기(링크 복사): ${shareUrl}`;
+      const shareText = `남친에게 보내기(링크 복사): ${shareUrl}`;
 
       if (navigator.share) {
         try{
           await navigator.share({
             title: '꽃을 만지는 누나',
-            text: '그에게 공유하기(링크 복사)',
+            text: '남친에게 보내기(링크 복사)',
             url: shareUrl
           });
           toast('공유창을 열었어!');
