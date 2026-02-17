@@ -804,10 +804,10 @@
         title:'크기는 어느 쪽?',
         sub:'한송이부터 풍성까지 골라줘.',
         options:[
-          {value:'single', title:'한송이', desc:'가볍고 간단하게'},
-          {value:'mini', title:'미니', desc:'작고 깔끔하게'},
-          {value:'basic', title:'기본', desc:'평균적인 볼륨'},
-          {value:'lush', title:'풍성', desc:'크고 눈에 띄게'}
+          {value:'single', title:'한송이(1 flower)', desc:'가볍고 간단하게'},
+          {value:'mini', title:'미니(S)', desc:'작고 깔끔하게'},
+          {value:'basic', title:'기본(M)', desc:'평균적인 볼륨'},
+          {value:'lush', title:'풍성(L)', desc:'크고 눈에 띄게'}
         ]
       },
       {
@@ -871,11 +871,6 @@
 
       return normalized;
     }
-
-    const sisterLines = [
-      'NO! 알아서주세요. 많이 팔리는 꽃 주세요.',
-      '금기 체크만 제대로 하면, 실패 확률 확 줄어.'
-    ];
 
     const paletteByPersonality = {
       '러블리': [
@@ -1325,15 +1320,14 @@
       return `추천 멘트: "${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}"`;
     }
 
-    function estimatePrice(personality, volume){
-      const v = normalizeVolume(volume);
-      if (v === 'lush' || personality === '우아함') {
-        return { label:'우아함/풍성', range:'약 8만~13만원' };
-      }
-      if (personality === '러블리' || personality === '활기') {
-        return { label:'러블리/활기', range:'약 5만~8만원' };
-      }
-      return { label:'심플/미니멀', range:'약 3만~5만원' };
+    function estimatePrice(volume){
+      const byVolume = {
+        single: { label:'한송이(1 flower)', range:'약 1만~2만원' },
+        mini: { label:'미니(S)', range:'약 3만~5만원' },
+        basic: { label:'기본(M)', range:'약 5만~8만원' },
+        lush: { label:'풍성(L)', range:'약 8만~13만원' }
+      };
+      return byVolume[volume] || byVolume.basic;
     }
 
     function buildCautions({taboos, urgency}){
@@ -1357,7 +1351,6 @@
       const taboos = (state.taboos || []).includes('없음') ? [] : (state.taboos || []);
       const personality = mapPersonality(state.brightness, state.style, state.volume);
       const profile = profiles[personality];
-      const line = sisterLines[Math.floor(Math.random() * sisterLines.length)];
 
       const { main, sub, tex } = pickFlowers(profile, taboos);
       const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
@@ -1386,11 +1379,11 @@
       }[state.style] || '세련';
 
       const volumeLabel = {
-        single:'한송이',
-        mini:'미니',
-        basic:'기본',
-        lush:'풍성'
-      }[state.volume] || '기본';
+        single:'한송이(1 flower)',
+        mini:'미니(S)',
+        basic:'기본(M)',
+        lush:'풍성(L)'
+      }[state.volume] || '기본(M)';
 
       const personalitySentence = (() => {
         const adj = {
@@ -1414,13 +1407,14 @@
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
+      const pickTitleColor = (palette[0] && palette[0].hex) ? palette[0].hex : '#166534';
       const sampleImage = pickConceptPreviewPhoto(personality);
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
       const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
-      const priceInfo = estimatePrice(personality, state.volume);
+      const priceInfo = estimatePrice(state.volume);
       const storyTip = buildStoryTip({
         personality,
         relation: state.relation,
@@ -1468,6 +1462,7 @@
         </div>
 
         <div class="hero" style="margin-top:2px;">
+          <div style="font-size:24px; font-weight:900; color:${escapeHtml(pickTitleColor)}; margin-bottom:6px;">꽃집 누나 PICK</div>
           <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
         </div>
 
@@ -1477,9 +1472,10 @@
               ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
               <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
               <div class="priceRow">
-                <span class="priceBadge">심플/미니멀: 약 3만~5만원</span>
-                <span class="priceBadge">러블리/활기: 약 5만~8만원</span>
-                <span class="priceBadge">우아함/풍성: 약 8만~13만원</span>
+                <span class="priceBadge">한송이(1 flower): 약 1만~2만원</span>
+                <span class="priceBadge">미니(S): 약 3만~5만원</span>
+                <span class="priceBadge">기본(M): 약 5만~8만원</span>
+                <span class="priceBadge">풍성(L): 약 8만~13만원</span>
               </div>
             </div>
             <div class="topItem">
