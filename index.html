@@ -753,7 +753,8 @@
           {value:'썸/소개팅', title:'썸/소개팅', desc:'가볍고 센스 있게'},
           {value:'여자친구(연인)', title:'여자친구', desc:'다정하고 설레게'},
           {value:'아내/배우자', title:'아내', desc:'고맙고 든든하게'},
-          {value:'친구/동료', title:'친구/직장동료', desc:'편하고 깔끔하게'}
+          {value:'친구/동료', title:'친구/직장동료', desc:'편하고 깔끔하게'},
+          {value:'가족', title:'가족', desc:'따뜻하고 담백하게'}
         ]
       },
       {
@@ -796,12 +797,14 @@
       },
       {
         id:'volume',
-        type:'ab',
+        type:'single',
         title:'크기는 어느 쪽?',
-        sub:'작고 깔끔 vs 크고 풍성 중에서 골라줘.',
+        sub:'한송이부터 풍성까지 골라줘.',
         options:[
-          {value:'simple', title:'심플하게', desc:'작고 정돈된 느낌'},
-          {value:'lush', title:'풍성하게', desc:'크고 눈에 띄는 느낌'}
+          {value:'single', title:'한송이', desc:'가볍고 간단하게'},
+          {value:'mini', title:'미니', desc:'작고 깔끔하게'},
+          {value:'basic', title:'기본', desc:'평균적인 볼륨'},
+          {value:'lush', title:'풍성', desc:'크고 눈에 띄게'}
         ]
       },
       {
@@ -1181,10 +1184,17 @@
       return 'chic';
     }
 
+    function normalizeVolume(volume){
+      if(volume === 'lush') return 'lush';
+      if(volume === 'single' || volume === 'mini' || volume === 'basic') return 'simple';
+      return 'simple';
+    }
+
     function mapPersonality(brightness, style, volume){
       const b = normalizeBrightness(brightness);
       const s = normalizeStyle(style);
-      const key = `${b}|${s}|${volume}`;
+      const v = normalizeVolume(volume);
+      const key = `${b}|${s}|${v}`;
       const table = {
         'bright|cute|lush':'귀여움',
         'bright|cute|simple':'러블리',
@@ -1239,6 +1249,11 @@
           simple: '수고했어. 이거 받아!',
           sense: '요즘 분위기랑 맞춰서 픽했어 🙂',
           sincere: '응원하는 마음이야. 잘 풀리길!'
+        },
+        '가족': {
+          simple: '늘 고마운 마음이야.',
+          sense: '가족이라 더 담백하게 챙겼어 🙂',
+          sincere: '항상 든든해서 고마워. 꽃으로 마음 전할게.'
         }
       };
 
@@ -1275,7 +1290,8 @@
         '썸/소개팅': '부담 없이 받았으면 좋겠고, 네 반응이 궁금해.',
         '여자친구(연인)': '네가 좋아해주면 그걸로 완전 성공이야.',
         '아내/배우자': '늘 고마운 마음을 이렇게라도 전하고 싶었어.',
-        '친구/동료': '너답게 잘 어울리면 진짜 뿌듯할 것 같아.'
+        '친구/동료': '너답게 잘 어울리면 진짜 뿌듯할 것 같아.',
+        '가족': '가족이라 더 따뜻하게 전하고 싶었어.'
       };
 
       const occasionTail = {
@@ -1295,7 +1311,8 @@
     }
 
     function estimatePrice(personality, volume){
-      if (volume === 'lush' || personality === '우아함') {
+      const v = normalizeVolume(volume);
+      if (v === 'lush' || personality === '우아함') {
         return { label:'우아함/풍성', range:'약 8만~13만원' };
       }
       if (personality === '러블리' || personality === '활기') {
@@ -1353,7 +1370,24 @@
         minimal:'미니멀'
       }[state.style] || '세련';
 
-      const volumeLabel = (state.volume === 'simple') ? '심플' : '풍성';
+      const volumeLabel = {
+        single:'한송이',
+        mini:'미니',
+        basic:'기본',
+        lush:'풍성'
+      }[state.volume] || '기본';
+
+      const personalitySentence = (() => {
+        const adj = {
+          '러블리':'부드럽고 사랑스러운',
+          '세련됨':'도시적이고 깔끔한',
+          '귀여움':'발랄하고 귀여운',
+          '미니멀':'담백하고 절제된',
+          '우아함':'차분하고 우아한',
+          '활기':'에너지 넘치는'
+        }[personality] || '깔끔한';
+        return `${adj} 그녀에겐 ${styleLabel} ${volumeLabel} 스타일을 추천드려요.`;
+      })();
 
       const reasonParts = [
         `관계: ${state.relation || '미선택'}`,
@@ -1389,7 +1423,7 @@
         <div class="hero">
           <h1>꽃을 만지는 누나의 결론</h1>
           <p class="muted">${escapeHtml(line)}</p>
-          <div class="mini">결과 성향: <b>${escapeHtml(personality)}</b></div>
+          <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
         </div>
 
         <div class="box">
@@ -1577,7 +1611,7 @@
         state.occasion = '기념일';
         state.brightness = 'bright';
         state.style = 'chic';
-        state.volume = 'simple';
+        state.volume = 'basic';
         state.taboos = ['없음'];
         state.urgency = '내일';
         showResult();
