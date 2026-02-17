@@ -1108,10 +1108,11 @@
         title:'그 사람 스타일은 어느 쪽?',
         sub:'딱 봤을 때 어울리는 쪽 고르면 돼.',
         options:[
-          {value:'cute', title:'귀엽게', desc:'부드럽고 사랑스럽게'},
-          {value:'chic', title:'세련되게', desc:'심플하고 도시적으로'},
-          {value:'romantic', title:'러블리하게', desc:'달콤하고 따뜻하게'},
-          {value:'minimal', title:'미니멀하게', desc:'담백하고 절제되게'}
+          {value:'soft_feminine', title:'청순/여리한', desc:'맑고 부드러운 분위기'},
+          {value:'romantic', title:'러블리한', desc:'달콤하고 사랑스러운 분위기'},
+          {value:'chic', title:'세련/도시적인', desc:'심플하고 감각적인 분위기'},
+          {value:'elegant', title:'우아/고급스러운', desc:'차분하고 클래식한 분위기'},
+          {value:'minimal', title:'미니멀/깔끔한', desc:'담백하고 절제된 분위기'}
         ]
       },
       {
@@ -1533,8 +1534,8 @@
     }
 
     function normalizeStyle(style){
-      if(style === 'cute' || style === 'romantic') return 'cute';
-      if(style === 'chic' || style === 'minimal') return 'chic';
+      if(style === 'cute' || style === 'romantic' || style === 'soft_feminine') return 'cute';
+      if(style === 'chic' || style === 'minimal' || style === 'elegant') return 'chic';
       return 'chic';
     }
 
