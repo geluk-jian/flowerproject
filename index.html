@@ -909,23 +909,21 @@
     };
 
     const bouquetPhotoByPersonality = {
-      '러블리': 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80',
-      '세련됨': 'https://images.unsplash.com/photo-1526394931762-8a4116f7ff89?auto=format&fit=crop&w=1200&q=80',
-      '귀여움': 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80',
-      '미니멀': 'https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=1200&q=80',
-      '우아함': 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80',
-      '활기': 'https://images.unsplash.com/photo-1494972308805-463bc619d34e?auto=format&fit=crop&w=1200&q=80'
+      '러블리': './image/rose.png',
+      '세련됨': './image/calla.png',
+      '귀여움': './image/gerbera.png',
+      '미니멀': './image/lisianthus.png',
+      '우아함': './image/lisianthus.png',
+      '활기': './image/tulip.png'
     };
 
     const flowerPhotoByName = {
-      '튤립': 'https://images.unsplash.com/photo-1524594227088-274fdea6b5a4?auto=format&fit=crop&w=1200&q=80',
-      '라넌큘러스': 'https://images.unsplash.com/photo-1491591462767-3b5599491cf1?auto=format&fit=crop&w=1200&q=80',
-      '리시안셔스': 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80',
-      '거베라': 'https://images.unsplash.com/photo-1447875569765-2b3db822bec9?auto=format&fit=crop&w=1200&q=80',
-      '카라': 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=1200&q=80',
-      '아네모네': 'https://images.unsplash.com/photo-1494336934272-fd4f0f0c35b3?auto=format&fit=crop&w=1200&q=80',
-      '해바라기': 'https://images.unsplash.com/photo-1470509037663-253afd7f0f51?auto=format&fit=crop&w=1200&q=80',
-      '알스트로메리아': 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=1200&q=80'
+      '장미': './image/rose.png',
+      '튤립': './image/tulip.png',
+      '라넌큘러스': './image/ranunculus.png',
+      '리시안셔스': './image/lisianthus.png',
+      '거베라': './image/gerbera.png',
+      '카라': './image/calla.png'
     };
 
     function fallbackSampleImage(concept){
@@ -955,7 +953,7 @@
 
     function pickConceptPreviewPhoto(personality){
       return bouquetPhotoByPersonality[personality]
-        || 'https://images.unsplash.com/photo-1487070183336-b863922373d4?auto=format&fit=crop&w=1200&q=80';
+        || './image/rose.png';
     }
 
     const state = {
