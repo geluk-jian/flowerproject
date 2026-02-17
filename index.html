@@ -660,8 +660,9 @@
           </div>
 
           <div class="startCta">
+            <div class="startGuide">10년차 꽃집 사장님이 추천해드림</div>
             <button id="btnStart" type="button">시작하기</button>
-            <button class="secondary" id="btnShareSite" type="button">&lt;내 남친 알고리즘으로 보내기&gt;</button>
+            <button class="secondary" id="btnShareSite" type="button">그에게 공유하기(링크 복사)</button>
             <div class="startMeta">※ 결과에서 멘트 복사 + 링크 공유 가능</div>
             <div class="startBrand">© TONE ART</div>
           </div>
@@ -754,8 +755,7 @@
     <section class="section" id="contact">
       <h2>문의</h2>
       <p>피드백/문의는 이메일로 연락해주세요.</p>
-      <p><b>contact@flowerproject.site</b></p>
-      <p class="small">실제 문의 메일로 교체가 필요하면 알려주세요.</p>
+      <p><b>tone_art@hanmail.net</b></p>
     </section>
 
   </div>
@@ -1917,13 +1917,13 @@
     });
     $('btnShareSite').addEventListener('click', async ()=>{
       const shareUrl = `${location.origin}${location.pathname}`;
-      const shareText = `내 남친 알고리즘으로 보내기: ${shareUrl}`;
+      const shareText = `그에게 공유하기(링크 복사): ${shareUrl}`;
 
       if (navigator.share) {
         try{
           await navigator.share({
             title: '꽃을 만지는 누나',
-            text: '내 남친 알고리즘으로 보내기',
+            text: '그에게 공유하기(링크 복사)',
             url: shareUrl
           });
           toast('공유창을 열었어!');
