@@ -514,56 +514,34 @@
       color: rgba(17,24,39,.85);
     }
 
-    /* 말풍선 */
-    .bubbles{
+    .startSlider{
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .slideFrame{
       position: relative;
-      min-height: 240px;
-      margin-top: 6px;
+      width: min(100%, 340px);
+      aspect-ratio: 4 / 3;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(226,232,240,.95);
+      background: #fff;
+      box-shadow: 0 16px 28px rgba(15, 23, 42, .14);
     }
-
-    .bubble{
-      position: relative;
-      width: 130px;
-      height: 130px;
-      border-radius: 999px;
-      padding: 18px 16px;
-      background: #ffffff;
-      border: 1px solid rgba(226,232,240,.9);
-      box-shadow:
-        0 16px 28px rgba(15, 23, 42, .12),
-        inset 0 -6px 14px rgba(15, 23, 42, .06);
-      font-weight: 900;
-      letter-spacing: -0.2px;
-      color: #111827;
-      text-align: center;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    .slideItem{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      opacity: 0;
+      transition: opacity .35s ease;
+      background: #fff;
     }
-
-    .bubble::after{
-      content:none;
-    }
-
-    .bubble:nth-child(1){
-      position:absolute;
-      top: 6px;
-      left: 6px;
-    }
-    .bubble:nth-child(2){
-      position:absolute;
-      top: 28px;
-      right: 6px;
-    }
-    .bubble:nth-child(3){
-      position:absolute;
-      bottom: 18px;
-      left: 24px;
-    }
-    .bubble:nth-child(4){
-      position:absolute;
-      bottom: 6px;
-      right: 26px;
+    .slideItem.active{
+      opacity: 1;
     }
 
     .startCta{
@@ -599,12 +577,9 @@
     }
 
     @media (max-width: 360px){
-      .bubbles{ min-height: 280px; }
-      .bubble{ width: 120px; height: 120px; }
-      .bubble:nth-child(1){ top: 6px; left: 6px; }
-      .bubble:nth-child(2){ top: 26px; right: 6px; }
-      .bubble:nth-child(3){ bottom: 22px; left: 10px; }
-      .bubble:nth-child(4){ bottom: 6px; right: 12px; }
+      .slideFrame{
+        border-radius: 14px;
+      }
     }
   </style>
 </head>
@@ -624,11 +599,15 @@
             <p>부담 없이 30초만 고르면 끝.</p>
           </div>
 
-          <div class="bubbles">
-            <div class="bubble">10년차 꽃집 누나</div>
-            <div class="bubble alt">아무거나 주세요 그만!</div>
-            <div class="bubble">꽃집 사장님 피셜</div>
-            <div class="bubble alt">시작하면 바로 추천</div>
+          <div class="startSlider">
+            <div class="slideFrame" id="startSlideFrame">
+              <img class="slideItem active" src="./image/rose.png" alt="대표 꽃 장미" loading="eager" />
+              <img class="slideItem" src="./image/calla.png" alt="대표 꽃 카라" loading="lazy" />
+              <img class="slideItem" src="./image/gerbera.png" alt="대표 꽃 거베라" loading="lazy" />
+              <img class="slideItem" src="./image/lisianthus.png" alt="대표 꽃 리시안셔스" loading="lazy" />
+              <img class="slideItem" src="./image/ranunculus.png" alt="대표 꽃 라넌큘러스" loading="lazy" />
+              <img class="slideItem" src="./image/tulip.png" alt="대표 꽃 튤립" loading="lazy" />
+            </div>
           </div>
 
           <div class="startCta">
@@ -688,6 +667,20 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
+
+    function initStartSlider(){
+      const frame = $('startSlideFrame');
+      if(!frame) return;
+      const slides = Array.from(frame.querySelectorAll('.slideItem'));
+      if(slides.length < 2) return;
+
+      let idx = 0;
+      setInterval(()=>{
+        slides[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+      }, 1000);
+    }
 
     function escapeHtml(value) {
       return String(value)
@@ -1672,6 +1665,8 @@
         history.replaceState(null, '', location.pathname);
       }
     })();
+
+    initStartSlider();
   </script>
 </body>
 </html>
