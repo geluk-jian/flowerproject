@@ -622,13 +622,13 @@
     }
     .speechBubble{
       position:absolute;
-      width: 108px;
-      height: 108px;
-      border-radius:50%;
+      width: 168px;
+      height: 96px;
+      border-radius:999px;
       border:2px solid rgba(17,24,39,.2);
       background:#ffffff;
       color:#111827;
-      font-size:13px;
+      font-size:14px;
       font-weight:900;
       line-height:1.2;
       letter-spacing:-.2px;
@@ -688,6 +688,36 @@
       border-radius: 16px;
       font-size: 16px;
     }
+    .startGuide{
+      text-align:center;
+      font-size:13px;
+      font-weight:850;
+      color:#111827;
+      background:rgba(255,255,255,.86);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:999px;
+      padding:8px 10px;
+    }
+    .examplePreviewLink{
+      appearance:none;
+      border:none;
+      background:none;
+      color:#0f172a;
+      font-size:14px;
+      font-weight:850;
+      text-decoration:underline;
+      text-underline-offset: 3px;
+      padding:2px 0 0;
+      margin: 0 auto;
+      cursor:pointer;
+      width:auto;
+    }
+    .examplePreviewLink:hover{
+      transform:none;
+      background:none;
+      border:none;
+      color:#166534;
+    }
 
     .startMeta{
       text-align: center;
@@ -713,8 +743,9 @@
       }
       .speechBubble{
         position:static;
-        width: 96px;
-        height: 96px;
+        width: 118px;
+        height: 74px;
+        border-radius:999px;
         font-size:12px;
       }
       .speechBubble::after{display:none;}
@@ -781,19 +812,20 @@
                 <img class="slideItem" src="./image/tulip.png" alt="대표 꽃 튤립" loading="lazy" />
               </div>
               <div class="speechBubble speechNo">NO! 예쁜거 그냥 주세요</div>
-              <div class="speechBubble speechAny">잘 팔리는거 아무거나요</div>
+              <div class="speechBubble speechAny">잘 팔리느거 아무거나요 Nope!</div>
               <div class="startBubbleRow" aria-hidden="true">
                 <div class="speechBubble">10년차 꽃집 사장님 추천</div>
                 <div class="speechBubble">NO! 예쁜거 그냥 주세요</div>
-                <div class="speechBubble">잘 팔리는거 아무거나요</div>
+                <div class="speechBubble">잘 팔리느거 아무거나요 Nope!</div>
               </div>
             </div>
           </div>
 
           <div class="startCta">
-            <div class="startGuide">10년차 꽃집 사장님이 추천해드림</div>
+            <div class="startGuide">&lt;대표 꽃 1송이+이름,꽃집 전달용 톤/무드 가이드, 카드/카톡 멘트 3개&gt; 결과확인 가능</div>
             <button id="btnStart" type="button">시작하기</button>
             <button class="secondary" id="btnShareSite" type="button">그에게 공유하기(링크 복사)</button>
+            <button id="btnLoadExample" class="examplePreviewLink" type="button">예시 결과 미리보기</button>
             <div class="startMeta">※ 결과에서 멘트 복사 + 링크 공유 가능</div>
             <div class="startBrand">© TONE ART</div>
           </div>
