@@ -57,6 +57,34 @@
       background:#fff;
     }
     .topnav a:hover{color: var(--text); border-color: var(--accent);}
+    .topInfoPanel{
+      display:none;
+      margin: 0 0 14px;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background:#fff;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .topInfoPanel.active{display:block;}
+    .topInfoHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .topInfoHead h2{
+      margin:0;
+      font-size:16px;
+      letter-spacing:-.2px;
+    }
+    .topInfoBody p{
+      margin:0 0 8px;
+      font-size:14px;
+      color:var(--text);
+    }
+    .topInfoBody p:last-child{margin-bottom:0;}
 
     .wrap{max-width:var(--max); margin:0 auto; padding:24px 16px 60px;}
 
@@ -560,6 +588,14 @@
       display: flex;
       justify-content: center;
     }
+    .startSliderWrap{
+      position: relative;
+      width: min(100%, 580px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 0 116px;
+    }
     .slideFrame{
       position: relative;
       width: min(100%, 340px);
@@ -584,6 +620,60 @@
     .slideItem.active{
       opacity: 1;
     }
+    .speechBubble{
+      position:absolute;
+      width: 108px;
+      height: 108px;
+      border-radius:50%;
+      border:2px solid rgba(17,24,39,.2);
+      background:#ffffff;
+      color:#111827;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.2;
+      letter-spacing:-.2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:10px;
+      box-shadow: 0 10px 20px rgba(15,23,42,.16);
+    }
+    .speechBubble::after{
+      content:"";
+      position:absolute;
+      width: 14px;
+      height: 14px;
+      background:#fff;
+      border-right:2px solid rgba(17,24,39,.2);
+      border-bottom:2px solid rgba(17,24,39,.2);
+      transform: rotate(45deg);
+    }
+    .speechOwner{
+      left: 0;
+      top: 14px;
+    }
+    .speechOwner::after{
+      right: 12px;
+      bottom: 10px;
+    }
+    .speechNo{
+      right: 0;
+      top: 0;
+    }
+    .speechNo::after{
+      left: 14px;
+      bottom: 8px;
+    }
+    .speechAny{
+      right: 6px;
+      bottom: 2px;
+    }
+    .speechAny::after{
+      left: 18px;
+      top: 12px;
+    }
+    .startBubbleRow{display:none;}
 
     .startCta{
       margin-top: 8px;
@@ -615,6 +705,30 @@
 
     @media (max-width: 420px){
       .startTitle h1{ font-size: 26px; }
+      .startSliderWrap{
+        width:100%;
+        padding:0;
+        flex-direction:column;
+        gap:10px;
+      }
+      .speechBubble{
+        position:static;
+        width: 96px;
+        height: 96px;
+        font-size:12px;
+      }
+      .speechBubble::after{display:none;}
+      .speechOwner,
+      .speechNo,
+      .speechAny{
+        display:none;
+      }
+      .startBubbleRow{
+        display:flex;
+        width:100%;
+        justify-content:space-between;
+        gap:8px;
+      }
     }
 
     @media (max-width: 360px){
@@ -627,13 +741,20 @@
 <body>
   <div class="wrap">
     <nav class="topnav" aria-label="사이트 탐색">
-      <a href="#about">소개</a>
-      <a href="#how">이용방법</a>
-      <a href="#guide">가이드</a>
-      <a href="#faq">FAQ</a>
-      <a href="#policy">정책</a>
-      <a href="#contact">문의</a>
+      <a href="#" data-info="about">소개</a>
+      <a href="#" data-info="how">이용방법</a>
+      <a href="#" data-info="guide">가이드</a>
+      <a href="#" data-info="faq">FAQ</a>
+      <a href="#" data-info="policy">정책</a>
+      <a href="#" data-info="contact">문의</a>
     </nav>
+    <section id="topInfoPanel" class="topInfoPanel" aria-live="polite">
+      <div class="topInfoHead">
+        <h2 id="topInfoTitle">안내</h2>
+        <button class="secondary" id="btnCloseTopInfo" type="button">닫기</button>
+      </div>
+      <div id="topInfoBody" class="topInfoBody"></div>
+    </section>
 
     <section class="screen active" id="screenStart">
       <div class="startPoster">
@@ -649,13 +770,23 @@
           </div>
 
           <div class="startSlider">
-            <div class="slideFrame" id="startSlideFrame">
-              <img class="slideItem active" src="./image/rose.png" alt="대표 꽃 장미" loading="eager" />
-              <img class="slideItem" src="./image/calla.png" alt="대표 꽃 카라" loading="lazy" />
-              <img class="slideItem" src="./image/gerbera.png" alt="대표 꽃 거베라" loading="lazy" />
-              <img class="slideItem" src="./image/lisianthus.png" alt="대표 꽃 리시안셔스" loading="lazy" />
-              <img class="slideItem" src="./image/ranunculus.png" alt="대표 꽃 라넌큘러스" loading="lazy" />
-              <img class="slideItem" src="./image/tulip.png" alt="대표 꽃 튤립" loading="lazy" />
+            <div class="startSliderWrap">
+              <div class="speechBubble speechOwner">10년차 꽃집 사장님 추천</div>
+              <div class="slideFrame" id="startSlideFrame">
+                <img class="slideItem active" src="./image/rose.png" alt="대표 꽃 장미" loading="eager" />
+                <img class="slideItem" src="./image/calla.png" alt="대표 꽃 카라" loading="lazy" />
+                <img class="slideItem" src="./image/gerbera.png" alt="대표 꽃 거베라" loading="lazy" />
+                <img class="slideItem" src="./image/lisianthus.png" alt="대표 꽃 리시안셔스" loading="lazy" />
+                <img class="slideItem" src="./image/ranunculus.png" alt="대표 꽃 라넌큘러스" loading="lazy" />
+                <img class="slideItem" src="./image/tulip.png" alt="대표 꽃 튤립" loading="lazy" />
+              </div>
+              <div class="speechBubble speechNo">NO! 예쁜거 그냥 주세요</div>
+              <div class="speechBubble speechAny">잘 팔리는거 아무거나요</div>
+              <div class="startBubbleRow" aria-hidden="true">
+                <div class="speechBubble">10년차 꽃집 사장님 추천</div>
+                <div class="speechBubble">NO! 예쁜거 그냥 주세요</div>
+                <div class="speechBubble">잘 팔리는거 아무거나요</div>
+              </div>
             </div>
           </div>
 
@@ -709,53 +840,6 @@
         </div>
         <div class="bd" id="resultArea"></div>
       </div>
-    </section>
-
-    <section class="section" id="about">
-      <h2>서비스 소개</h2>
-      <p>이 사이트는 “꽃을 고르는 기준”을 짧은 질문으로 정리해주는 무료 가이드입니다. 결과는 실제 꽃집 주문에 바로 활용할 수 있는 톤/포장/멘트 힌트를 제공합니다.</p>
-      <p class="small">본 서비스는 특정 꽃집과 제휴/연결되지 않으며, 추천은 참고용입니다.</p>
-    </section>
-
-    <section class="section" id="how">
-      <h2>이용 방법</h2>
-      <div class="twoCol">
-        <div>
-          <p><b>1) 질문 30초</b> — 관계/상황/무드만 골라주세요.</p>
-          <p><b>2) 결과 확인</b> — 톤/포장/꽃 조합/멘트가 제공됩니다.</p>
-        </div>
-        <div>
-          <p><b>3) 꽃집 전달</b> — 복붙 문장으로 주문하면 정확도가 높아집니다.</p>
-          <p><b>4) 공유</b> — 결과 링크를 공유해 취향을 맞춰볼 수 있어요.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="guide">
-      <h2>고품질 주문 가이드</h2>
-      <p><b>핵심은 “무드 + 톤 + 금기”</b>입니다. 이 3가지를 정확히 말하면 꽃집이 빠르게 이해합니다.</p>
-      <p><b>금기가 있다면 먼저</b> 전달하세요(향, 알레르기, 특정 꽃). 그 다음 원하는 톤과 포장 느낌을 설명하는 것이 안전합니다.</p>
-      <p class="small">계절·재고에 따라 대체 꽃이 사용될 수 있습니다. 이때 “무드 유지” 문구를 넣으면 품질이 안정됩니다.</p>
-    </section>
-
-    <section class="section" id="faq">
-      <h2>FAQ</h2>
-      <p><b>Q. 결과는 항상 똑같나요?</b><br/>A. 기본 규칙은 같고, 상황/관계/금기에 따라 결과가 달라집니다.</p>
-      <p><b>Q. 이 결과만으로 바로 주문해도 되나요?</b><br/>A. 가능합니다. 다만 예산/픽업 시간/재고에 따라 조정이 필요할 수 있어요.</p>
-      <p><b>Q. 사진과 실제가 다를 수 있나요?</b><br/>A. 꽃은 자연물이라 계절에 따라 색감과 구성에 차이가 있습니다.</p>
-    </section>
-
-    <section class="section" id="policy">
-      <h2>정책 안내</h2>
-      <p><b>개인정보</b>: 이 사이트는 회원가입 없이 이용할 수 있으며, 입력값은 브라우저 내에서만 처리됩니다.</p>
-      <p><b>광고</b>: Google AdSense가 쿠키를 사용할 수 있습니다. 자세한 내용은 아래 정책 페이지를 확인하세요.</p>
-      <p class="small">관련 문서: <a href="privacy.html">개인정보처리방침</a> · <a href="terms.html">이용약관</a></p>
-    </section>
-
-    <section class="section" id="contact">
-      <h2>문의</h2>
-      <p>피드백/문의는 이메일로 연락해주세요.</p>
-      <p><b>tone_art@hanmail.net</b></p>
     </section>
 
   </div>
@@ -842,6 +926,88 @@
         $(id).classList.toggle('active', id === which);
       });
       window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    const topInfoMap = {
+      about: {
+        title: '소개',
+        lines: [
+          '이 사이트는 꽃 선택을 30초 질문으로 정리해주는 무료 가이드입니다.',
+          '결과는 꽃집 주문에 바로 전달할 수 있는 톤/포장/멘트 힌트를 제공합니다.'
+        ]
+      },
+      how: {
+        title: '이용방법',
+        lines: [
+          '1) 질문에 답하기: 관계/상황/무드를 고릅니다.',
+          '2) 결과 확인: 꽃 조합과 멘트를 확인합니다.',
+          '3) 꽃집 전달: 복사한 문장으로 빠르게 주문합니다.'
+        ]
+      },
+      guide: {
+        title: '가이드',
+        lines: [
+          '핵심은 무드 + 톤 + 금기 3가지를 함께 말하는 것입니다.',
+          '향/알레르기/피하고 싶은 꽃이 있으면 먼저 알려주세요.'
+        ]
+      },
+      faq: {
+        title: 'FAQ',
+        lines: [
+          'Q. 결과가 매번 같나요? A. 선택한 조건에 따라 달라집니다.',
+          'Q. 바로 주문 가능한가요? A. 네, 예산/재고에 맞게 미세 조정하면 됩니다.'
+        ]
+      },
+      policy: {
+        title: '정책',
+        lines: [
+          '개인정보: 입력값은 브라우저 내에서 처리됩니다.',
+          '정책 문서: 개인정보처리방침, 이용약관 페이지를 확인해주세요.'
+        ]
+      },
+      contact: {
+        title: '문의',
+        lines: [
+          '피드백/문의 메일: tone_art@hanmail.net'
+        ]
+      }
+    };
+
+    function initTopInfoPanel(){
+      const panel = $('topInfoPanel');
+      const titleEl = $('topInfoTitle');
+      const bodyEl = $('topInfoBody');
+      const closeBtn = $('btnCloseTopInfo');
+      if(!panel || !titleEl || !bodyEl) return;
+
+      const links = Array.from(document.querySelectorAll('.topnav a[data-info]'));
+      let openKey = '';
+
+      const hidePanel = () => {
+        panel.classList.remove('active');
+        openKey = '';
+      };
+
+      links.forEach((link)=>{
+        link.addEventListener('click', (e)=>{
+          e.preventDefault();
+          const key = link.dataset.info || '';
+          const data = topInfoMap[key];
+          if(!data) return;
+          if(openKey === key){
+            hidePanel();
+            return;
+          }
+          titleEl.textContent = data.title;
+          bodyEl.innerHTML = data.lines.map((line)=>`<p>${escapeHtml(line)}</p>`).join('');
+          panel.classList.add('active');
+          openKey = key;
+        });
+      });
+
+      if(closeBtn){
+        closeBtn.addEventListener('click', hidePanel);
+      }
     }
 
     const steps = [
@@ -1971,6 +2137,7 @@
       }
     })();
 
+    initTopInfoPanel();
     initStartSlider();
   </script>
 </body>
