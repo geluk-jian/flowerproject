@@ -57,6 +57,14 @@
       background:#fff;
     }
     .topnav a:hover{color: var(--text); border-color: var(--accent);}
+    .toneHandle{
+      margin-top: 16px;
+      text-align:center;
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.2px;
+      color:#334155;
+    }
     .topInfoPanel{
       display:none;
       margin: 0 0 14px;
@@ -782,22 +790,6 @@
 </head>
 <body>
   <div class="wrap">
-    <nav class="topnav" aria-label="사이트 탐색">
-      <a href="#" data-info="about">소개</a>
-      <a href="#" data-info="how">이용방법</a>
-      <a href="#" data-info="guide">가이드</a>
-      <a href="#" data-info="faq">FAQ</a>
-      <a href="#" data-info="policy">정책</a>
-      <a href="#" data-info="contact">문의</a>
-    </nav>
-    <section id="topInfoPanel" class="topInfoPanel" aria-live="polite">
-      <div class="topInfoHead">
-        <h2 id="topInfoTitle">안내</h2>
-        <button class="secondary" id="btnCloseTopInfo" type="button">닫기</button>
-      </div>
-      <div id="topInfoBody" class="topInfoBody"></div>
-    </section>
-
     <section class="screen active" id="screenStart">
       <div class="startPoster">
         <div class="startInner">
@@ -889,6 +881,23 @@
         </div>
         <div class="bd" id="resultArea"></div>
       </div>
+    </section>
+
+    <div class="toneHandle">@tone_art</div>
+    <nav class="topnav" aria-label="사이트 탐색">
+      <a href="#" data-info="about">소개</a>
+      <a href="#" data-info="how">이용방법</a>
+      <a href="#" data-info="guide">가이드</a>
+      <a href="#" data-info="faq">FAQ</a>
+      <a href="#" data-info="policy">정책</a>
+      <a href="#" data-info="contact">문의</a>
+    </nav>
+    <section id="topInfoPanel" class="topInfoPanel" aria-live="polite">
+      <div class="topInfoHead">
+        <h2 id="topInfoTitle">안내</h2>
+        <button class="secondary" id="btnCloseTopInfo" type="button">닫기</button>
+      </div>
+      <div id="topInfoBody" class="topInfoBody"></div>
     </section>
 
   </div>
