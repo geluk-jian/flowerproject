@@ -776,18 +776,6 @@
         ]
       },
       {
-        id:'brightness',
-        type:'single',
-        title:'느낌 하나만 골라줘',
-        sub:'더 끌리는 느낌을 골라줘.',
-        options:[
-          {value:'bright', title:'화사하게', desc:'밝고 생기 있는 느낌'},
-          {value:'calm', title:'차분하게', desc:'잔잔하고 깔끔한 느낌'},
-          {value:'vivid', title:'선명하게', desc:'색감이 또렷한 느낌'},
-          {value:'soft', title:'은은하게', desc:'부드럽고 은은한 느낌'}
-        ]
-      },
-      {
         id:'style',
         type:'single',
         title:'그 사람 스타일은 어느 쪽?',
@@ -797,6 +785,30 @@
           {value:'chic', title:'세련되게', desc:'심플하고 도시적으로'},
           {value:'romantic', title:'러블리하게', desc:'달콤하고 따뜻하게'},
           {value:'minimal', title:'미니멀하게', desc:'담백하고 절제되게'}
+        ]
+      },
+      {
+        id:'finish',
+        type:'single',
+        title:'꽃 “마무리”는 어떤 느낌이 좋아?',
+        sub:'포장/리본/전체 스타일링까지 포함한 느낌을 골라줘.',
+        options:[
+          {value:'깔끔 마감', title:'깔끔 마감', desc:'종이 1~2겹, 리본 최소, 정돈된 느낌'},
+          {value:'포인트 마감', title:'포인트 마감', desc:'눈에 띄는 포인트 컬러, 사진빨 잘 받는 느낌'},
+          {value:'고급 마감', title:'고급 마감', desc:'톤다운, 무광 재질, 차분한 분위기'},
+          {value:'러블리 마감', title:'러블리 마감', desc:'부드러운 색감, 리본이 기억나는 느낌'}
+        ]
+      },
+      {
+        id:'brightness',
+        type:'single',
+        title:'느낌 하나만 골라줘',
+        sub:'더 끌리는 느낌을 골라줘.',
+        options:[
+          {value:'bright', title:'화사하게', desc:'밝고 생기 있는 느낌'},
+          {value:'calm', title:'차분하게', desc:'잔잔하고 깔끔한 느낌'},
+          {value:'vivid', title:'선명하게', desc:'색감이 또렷한 느낌'},
+          {value:'soft', title:'은은하게', desc:'부드럽고 은은한 느낌'}
         ]
       },
       {
@@ -847,6 +859,7 @@
       const normalized = {
         relation: null,
         occasion: null,
+        finish: null,
         brightness: null,
         style: null,
         volume: null,
@@ -856,7 +869,7 @@
 
       if (!raw || typeof raw !== 'object') return normalized;
 
-      ['relation', 'occasion', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
+      ['relation', 'occasion', 'finish', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
         const value = raw[key];
         normalized[key] = allowedValues[key].has(value) ? value : null;
       });
@@ -972,6 +985,7 @@
     const state = {
       relation:null,
       occasion:null,
+      finish:null,
       brightness:null,
       style:null,
       volume:null,
@@ -982,6 +996,7 @@
     function clearState(){
       state.relation = null;
       state.occasion = null;
+      state.finish = null;
       state.brightness = null;
       state.style = null;
       state.volume = null;
@@ -1359,6 +1374,14 @@
 
       let tone = profile.tone;
       let wrap = profile.wrap;
+      const finishHintByValue = {
+        '깔끔 마감':'종이 1~2겹, 리본 최소',
+        '포인트 마감':'포인트 컬러 강조',
+        '고급 마감':'톤다운, 무광 재질',
+        '러블리 마감':'부드러운 색감 + 리본 강조'
+      };
+      const finishHint = finishHintByValue[state.finish];
+      if(finishHint) wrap += ` / ${finishHint}`;
 
       if(taboos.includes('화려한 건 부담')){
         tone += ' (톤 1~2개로 제한 추천)';
@@ -1401,6 +1424,7 @@
       const reasonParts = [
         `관계: ${state.relation || '미선택'}`,
         `상황: ${state.occasion || '미선택'}`,
+        state.finish ? `마무리: ${state.finish}` : '',
         occasionReason[state.occasion] || '',
         `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}” 쪽!`
       ].filter(Boolean);
@@ -1413,7 +1437,7 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const floristOrder = '오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요. 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
+      const floristOrder = `오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const priceInfo = estimatePrice(state.volume);
       const storyTip = buildStoryTip({
@@ -1638,6 +1662,7 @@
       btnLoadExample.addEventListener('click', ()=>{
         state.relation = '여자친구(연인)';
         state.occasion = '기념일';
+        state.finish = '깔끔 마감';
         state.brightness = 'bright';
         state.style = 'chic';
         state.volume = 'basic';
