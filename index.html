@@ -1141,30 +1141,6 @@
         ]
       },
       {
-        id:'finish',
-        type:'single',
-        title:'꽃 “마무리”는 어떤 느낌이 좋아?',
-        sub:'포장/리본/전체 스타일링까지 포함한 느낌을 골라줘.',
-        options:[
-          {value:'깔끔 마감', title:'깔끔 마감', desc:'종이 1~2겹, 리본 최소, 정돈된 느낌'},
-          {value:'포인트 마감', title:'포인트 마감', desc:'눈에 띄는 포인트 컬러, 사진빨 잘 받는 느낌'},
-          {value:'고급 마감', title:'고급 마감', desc:'톤다운, 무광 재질, 차분한 분위기'},
-          {value:'러블리 마감', title:'러블리 마감', desc:'부드러운 색감, 리본이 기억나는 느낌'}
-        ]
-      },
-      {
-        id:'brightness',
-        type:'single',
-        title:'느낌 하나만 골라줘',
-        sub:'더 끌리는 느낌을 골라줘.',
-        options:[
-          {value:'bright', title:'화사하게', desc:'밝고 생기 있는 느낌'},
-          {value:'calm', title:'차분하게', desc:'잔잔하고 깔끔한 느낌'},
-          {value:'vivid', title:'선명하게', desc:'색감이 또렷한 느낌'},
-          {value:'soft', title:'은은하게', desc:'부드럽고 은은한 느낌'}
-        ]
-      },
-      {
         id:'volume',
         type:'single',
         title:'크기는 어느 쪽?',
@@ -1229,7 +1205,7 @@
         elegant: 'chic_elegant'
       };
 
-      ['relation', 'occasion', 'palette', 'photoHabit', 'finish', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
+      ['relation', 'occasion', 'palette', 'photoHabit', 'style', 'volume', 'urgency'].forEach((key)=>{
         const value = raw[key];
         const resolved = (key === 'style' && legacyStyleMap[value]) ? legacyStyleMap[value] : value;
         normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
@@ -1948,13 +1924,6 @@
         wrap += ' (포장/리본 최소화 추천)';
       }
 
-      const brightnessLabel = {
-        bright:'화사',
-        calm:'차분',
-        vivid:'선명',
-        soft:'은은'
-      }[state.brightness] || '화사';
-
       const styleLabel = {
         cute:'귀여움',
         chic:'세련/우아',
@@ -2006,7 +1975,7 @@
         state.finish ? `마무리: ${state.finish}` : '',
         state.photoHabit ? `사진 습관: ${photoHabitLabel}` : '',
         occasionReason[state.occasion] || '',
-        `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}${state.palette ? ` / ${paletteLabel}` : ''}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
+        `선택한 무드는 “${styleLabel} / ${volumeLabel}${state.palette ? ` / ${paletteLabel}` : ''}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
       ].filter(Boolean);
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
@@ -2244,8 +2213,6 @@
         state.occasion = '생일/기념일';
         state.palette = 'white_green';
         state.photoHabit = 'sns_sometimes';
-        state.finish = '깔끔 마감';
-        state.brightness = 'bright';
         state.style = 'chic_elegant';
         state.volume = 'basic';
         state.taboos = ['없음'];
