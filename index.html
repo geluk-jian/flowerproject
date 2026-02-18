@@ -1116,15 +1116,16 @@
         ]
       },
       {
-        id:'finish',
+        id:'palette',
         type:'single',
-        title:'꽃 “마무리”는 어떤 느낌이 좋아?',
-        sub:'포장/리본/전체 스타일링까지 포함한 느낌을 골라줘.',
+        title:'색감은 뭐가 더 그녀 스타일?',
+        sub:'옷/네일/방 톤 떠올리고 고르면 돼.',
         options:[
-          {value:'깔끔 마감', title:'깔끔 마감', desc:'종이 1~2겹, 리본 최소, 정돈된 느낌'},
-          {value:'포인트 마감', title:'포인트 마감', desc:'눈에 띄는 포인트 컬러, 사진빨 잘 받는 느낌'},
-          {value:'고급 마감', title:'고급 마감', desc:'톤다운, 무광 재질, 차분한 분위기'},
-          {value:'러블리 마감', title:'러블리 마감', desc:'부드러운 색감, 리본이 기억나는 느낌'}
+          { value: 'white_green',   title: '화이트·그린 🤍🌿', desc: '깔끔/정돈/미니멀' },
+          { value: 'pink_peach',    title: '핑크·피치 🩷🍑', desc: '부드럽고 러블리' },
+          { value: 'lilac',         title: '연보라·라일락 💜🫧', desc: '쿨하고 감성' },
+          { value: 'red_wine',      title: '레드·버건디 ❤️🍷', desc: '로맨틱/확실한 포인트' },
+          { value: 'yellow_orange', title: '옐로·오렌지 💛🧡', desc: '기분 업/발랄' }
         ]
       },
       {
@@ -1137,6 +1138,18 @@
           { value: 'sns_sometimes', title: '가끔 올림', desc: '기념일/특별한 날' },
           { value: 'private_photo', title: '찍긴 하는데 올리진 않음', desc: '기록용/개인 소장' },
           { value: 'no_photo', title: '사진 관심 없음', desc: '받으면 바로 끝' }
+        ]
+      },
+      {
+        id:'finish',
+        type:'single',
+        title:'꽃 “마무리”는 어떤 느낌이 좋아?',
+        sub:'포장/리본/전체 스타일링까지 포함한 느낌을 골라줘.',
+        options:[
+          {value:'깔끔 마감', title:'깔끔 마감', desc:'종이 1~2겹, 리본 최소, 정돈된 느낌'},
+          {value:'포인트 마감', title:'포인트 마감', desc:'눈에 띄는 포인트 컬러, 사진빨 잘 받는 느낌'},
+          {value:'고급 마감', title:'고급 마감', desc:'톤다운, 무광 재질, 차분한 분위기'},
+          {value:'러블리 마감', title:'러블리 마감', desc:'부드러운 색감, 리본이 기억나는 느낌'}
         ]
       },
       {
@@ -1199,8 +1212,9 @@
       const normalized = {
         relation: null,
         occasion: null,
-        finish: null,
+        palette: null,
         photoHabit: null,
+        finish: null,
         brightness: null,
         style: null,
         volume: null,
@@ -1215,7 +1229,7 @@
         elegant: 'chic_elegant'
       };
 
-      ['relation', 'occasion', 'finish', 'photoHabit', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
+      ['relation', 'occasion', 'palette', 'photoHabit', 'finish', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
         const value = raw[key];
         const resolved = (key === 'style' && legacyStyleMap[value]) ? legacyStyleMap[value] : value;
         normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
@@ -1332,8 +1346,9 @@
     const state = {
       relation:null,
       occasion:null,
-      finish:null,
+      palette:null,
       photoHabit:null,
+      finish:null,
       brightness:null,
       style:null,
       volume:null,
@@ -1344,8 +1359,9 @@
     function clearState(){
       state.relation = null;
       state.occasion = null;
-      state.finish = null;
+      state.palette = null;
       state.photoHabit = null;
+      state.finish = null;
       state.brightness = null;
       state.style = null;
       state.volume = null;
@@ -1949,6 +1965,14 @@
         trendy:'트렌디/힙'
       }[state.style] || '세련/우아';
 
+      const paletteLabel = {
+        white_green:'화이트·그린',
+        pink_peach:'핑크·피치',
+        lilac:'연보라·라일락',
+        red_wine:'레드·버건디',
+        yellow_orange:'옐로·오렌지'
+      }[state.palette] || '미선택';
+
       const photoHabitLabel = {
         sns_often:'SNS 자주',
         sns_sometimes:'가끔 업로드',
@@ -1978,10 +2002,11 @@
       const reasonParts = [
         `관계: ${state.relation || '미선택'}`,
         `상황: ${state.occasion || '미선택'}`,
+        state.palette ? `색감: ${paletteLabel}` : '',
         state.finish ? `마무리: ${state.finish}` : '',
         state.photoHabit ? `사진 습관: ${photoHabitLabel}` : '',
         occasionReason[state.occasion] || '',
-        `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
+        `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}${state.palette ? ` / ${paletteLabel}` : ''}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
       ].filter(Boolean);
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
@@ -2217,8 +2242,9 @@
       btnLoadExample.addEventListener('click', ()=>{
         state.relation = '여자친구(연인)';
         state.occasion = '생일/기념일';
-        state.finish = '깔끔 마감';
+        state.palette = 'white_green';
         state.photoHabit = 'sns_sometimes';
+        state.finish = '깔끔 마감';
         state.brightness = 'bright';
         state.style = 'chic_elegant';
         state.volume = 'basic';
