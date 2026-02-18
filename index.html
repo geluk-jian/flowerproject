@@ -863,7 +863,7 @@
         <div class="bd">
           <div class="progressWrap">
             <div class="progressTop">
-              <span id="stepText">1/7</span>
+              <span id="stepText">1/6</span>
               <span id="stepHint">선택하면 다음으로 넘어가요</span>
             </div>
             <div class="bar"><div id="barFill"></div></div>
@@ -1155,17 +1155,6 @@
           {value:'basic', title:'기본(M)', desc:'평균적인 볼륨'},
           {value:'lush', title:'풍성(L)', desc:'크고 눈에 띄게'}
         ]
-      },
-      {
-        id:'urgency',
-        type:'single',
-        title:'언제 필요해?',
-        sub:'필요한 날짜에 맞춰 가능한 걸로 추천할게.',
-        options:[
-          {value:'오늘(당일)', title:'오늘', desc:'지금 가능한 꽃 위주'},
-          {value:'내일', title:'내일', desc:'대부분 가능, 일부 대체 가능'},
-          {value:'여유(2–7일)', title:'2~7일 여유', desc:'원하는 꽃 반영 쉬움'}
-        ]
       }
     ];
 
@@ -1183,8 +1172,7 @@
         finish: null,
         brightness: null,
         style: null,
-        volume: null,
-        urgency: null
+        volume: null
       };
 
       if (!raw || typeof raw !== 'object') return normalized;
@@ -1194,7 +1182,7 @@
         elegant: 'chic_elegant'
       };
 
-      ['relation', 'occasion', 'palette', 'photoHabit', 'style', 'volume', 'urgency'].forEach((key)=>{
+      ['relation', 'occasion', 'palette', 'photoHabit', 'style', 'volume'].forEach((key)=>{
         const value = raw[key];
         const resolved = (key === 'style' && legacyStyleMap[value]) ? legacyStyleMap[value] : value;
         normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
@@ -1307,8 +1295,7 @@
       finish:null,
       brightness:null,
       style:null,
-      volume:null,
-      urgency:null
+      volume:null
     };
 
     function clearState(){
@@ -1320,7 +1307,6 @@
       state.brightness = null;
       state.style = null;
       state.volume = null;
-      state.urgency = null;
     }
 
     let stepIdx = 0;
@@ -1841,7 +1827,7 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const floristOrder = `오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
+      const floristOrder = `화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const priceInfo = estimatePrice(state.volume);
       const storyTip = buildStoryTip({
@@ -2063,7 +2049,6 @@
         state.photoHabit = 'sns_sometimes';
         state.style = 'chic_elegant';
         state.volume = 'basic';
-        state.urgency = '내일';
         showResult();
       });
     }
