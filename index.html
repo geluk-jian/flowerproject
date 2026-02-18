@@ -811,7 +811,7 @@
           </div>
 
           <div class="startTitle">
-            <h1>여친 꽃선물 "예쁘게요"<br/>말고 30초만에 추천</h1>
+            <h1>여친 꽃선물 "예쁘게요"<br/><br/>30초만에 추천</h1>
             <p>취향 몰라도 누나가 도와줄게.</p>
           </div>
 
@@ -1610,14 +1610,35 @@
       return `추천 멘트: "${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}"`;
     }
 
-    function estimatePrice(volume){
-      const byVolume = {
-        single: { label:'한송이(1 flower)', range:'약 1만~2만원' },
-        mini: { label:'미니(S)', range:'약 3만~5만원' },
-        basic: { label:'기본(M)', range:'약 5만~8만원' },
-        lush: { label:'풍성(L)', range:'약 8만~13만원' }
-      };
-      return byVolume[volume] || byVolume.basic;
+    function hexToRgb(hex){
+      const h = (hex || '').replace('#','');
+      if(h.length !== 6) return null;
+      const r = parseInt(h.slice(0,2),16);
+      const g = parseInt(h.slice(2,4),16);
+      const b = parseInt(h.slice(4,6),16);
+      if(Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return null;
+      return { r, g, b };
+    }
+
+    function rgbToSaturation({r,g,b}){
+      const rf = r/255, gf = g/255, bf = b/255;
+      const max = Math.max(rf,gf,bf);
+      const min = Math.min(rf,gf,bf);
+      const l = (max + min) / 2;
+      if(max === min) return 0;
+      const d = max - min;
+      return l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    }
+
+    function pickMostSaturatedHex(palette){
+      let best = { hex:'#166534', sat:-1 };
+      (palette || []).forEach(p => {
+        const rgb = hexToRgb(p.hex);
+        if(!rgb) return;
+        const sat = rgbToSaturation(rgb);
+        if(sat > best.sat) best = { hex:p.hex, sat };
+      });
+      return best.hex;
     }
 
     /* ===== FREE 대표 꽃 1송이 이미지 매핑 (너 레포 경로/파일명 기준) ===== */
@@ -1822,14 +1843,13 @@
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
-      const pickTitleColor = (palette[0] && palette[0].hex) ? palette[0].hex : '#166534';
+      const pickTitleColor = pickMostSaturatedHex(palette);
       const sampleImage = pickConceptPreviewPhoto(personality);
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
       const floristOrder = `화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
-      const priceInfo = estimatePrice(state.volume);
       const storyTip = buildStoryTip({
         personality,
         relation: state.relation,
@@ -1857,6 +1877,10 @@
             />
             <div class="cap">위 꽃은 메인으로 추천드려요.</div>
           </div>
+          <div class="hero" style="margin-top:10px;">
+            <div style="font-size:24px; font-weight:900; color:${escapeHtml(pickTitleColor)}; margin-bottom:6px;">꽃집 누나 PICK</div>
+            <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
+          </div>
           <div class="palette">
             ${palette.map(p => `
               <div class="swatch">
@@ -1865,6 +1889,20 @@
               </div>
             `).join('')}
           </div>
+        </div>
+
+        <div class="box">
+          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
+          <ul class="list">
+            <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
+            <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
+            <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
+          </ul>
+          <div class="divider"></div>
+          <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
+        </div>
+
+        <div class="box">
           <div class="chips">
             <span class="chip">컨셉: <b>${escapeHtml(profile.concept)}</b></span>
             ${profile.mood.map(m => `<span class="chip">${escapeHtml(m)}</span>`).join('')}
@@ -1876,16 +1914,11 @@
           </div>
         </div>
 
-        <div class="hero" style="margin-top:2px;">
-          <div style="font-size:24px; font-weight:900; color:${escapeHtml(pickTitleColor)}; margin-bottom:6px;">꽃집 누나 PICK</div>
-          <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
-        </div>
-
         <div class="box">
           <div class="top3">
             <div class="topItem">
-              ✅ 예상 가격대: ${escapeHtml(priceInfo.label)}
-              <small>${escapeHtml(priceInfo.range)} · 지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
+              ✅ 예상 가격대: 약 3만~5만원
+              <small>지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
               <div class="priceRow">
                 <span class="priceBadge">한송이(1 flower): 약 1만~2만원</span>
                 <span class="priceBadge">미니(S): 약 3만~5만원</span>
@@ -1902,18 +1935,6 @@
             </div>
           </div>
         </div>
-
-        <div class="box">
-          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
-          <ul class="list">
-            <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
-            <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
-            <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
-          </ul>
-          <div class="divider"></div>
-          <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
-        </div>
-
         <div class="box">
           <h3>왜 이게 맞냐면</h3>
           <details class="explain">
