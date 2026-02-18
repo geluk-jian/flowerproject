@@ -608,9 +608,11 @@
       position: relative;
       width: min(100%, 580px);
       display:flex;
+      flex-direction: column;
       align-items:center;
       justify-content:center;
       padding: 0 116px;
+      gap: 12px;
     }
     .slideFrame{
       position: relative;
@@ -689,7 +691,21 @@
       left: 18px;
       top: 12px;
     }
-    .startBubbleRow{display:none;}
+    .startBubbleRow{
+      display:flex;
+      width:100%;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .startBubbleRow .speechBubble{
+      position:static;
+    }
+    .startBubbleRow .speechBubble::after{display:none;}
+    .speechOwner,
+    .speechNo,
+    .speechAny{
+      display:none;
+    }
 
     .startCta{
       margin-top: 8px;
@@ -769,24 +785,12 @@
         gap:10px;
       }
       .speechBubble{
-        position:static;
         width: 118px;
         height: 74px;
         border-radius:999px;
         font-size:12px;
       }
       .speechBubble::after{display:none;}
-      .speechOwner,
-      .speechNo,
-      .speechAny{
-        display:none;
-      }
-      .startBubbleRow{
-        display:flex;
-        width:100%;
-        justify-content:space-between;
-        gap:8px;
-      }
     }
 
     @media (max-width: 360px){
