@@ -1145,15 +1145,16 @@
         ]
       },
       {
-        id:'volume',
-        type:'single',
-        title:'크기는 어느 쪽?',
-        sub:'한송이부터 풍성까지 골라줘.',
+        id:'cautions',
+        type:'multi',
+        title:'참고해야 할 게 있어?',
+        sub:'있으면 체크하고, 없으면 “없음” 누르면 돼. (복수 선택 가능)',
         options:[
-          {value:'single', title:'한송이(1 flower)', desc:'가볍고 간단하게'},
-          {value:'mini', title:'미니(S)', desc:'작고 깔끔하게'},
-          {value:'basic', title:'기본(M)', desc:'평균적인 볼륨'},
-          {value:'lush', title:'풍성(L)', desc:'크고 눈에 띄게'}
+          {value:'scent_light', title:'향은 약한 쪽이 좋아요', desc:'향 민감'},
+          {value:'allergy_sensitive', title:'알레르기/민감이 있어요', desc:'꽃가루/향 최소'},
+          {value:'no_rose', title:'장미는 다른 꽃이면 더 좋아요', desc:'취향/기억'},
+          {value:'clean_over_flashy', title:'화려함보단 깔끔한 게 좋아요', desc:'톤 줄이면 안전'},
+          {value:'none', title:'없음', desc:'특별한 주의 없음'}
         ]
       }
     ];
@@ -1172,7 +1173,7 @@
         finish: null,
         brightness: null,
         style: null,
-        volume: null
+        cautions: []
       };
 
       if (!raw || typeof raw !== 'object') return normalized;
@@ -1182,11 +1183,16 @@
         elegant: 'chic_elegant'
       };
 
-      ['relation', 'occasion', 'palette', 'photoHabit', 'style', 'volume'].forEach((key)=>{
+      ['relation', 'occasion', 'palette', 'photoHabit', 'style'].forEach((key)=>{
         const value = raw[key];
         const resolved = (key === 'style' && legacyStyleMap[value]) ? legacyStyleMap[value] : value;
         normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
       });
+
+      const cautions = Array.isArray(raw.cautions) ? raw.cautions : [];
+      const safeCautions = cautions.filter(v => allowedValues.cautions.has(v));
+      if(safeCautions.includes('none')) normalized.cautions = ['none'];
+      else normalized.cautions = safeCautions;
 
       return normalized;
     }
@@ -1295,7 +1301,7 @@
       finish:null,
       brightness:null,
       style:null,
-      volume:null
+      cautions:[]
     };
 
     function clearState(){
@@ -1306,13 +1312,32 @@
       state.finish = null;
       state.brightness = null;
       state.style = null;
-      state.volume = null;
+      state.cautions = [];
     }
 
     let stepIdx = 0;
     function currentStep(){ return steps[stepIdx]; }
 
     function setAnswer(stepId, value){
+      const step = steps.find(s => s.id === stepId);
+      if(step && step.type === 'multi'){
+        const current = Array.isArray(state[stepId]) ? [...state[stepId]] : [];
+        const idx = current.indexOf(value);
+        if(idx >= 0){
+          current.splice(idx, 1);
+        }else{
+          if(value === 'none'){
+            current.length = 0;
+            current.push('none');
+          }else{
+            const noneIdx = current.indexOf('none');
+            if(noneIdx >= 0) current.splice(noneIdx, 1);
+            current.push(value);
+          }
+        }
+        state[stepId] = current;
+        return;
+      }
       state[stepId] = value;
     }
 
@@ -1323,7 +1348,7 @@
     function canGoNext(){
       const s = currentStep();
       const ans = getAnswer(s.id);
-      if(s.type === 'multi') return true;
+      if(s.type === 'multi') return Array.isArray(ans) && ans.length > 0;
       return !!ans;
     }
 
@@ -1495,26 +1520,15 @@
       return 'chic';
     }
 
-    function normalizeVolume(volume){
-      if(volume === 'lush') return 'lush';
-      if(volume === 'single' || volume === 'mini' || volume === 'basic') return 'simple';
-      return 'simple';
-    }
-
-    function mapPersonality(brightness, style, volume){
+    function mapPersonality(brightness, style){
       const b = normalizeBrightness(brightness);
       const s = normalizeStyle(style);
-      const v = normalizeVolume(volume);
-      const key = `${b}|${s}|${v}`;
+      const key = `${b}|${s}`;
       const table = {
-        'bright|cute|lush':'귀여움',
-        'bright|cute|simple':'러블리',
-        'bright|chic|simple':'세련됨',
-        'bright|chic|lush':'활기',
-        'calm|chic|simple':'미니멀',
-        'calm|chic|lush':'우아함',
-        'calm|cute|simple':'러블리',
-        'calm|cute|lush':'우아함'
+        'bright|cute':'러블리',
+        'bright|chic':'세련됨',
+        'calm|chic':'미니멀',
+        'calm|cute':'러블리'
       };
       return table[key] || '세련됨';
     }
@@ -1760,7 +1774,7 @@
     }
 
     function showResult(){
-      const personality = mapPersonality(state.brightness, state.style, state.volume);
+      const personality = mapPersonality(state.brightness, state.style);
       const profile = profiles[personality];
 
       const { main, sub, tex } = pickFlowers(profile);
@@ -1811,12 +1825,15 @@
         no_photo:'사진 관심 없음'
       }[state.photoHabit] || '미선택';
 
-      const volumeLabel = {
-        single:'한송이(1 flower)',
-        mini:'미니(S)',
-        basic:'기본(M)',
-        lush:'풍성(L)'
-      }[state.volume] || '기본(M)';
+      const cautionLabel = {
+        scent_light:'향은 약한 쪽이 좋아요',
+        allergy_sensitive:'알레르기/민감(꽃가루/향 최소)',
+        no_rose:'장미는 다른 꽃이면 더 좋아요',
+        clean_over_flashy:'화려함보단 깔끔한 게 좋아요',
+        none:'없음'
+      };
+      const cautionValues = (state.cautions || []).filter(v => v !== 'none');
+      const cautionText = cautionValues.map(v => cautionLabel[v] || v).join(', ');
 
       const personalitySentence = (() => {
         const adj = {
@@ -1827,7 +1844,7 @@
           '우아함':'차분하고 우아한',
           '활기':'에너지 넘치는'
         }[personality] || '깔끔한';
-        return `${adj} 그녀에겐 ${styleLabel} ${volumeLabel} 스타일을 추천드려요.`;
+        return `${adj} 그녀에겐 ${styleLabel} 스타일을 추천드려요.`;
       })();
 
       const reasonParts = [
@@ -1836,8 +1853,9 @@
         state.palette ? `색감: ${paletteLabel}` : '',
         state.finish ? `마무리: ${state.finish}` : '',
         state.photoHabit ? `사진 습관: ${photoHabitLabel}` : '',
+        cautionText ? `참고사항: ${cautionText}` : '',
         occasionReason[state.occasion] || '',
-        `선택한 무드는 “${styleLabel} / ${volumeLabel}${state.palette ? ` / ${paletteLabel}` : ''}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
+        `선택한 무드는 “${styleLabel}${state.palette ? ` / ${paletteLabel}` : ''}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
       ].filter(Boolean);
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
@@ -1848,7 +1866,7 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const floristOrder = `화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
+      const floristOrder = `화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''}${cautionText ? ` 참고사항: ${cautionText}.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const storyTip = buildStoryTip({
         personality,
@@ -1889,6 +1907,14 @@
               </div>
             `).join('')}
           </div>
+        </div>
+
+        <div class="box">
+          <h3>참고사항</h3>
+          <p style="margin:0; font-size:14px; font-weight:800; color:var(--text);">
+            ${escapeHtml(cautionText || '없음')}
+          </p>
+          <div class="footnote">※ 꽃집에 전달할 때 미리 알려주면 안전해요.</div>
         </div>
 
         <div class="box">
@@ -2069,7 +2095,7 @@
         state.palette = 'white_green';
         state.photoHabit = 'sns_sometimes';
         state.style = 'chic_elegant';
-        state.volume = 'basic';
+        state.cautions = ['none'];
         showResult();
       });
     }
