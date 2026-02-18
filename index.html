@@ -1883,137 +1883,197 @@
       url.searchParams.set('r', code);
       history.replaceState(null, '', url.toString());
 
+      // ====== Hero 요약 데이터 만들기 ======
+      const mainAsset = getMainFlowerAsset(personality);
+
+      const finishShort = (() => {
+        // 사진 타입 기준: 포인트/깔끔만 간단히
+        if (state.photoHabit === 'sns_often' || state.photoHabit === 'sns_sometimes') return '포인트';
+        if (state.photoHabit === 'private_photo') return '깔끔';
+        if (state.photoHabit === 'no_photo') return '깔끔';
+        return '무난';
+      })();
+
+      // 주의(참고사항) 요약: taboos/cautions가 없거나 none이면 "없음"
+      const rawTaboos = Array.isArray(state.taboos)
+        ? state.taboos
+        : (Array.isArray(state.cautions) ? state.cautions : []);
+      const tabooShortMap = {
+        // 새 value 방식(추천)
+        no_scent: '향 약하게',
+        allergy: '알레르기',
+        no_rose: '장미 제외',
+        keep_simple: '깔끔하게',
+
+        // 예전 문구 방식(혹시 남아있을 때)
+        '향 강한 꽃은 싫어함': '향 약하게',
+        '알레르기/민감 있음': '알레르기',
+        '장미는 싫어함': '장미 제외',
+        '화려한 건 부담': '깔끔하게',
+
+        none: '없음',
+        '없음': '없음',
+
+        // 현재 cautions 값
+        scent_light: '향 약하게',
+        allergy_sensitive: '알레르기',
+        clean_over_flashy: '깔끔하게'
+      };
+
+      const tabooShortList = rawTaboos
+        .map(v => tabooShortMap[v] || String(v))
+        .filter(v => v && v !== '없음' && v !== 'none');
+
+      const cautionChipHtml = (() => {
+        if (tabooShortList.length === 0) {
+          return `<span class="chip">주의: <b>없음</b></span>`;
+        }
+        if (tabooShortList.length === 1) {
+          return `<span class="chip">주의: <b>${escapeHtml(tabooShortList[0])}</b></span>`;
+        }
+        if (tabooShortList.length === 2) {
+          return `<span class="chip">주의: <b>${escapeHtml(tabooShortList.join(' · '))}</b></span>`;
+        }
+        // 3개 이상이면 칩은 "2개(눌러보기)"로, 안에 전체 리스트
+        return `
+          <details class="chipDetails">
+            <summary class="chip">주의: <b>2개(눌러보기)</b></summary>
+            <div class="chipPanel">
+              ${tabooShortList.map(x => `<div class="chipLine">• ${escapeHtml(x)}</div>`).join('')}
+            </div>
+          </details>
+        `;
+      })();
+
+      const pickLine = `꽃집 누나 PICK: ${styleLabel} 톤으로 “${paletteLabel}” 가면 실패 확률 낮아.`;
+
+      // 가격 정보: volume 없으면 기본(M)
+      const priceInfoMap = {
+        single: { label: '한송이(1 flower)', range: '약 1만~2만원' },
+        mini: { label: '미니(S)', range: '약 3만~5만원' },
+        basic: { label: '기본(M)', range: '약 5만~8만원' },
+        lush: { label: '풍성(L)', range: '약 8만~13만원' }
+      };
+      const priceInfo = priceInfoMap[state.volume] || priceInfoMap.basic;
+
+      // ====== 주문문장(기존 floristOrder 유지하되, 미리보기/전체보기 구성) ======
+      const orderPreviewText = floristOrder;
+
       const resultHtml = `
-        <div class="box">
-          <h3>추천 컨셉</h3>
-          <div class="samplePhoto">
-            <div class="title">컨셉 대표 꽃: ${escapeHtml(personality)} 무드 · ${escapeHtml(conceptFlowerName)}</div>
-            <img
-              src="${escapeHtml(sampleImage)}"
-              alt="${escapeHtml(profile.concept)} 샘플 사진"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-              onerror="if(!this.dataset.err1){this.dataset.err1='1';this.src='${escapeHtml(sampleImageFallback)}';}else{this.onerror=null;this.src='${escapeHtml(sampleImageFallbackFinal)}';}"
-            />
-            <div class="cap">위 꽃은 메인으로 추천드려요.</div>
-          </div>
-          <div class="hero" style="margin-top:10px;">
-            <div style="font-size:24px; font-weight:900; color:${escapeHtml(pickTitleColor)}; margin-bottom:6px;">꽃집 누나 PICK</div>
-            <div class="mini">결과 성향: <b>${escapeHtml(personalitySentence)}</b></div>
-          </div>
-          <div class="palette">
-            ${palette.map(p => `
-              <div class="swatch">
-                <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
-                <div class="swatchMeta">${escapeHtml(p.name)}<br/>${escapeHtml(p.hex)}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="box">
-          <h3>참고사항</h3>
-          <p style="margin:0; font-size:14px; font-weight:800; color:var(--text);">
-            ${escapeHtml(cautionText || '없음')}
-          </p>
-          <div class="footnote">※ 꽃집에 전달할 때 미리 알려주면 안전해요.</div>
-        </div>
-
-        <div class="box">
-          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
-          <ul class="list">
-            <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
-            <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
-            <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
-          </ul>
-          <div class="divider"></div>
-          <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
-        </div>
-
-        <div class="box">
-          <div class="chips">
-            <span class="chip">컨셉: <b>${escapeHtml(profile.concept)}</b></span>
-            ${profile.mood.map(m => `<span class="chip">${escapeHtml(m)}</span>`).join('')}
-          </div>
-          <div class="divider"></div>
-          <div class="muted" style="font-size:13px;">
-            톤/색감: <b>${escapeHtml(tone)}</b><br/>
-            포장: <b>${escapeHtml(wrap)}</b>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="top3">
-            <div class="topItem">
-              ✅ 예상 가격대: 약 3만~5만원
-              <small>지역/시즌/꽃값에 따라 달라질 수 있어요.</small>
-              <div class="priceRow">
-                <span class="priceBadge">한송이(1 flower): 약 1만~2만원</span>
-                <span class="priceBadge">미니(S): 약 3만~5만원</span>
-                <span class="priceBadge">기본(M): 약 5만~8만원</span>
-                <span class="priceBadge">풍성(L): 약 8만~13만원</span>
-              </div>
+        <!-- [A] HERO 카드 -->
+        <div class="box heroCard">
+          <div class="heroRow">
+            <div class="heroImgWrap">
+              <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
             </div>
-            <div class="topItem">
-              ✅ 바로 주문: 꽃집에 보내기
-              <small>버튼 누르면 주문 문장을 복사해줘요.</small>
-              <div class="btnrow" style="margin-top:8px;">
-                <button id="btnCopyOrder">꽃집에 보내기(주문문장 복사)</button>
+            <div class="heroMeta">
+              <div class="heroLabel">대표 꽃 1송이</div>
+              <div class="heroName">${escapeHtml(mainAsset.name)}</div>
+              <div class="heroPickLine">${escapeHtml(pickLine)}</div>
+
+              <div class="heroChips">
+                <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
+                <span class="chip">마무리: <b>${escapeHtml(finishShort)}</b></span>
+                ${cautionChipHtml}
               </div>
             </div>
           </div>
         </div>
+
+        <!-- [B] 메인 버튼 + 주문문장 미리보기/전체보기 -->
         <div class="box">
-          <h3>왜 이게 맞냐면</h3>
-          <details class="explain">
-            <summary>접기/펼치기</summary>
-            <p>${reasonParts.map(escapeHtml).join(' ')}</p>
+          <button id="btnCopyOrder" class="primaryFull" type="button">꽃집에 보내기(주문문장 복사)</button>
+          <p class="orderPreview">${escapeHtml(orderPreviewText)}</p>
+
+          <details class="detailsPlain">
+            <summary>주문문장 전체 보기</summary>
+            <div class="fullText">${escapeHtml(orderPreviewText)}</div>
           </details>
         </div>
 
+        <!-- [C] 서브 버튼 (멘트 3개 복사) -->
         <div class="box">
-          <h3>꽃 의미 한 줄</h3>
-          <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
-          <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
+          <button class="secondary primaryFull" id="btnCopyMent" type="button">그녀에게 보낼 멘트 3개 복사</button>
+
+          <details class="detailsPlain">
+            <summary>멘트 미리보기</summary>
+            <ol class="list" style="margin-top:10px;">
+              <li>${escapeHtml(msgs.simple)}</li>
+              <li>${escapeHtml(msgs.sense)}</li>
+              <li>${escapeHtml(msgs.sincere)}</li>
+            </ol>
+          </details>
         </div>
 
-        <div class="box">
-          <h3>꽃집 DM용 주문문장(무료 1개)</h3>
-          <p style="margin:0; font-size:13px; font-weight:700;">${escapeHtml(floristOrder)}</p>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyOrderInline">주문문장 복사</button>
+        <!-- 아래는 일단 접어두는 상세(원하면 유지/삭제 가능) -->
+        <details class="explain" style="margin-top:12px;">
+          <summary>자세히 보기(컨셉/조합/가격/꽃말)</summary>
+
+          <div class="box" style="margin-top:12px;">
+            <h3>컨셉 디테일</h3>
+            <div class="muted" style="font-size:13px;">
+              톤/색감: <b>${escapeHtml(tone)}</b><br/>
+              포장: <b>${escapeHtml(wrap)}</b>
+            </div>
+            <div class="palette" style="margin-top:10px;">
+              ${(palette || []).map(p => `
+                <div class="swatch">
+                  <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
+                  <div class="swatchMeta">${escapeHtml(p.name)}</div>
+                </div>
+              `).join('')}
+            </div>
           </div>
-        </div>
 
-        <div class="box">
-          <h3>선물 스토리/전달 메시지 팁</h3>
-          <p style="margin:0; font-size:13px; font-weight:700; color:var(--text);">${escapeHtml(storyTip)}</p>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyStoryTip">스토리 멘트 복사</button>
+          <div class="box">
+            <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
+            <ul class="list">
+              <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
+              <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
+              <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
+            </ul>
+            <div class="divider"></div>
+            <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
           </div>
-        </div>
 
-        <div class="box">
-          <h3>바로 써먹는 멘트 3개</h3>
-          <ol class="list">
-            <li>${escapeHtml(msgs.simple)}</li>
-            <li>${escapeHtml(msgs.sense)}</li>
-            <li>${escapeHtml(msgs.sincere)}</li>
-          </ol>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyMent">멘트 3개 복사</button>
-            <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
-            <button class="secondary" id="btnCopyShareForHer">여친한테 공유문구 복사</button>
+          <div class="box">
+            <h3>예상 가격대</h3>
+            <p style="margin:0; font-size:13px; font-weight:750;">
+              <b>${escapeHtml(priceInfo.label)}</b> 기준: ${escapeHtml(priceInfo.range)} (지역/시즌/꽃값에 따라 달라질 수 있어요)
+            </p>
           </div>
-          <div class="footnote">공유 문구 예: “이거 해보고 꽃 골라줘 😂” (출처 없음)</div>
-        </div>
 
-        <div class="box ctaPro">
-          <h3>PRO(예정): 꽃집 DM 주문서 + 멘트 10개</h3>
-          <p class="muted" style="margin:0; font-size:13px;">
-            다음 단계는 “꽃집에 그대로 보내면 제작되는 주문서”까지 뽑아주는 거야.
-          </p>
-        </div>
+          <div class="box">
+            <h3>꽃 의미 한 줄</h3>
+            <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
+            <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
+          </div>
+
+          <div class="box">
+            <h3>왜 이게 맞냐면</h3>
+            <details class="explain">
+              <summary>접기/펼치기</summary>
+              <p>${reasonParts.map(escapeHtml).join(' ')}</p>
+            </details>
+          </div>
+
+          <div class="box">
+            <h3>선물 스토리/전달 메시지 팁</h3>
+            <p style="margin:0; font-size:13px; font-weight:700; color:var(--text);">${escapeHtml(storyTip)}</p>
+            <div class="btnrow">
+              <button class="secondary" id="btnCopyStoryTip">스토리 멘트 복사</button>
+              <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
+              <button class="secondary" id="btnCopyShareForHer">여친한테 공유문구 복사</button>
+            </div>
+          </div>
+
+          <div class="box ctaPro">
+            <h3>PRO(예정): 꽃집 DM 주문서 + 멘트 10개</h3>
+            <p class="muted" style="margin:0; font-size:13px;">
+              다음 단계는 “꽃집에 그대로 보내면 제작되는 주문서”까지 뽑아주는 거야.
+            </p>
+          </div>
+        </details>
 
         <div class="btnrow" style="margin-top:16px;">
           <button id="btnAgain">다시 하기</button>
@@ -2023,42 +2083,63 @@
 
       $('resultArea').innerHTML = resultHtml;
 
-      $('btnCopyMent').onclick = async ()=>{
-        const text = [msgs.simple, msgs.sense, msgs.sincere].join('\n');
-        const ok = await copyText(text);
-        toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
-      $('btnCopyOrder').onclick = async ()=>{
-        const ok = await copyText(floristOrder);
-        toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
-      $('btnCopyOrderInline').onclick = async ()=>{
-        const ok = await copyText(floristOrder);
-        toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
+      // ====== 버튼 바인딩: 없는 버튼은 안전하게 스킵 ======
+      const btnCopyMentEl = $('btnCopyMent');
+      if(btnCopyMentEl){
+        btnCopyMentEl.onclick = async ()=>{
+          const text = [msgs.simple, msgs.sense, msgs.sincere].join('\n');
+          const ok = await copyText(text);
+          toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
 
-      $('btnCopyLink').onclick = async ()=>{
-        const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
-        const ok = await copyText(shareText);
-        toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
-      $('btnCopyStoryTip').onclick = async ()=>{
-        const ok = await copyText(storyTip);
-        toast(ok ? '스토리 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
-      $('btnCopyShareForHer').onclick = async ()=>{
-        const ok = await copyText(shareForGirlfriend);
-        toast(ok ? '공유문구를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-      };
+      const btnCopyOrderEl = $('btnCopyOrder');
+      if(btnCopyOrderEl){
+        btnCopyOrderEl.onclick = async ()=>{
+          const ok = await copyText(floristOrder);
+          toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
 
-      $('btnAgain').onclick = ()=>{
-        clearState();
-        stepIdx = 0;
-        showScreen('screenQuiz');
-        renderStep();
-      };
+      const btnCopyLinkEl = $('btnCopyLink');
+      if(btnCopyLinkEl){
+        btnCopyLinkEl.onclick = async ()=>{
+          const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
+          const ok = await copyText(shareText);
+          toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
 
-      $('btnHome').onclick = resetAll;
+      const btnCopyStoryTipEl = $('btnCopyStoryTip');
+      if(btnCopyStoryTipEl){
+        btnCopyStoryTipEl.onclick = async ()=>{
+          const ok = await copyText(storyTip);
+          toast(ok ? '스토리 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
+
+      const btnCopyShareForHerEl = $('btnCopyShareForHer');
+      if(btnCopyShareForHerEl){
+        btnCopyShareForHerEl.onclick = async ()=>{
+          const ok = await copyText(shareForGirlfriend);
+          toast(ok ? '공유문구를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
+
+      const btnAgainEl = $('btnAgain');
+      if(btnAgainEl){
+        btnAgainEl.onclick = ()=>{
+          clearState();
+          stepIdx = 0;
+          showScreen('screenQuiz');
+          renderStep();
+        };
+      }
+
+      const btnHomeEl = $('btnHome');
+      if(btnHomeEl){
+        btnHomeEl.onclick = resetAll;
+      }
 
       showScreen('screenResult');
     }
@@ -2124,5 +2205,123 @@
     initTopInfoPanel();
     initStartSlider();
   </script>
+  <style>
+    /* ===== Result Top (Hero + Actions) ===== */
+    .heroCard{
+      padding: 16px;
+    }
+    .heroRow{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .heroImgWrap{
+      width: 92px;
+      height: 92px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+    }
+    .heroImgWrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#fff;
+    }
+    .heroMeta{
+      flex:1;
+      min-width:0;
+    }
+    .heroLabel{
+      font-size:12px;
+      font-weight:900;
+      color: var(--muted);
+      letter-spacing:-.1px;
+    }
+    .heroName{
+      margin-top:2px;
+      font-size:18px;
+      font-weight:950;
+      letter-spacing:-.3px;
+      color: var(--text);
+    }
+    .heroPickLine{
+      margin-top:6px;
+      font-size:13px;
+      font-weight:850;
+      color: var(--text);
+    }
+    .heroChips{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .primaryFull{
+      width:100%;
+      padding: 14px 14px;
+      border-radius: 16px;
+      font-size: 16px;
+    }
+
+    .orderPreview{
+      margin: 10px 0 0;
+      font-size:13px;
+      font-weight:700;
+      color: var(--text);
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
+    .detailsPlain{
+      margin-top:10px;
+    }
+    .detailsPlain summary{
+      cursor:pointer;
+      font-weight:900;
+      font-size:13px;
+      color:var(--text);
+      list-style:none;
+    }
+    .detailsPlain summary::-webkit-details-marker{display:none;}
+    .detailsPlain .fullText{
+      margin:8px 0 0;
+      font-size:13px;
+      color:var(--text);
+      font-weight:650;
+      white-space: pre-wrap;
+    }
+
+    /* chip처럼 클릭 가능한 주의사항 */
+    .chipDetails{
+      display:inline-block;
+    }
+    .chipDetails summary.chip{
+      cursor:pointer;
+      user-select:none;
+    }
+    .chipDetails summary.chip::-webkit-details-marker{display:none;}
+    .chipPanel{
+      margin-top:8px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+    }
+    .chipLine{
+      font-size:12px;
+      color:var(--text);
+      font-weight:750;
+      margin:4px 0;
+    }
+  </style>
 </body>
 </html>
