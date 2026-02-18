@@ -1184,7 +1184,6 @@
         brightness: null,
         style: null,
         volume: null,
-        taboos: [],
         urgency: null
       };
 
@@ -1200,14 +1199,6 @@
         const resolved = (key === 'style' && legacyStyleMap[value]) ? legacyStyleMap[value] : value;
         normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
       });
-
-      if (Array.isArray(raw.taboos) && allowedValues.taboos) {
-        const cleaned = raw.taboos.filter(v => allowedValues.taboos.has(v));
-        normalized.taboos = Array.from(new Set(cleaned));
-        if (normalized.taboos.includes('없음')) {
-          normalized.taboos = ['없음'];
-        }
-      }
 
       return normalized;
     }
@@ -1317,7 +1308,6 @@
       brightness:null,
       style:null,
       volume:null,
-      taboos:[],
       urgency:null
     };
 
@@ -1330,7 +1320,6 @@
       state.brightness = null;
       state.style = null;
       state.volume = null;
-      state.taboos = [];
       state.urgency = null;
     }
 
@@ -1338,26 +1327,10 @@
     function currentStep(){ return steps[stepIdx]; }
 
     function setAnswer(stepId, value){
-      if(stepId === 'taboos'){
-        const v = value;
-        const has = state.taboos.includes(v);
-
-        if(v === '없음'){
-          state.taboos = has ? [] : ['없음'];
-          return;
-        }
-
-        state.taboos = state.taboos.filter(x => x !== '없음');
-
-        if(has) state.taboos = state.taboos.filter(x => x !== v);
-        else state.taboos.push(v);
-        return;
-      }
       state[stepId] = value;
     }
 
     function getAnswer(stepId){
-      if(stepId === 'taboos') return state.taboos;
       return state[stepId];
     }
 
@@ -1514,11 +1487,6 @@
       }
     };
 
-    const tabooBans = {
-      '향 강한 꽃은 싫어함': ['백합','프리지아','히아신스','스톡'],
-      '장미는 싫어함': ['장미','스프레이장미']
-    };
-
     const occasionReason = {
       '생일/기념일':'특별한 날엔 밝고 센스 있는 무드가 가장 안전해요.',
       '생일':'생일은 ‘축하’가 중심. 밝고 기분 좋아지는 무드가 안전해요.',
@@ -1565,23 +1533,10 @@
       return table[key] || '세련됨';
     }
 
-    function pickFlowers(profile, taboos){
-      let banned = [];
-      (taboos || []).forEach(t => { if(tabooBans[t]) banned = banned.concat(tabooBans[t]); });
-      banned = Array.from(new Set(banned));
-
-      const mainCandidates = profile.flowers.main.filter(f => !banned.some(b => f.includes(b)));
-      const subCandidates = profile.flowers.sub.filter(f => !banned.some(b => f.includes(b)));
-      const texCandidates = profile.flowers.texture.filter(f => !banned.some(b => f.includes(b)));
-
-      const fallbackMain = ['리시안셔스(유스토마)','튤립','라넌큘러스','거베라'].filter(f => !banned.some(b => f.includes(b)));
-      const fallbackSub = ['알스트로메리아','스프레이 카네이션'].filter(f => !banned.some(b => f.includes(b)));
-      const fallbackTex = ['유칼립투스','러스커스(그린)','왁스플라워'].filter(f => !banned.some(b => f.includes(b)));
-
-      const main = (mainCandidates.length ? mainCandidates : fallbackMain).slice(0,2);
-      const sub = (subCandidates.length ? subCandidates : fallbackSub).slice(0,2);
-      const tex = (texCandidates.length ? texCandidates : fallbackTex).slice(0,2);
-
+    function pickFlowers(profile){
+      const main = (profile.flowers.main || ['리시안셔스(유스토마)','튤립']).slice(0,2);
+      const sub = (profile.flowers.sub || ['알스트로메리아','스프레이 카네이션']).slice(0,2);
+      const tex = (profile.flowers.texture || ['유칼립투스','러스커스(그린)']).slice(0,2);
       return { main, sub, tex };
     }
 
@@ -1880,13 +1835,11 @@
     }
 
     function showResult(){
-      const taboos = (state.taboos || []).includes('없음') ? [] : (state.taboos || []);
       const personality = mapPersonality(state.brightness, state.style, state.volume);
       const profile = profiles[personality];
 
-      const { main, sub, tex } = pickFlowers(profile, taboos);
+      const { main, sub, tex } = pickFlowers(profile);
       const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
-      const cautions = buildCautions({taboos, urgency: state.urgency});
 
       let tone = profile.tone;
       let wrap = profile.wrap;
@@ -1907,11 +1860,6 @@
       };
       const photoFinishHint = (!state.finish && state.photoHabit) ? photoFinishHintByValue[state.photoHabit] : '';
       if(photoFinishHint) wrap += ` / ${photoFinishHint}`;
-
-      if(taboos.includes('화려한 건 부담')){
-        tone += ' (톤 1~2개로 제한 추천)';
-        wrap += ' (포장/리본 최소화 추천)';
-      }
 
       const styleLabel = {
         cute:'귀여움',
@@ -1975,7 +1923,7 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const floristOrder = `오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 장미 제외. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
+      const floristOrder = `오늘/내일 픽업 가능하면, 화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const priceInfo = estimatePrice(state.volume);
       const storyTip = buildStoryTip({
@@ -1985,7 +1933,7 @@
         tone
       });
 
-      const shareState = {...state, taboos};
+      const shareState = {...state};
       const code = base64UrlEncode(shareState);
       const url = new URL(location.href);
       url.searchParams.set('r', code);
@@ -2107,13 +2055,6 @@
           <div class="footnote">공유 문구 예: “이거 해보고 꽃 골라줘 😂” (출처 없음)</div>
         </div>
 
-        <div class="box">
-          <h3>주의사항</h3>
-          <ul class="list">
-            ${cautions.map(c=>`<li>${escapeHtml(c)}</li>`).join('')}
-          </ul>
-        </div>
-
         <div class="box ctaPro">
           <h3>PRO(예정): 꽃집 DM 주문서 + 멘트 10개</h3>
           <p class="muted" style="margin:0; font-size:13px;">
@@ -2204,7 +2145,6 @@
         state.photoHabit = 'sns_sometimes';
         state.style = 'chic_elegant';
         state.volume = 'basic';
-        state.taboos = ['없음'];
         state.urgency = '내일';
         showResult();
       });
