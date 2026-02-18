@@ -1166,20 +1166,6 @@
           {value:'내일', title:'내일', desc:'대부분 가능, 일부 대체 가능'},
           {value:'여유(2–7일)', title:'2~7일 여유', desc:'원하는 꽃 반영 쉬움'}
         ]
-      },
-      {
-        id:'taboos',
-        type:'multi',
-        title:'참고해야 할 게 있어?',
-        sub:'있으면 체크하고, 없으면 “없음” 누르면 돼. (복수 선택 가능)',
-        footnote:'※ “없음”을 고르면 다른 선택은 자동 해제돼요.',
-        options:[
-          { value:'향 강한 꽃은 싫어함', title:'향은 약한 쪽이 좋아요', desc:'향 민감' },
-          { value:'장미는 싫어함', title:'장미는 다른 꽃이면 더 좋아요', desc:'취향/기억' },
-          { value:'화려한 건 부담', title:'화려함보단 깔끔한 게 좋아요', desc:'톤을 줄이면 안전' },
-          { value:'알레르기/민감 있음', title:'알레르기/민감이 있어요', desc:'꽃가루/향 최소' },
-          { value:'없음', title:'없음', desc:'특별한 주의 없음' }
-        ]
       }
     ];
 
@@ -1215,13 +1201,12 @@
         normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
       });
 
-      if (Array.isArray(raw.taboos)) {
+      if (Array.isArray(raw.taboos) && allowedValues.taboos) {
         const cleaned = raw.taboos.filter(v => allowedValues.taboos.has(v));
         normalized.taboos = Array.from(new Set(cleaned));
-      }
-
-      if (normalized.taboos.includes('없음')) {
-        normalized.taboos = ['없음'];
+        if (normalized.taboos.includes('없음')) {
+          normalized.taboos = ['없음'];
+        }
       }
 
       return normalized;
