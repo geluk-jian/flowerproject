@@ -1110,8 +1110,8 @@
         options:[
           {value:'soft_feminine', title:'청순/여리한', desc:'맑고 부드러운 분위기'},
           {value:'romantic', title:'러블리한', desc:'달콤하고 사랑스러운 분위기'},
-          {value:'chic', title:'세련/도시적인', desc:'심플하고 감각적인 분위기'},
-          {value:'elegant', title:'우아/고급스러운', desc:'차분하고 클래식한 분위기'},
+          {value:'chic_elegant', title:'세련/도시적 · 우아', desc:'모던하고 품격 있는 분위기'},
+          {value:'trendy', title:'트렌디/힙한', desc:'감각적이고 쿨한 분위기'},
           {value:'minimal', title:'미니멀/깔끔한', desc:'담백하고 절제된 분위기'}
         ]
       },
@@ -1125,6 +1125,18 @@
           {value:'포인트 마감', title:'포인트 마감', desc:'눈에 띄는 포인트 컬러, 사진빨 잘 받는 느낌'},
           {value:'고급 마감', title:'고급 마감', desc:'톤다운, 무광 재질, 차분한 분위기'},
           {value:'러블리 마감', title:'러블리 마감', desc:'부드러운 색감, 리본이 기억나는 느낌'}
+        ]
+      },
+      {
+        id:'photoHabit',
+        type:'single',
+        title:'사진 찍는 타입이야?',
+        sub:'사진빨 중요하면 마무리도 달라져. 타입만 골라줘.',
+        options:[
+          { value: 'sns_often', title: 'SNS에 자주 올림', desc: '피드/스토리 자주' },
+          { value: 'sns_sometimes', title: '가끔 올림', desc: '기념일/특별한 날' },
+          { value: 'private_photo', title: '찍긴 하는데 올리진 않음', desc: '기록용/개인 소장' },
+          { value: 'no_photo', title: '사진 관심 없음', desc: '받으면 바로 끝' }
         ]
       },
       {
@@ -1188,6 +1200,7 @@
         relation: null,
         occasion: null,
         finish: null,
+        photoHabit: null,
         brightness: null,
         style: null,
         volume: null,
@@ -1197,9 +1210,15 @@
 
       if (!raw || typeof raw !== 'object') return normalized;
 
-      ['relation', 'occasion', 'finish', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
+      const legacyStyleMap = {
+        chic: 'chic_elegant',
+        elegant: 'chic_elegant'
+      };
+
+      ['relation', 'occasion', 'finish', 'photoHabit', 'brightness', 'style', 'volume', 'urgency'].forEach((key)=>{
         const value = raw[key];
-        normalized[key] = allowedValues[key].has(value) ? value : null;
+        const resolved = (key === 'style' && legacyStyleMap[value]) ? legacyStyleMap[value] : value;
+        normalized[key] = allowedValues[key].has(resolved) ? resolved : null;
       });
 
       if (Array.isArray(raw.taboos)) {
@@ -1314,6 +1333,7 @@
       relation:null,
       occasion:null,
       finish:null,
+      photoHabit:null,
       brightness:null,
       style:null,
       volume:null,
@@ -1325,6 +1345,7 @@
       state.relation = null;
       state.occasion = null;
       state.finish = null;
+      state.photoHabit = null;
       state.brightness = null;
       state.style = null;
       state.volume = null;
@@ -1535,7 +1556,7 @@
 
     function normalizeStyle(style){
       if(style === 'cute' || style === 'romantic' || style === 'soft_feminine') return 'cute';
-      if(style === 'chic' || style === 'minimal' || style === 'elegant') return 'chic';
+      if(style === 'chic' || style === 'minimal' || style === 'elegant' || style === 'chic_elegant' || style === 'trendy') return 'chic';
       return 'chic';
     }
 
@@ -1897,6 +1918,15 @@
       const finishHint = finishHintByValue[state.finish];
       if(finishHint) wrap += ` / ${finishHint}`;
 
+      const photoFinishHintByValue = {
+        sns_often:'포인트 컬러 + 사진빨 마감',
+        sns_sometimes:'포인트 or 고급 마감',
+        private_photo:'고급/깔끔 마감',
+        no_photo:'깔끔 마감'
+      };
+      const photoFinishHint = (!state.finish && state.photoHabit) ? photoFinishHintByValue[state.photoHabit] : '';
+      if(photoFinishHint) wrap += ` / ${photoFinishHint}`;
+
       if(taboos.includes('화려한 건 부담')){
         tone += ' (톤 1~2개로 제한 추천)';
         wrap += ' (포장/리본 최소화 추천)';
@@ -1911,10 +1941,20 @@
 
       const styleLabel = {
         cute:'귀여움',
-        chic:'세련',
+        chic:'세련/우아',
         romantic:'러블리',
-        minimal:'미니멀'
-      }[state.style] || '세련';
+        minimal:'미니멀',
+        soft_feminine:'청순',
+        chic_elegant:'세련/우아',
+        trendy:'트렌디/힙'
+      }[state.style] || '세련/우아';
+
+      const photoHabitLabel = {
+        sns_often:'SNS 자주',
+        sns_sometimes:'가끔 업로드',
+        private_photo:'찍고 보관',
+        no_photo:'사진 관심 없음'
+      }[state.photoHabit] || '미선택';
 
       const volumeLabel = {
         single:'한송이(1 flower)',
@@ -1939,8 +1979,9 @@
         `관계: ${state.relation || '미선택'}`,
         `상황: ${state.occasion || '미선택'}`,
         state.finish ? `마무리: ${state.finish}` : '',
+        state.photoHabit ? `사진 습관: ${photoHabitLabel}` : '',
         occasionReason[state.occasion] || '',
-        `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}” 쪽!`
+        `선택한 무드는 “${brightnessLabel} / ${styleLabel} / ${volumeLabel}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
       ].filter(Boolean);
 
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
@@ -2177,8 +2218,9 @@
         state.relation = '여자친구(연인)';
         state.occasion = '생일/기념일';
         state.finish = '깔끔 마감';
+        state.photoHabit = 'sns_sometimes';
         state.brightness = 'bright';
-        state.style = 'chic';
+        state.style = 'chic_elegant';
         state.volume = 'basic';
         state.taboos = ['없음'];
         state.urgency = '내일';
