@@ -1,0 +1,3 @@
+name = "flowerproject-worker"
+main = "worker/index.js"
+compatibility_date = "2026-02-19"

@@ -2000,6 +2000,22 @@
           </ol>
         </div>
 
+        <!-- [PAID] 디테일 확장 -->
+        <div class="box paidCard" id="paidUpsellBox">
+          <div class="paidHead">
+            <div class="paidTitle">유료: 디테일 확장 추천</div>
+            <div class="paidPrice">결제 필요</div>
+          </div>
+          <p class="paidDesc">더 자세한 제작 가이드 + 상황별 멘트 10개 + 꽃집 전달용 상세 문장</p>
+          <button id="btnOpenPaid" class="primaryFull paidCta" type="button">유료 추천 열기</button>
+          <div class="paidFineprint">※ 결제 연동 전: 데모로 결과만 생성됩니다.</div>
+        </div>
+
+        <div class="box paidResultBox" id="paidResultBox" style="display:none;">
+          <h3>유료 추천 결과</h3>
+          <div class="paidResultBody" id="paidResultBody"></div>
+        </div>
+
         <!-- 아래는 일단 접어두는 상세(원하면 유지/삭제 가능) -->
         <details class="explain" style="margin-top:12px;">
           <summary>자세히 보기(컨셉/조합/가격/꽃말)</summary>
@@ -2095,6 +2111,104 @@
         btnCopyStoryTipEl.onclick = async ()=>{
           const ok = await copyText(storyTip);
           toast(ok ? '스토리 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
+
+      const paidUpsellBoxEl = $('paidUpsellBox');
+      const paidResultBoxEl = $('paidResultBox');
+      const paidResultBodyEl = $('paidResultBody');
+      const btnOpenPaidEl = $('btnOpenPaid');
+      const paidPayload = {
+        relation: state.relation,
+        occasion: state.occasion,
+        style: styleLabel,
+        palette: paletteLabel,
+        photoHabit: photoHabitLabel,
+        cautions: cautionText || '없음',
+        mainFlower: mainAsset.name,
+        tone,
+        wrap,
+        pickLine,
+        orderSentence,
+        noteSentence,
+        meaning,
+        substitution,
+        storyTip
+      };
+
+      const formatLines = (text) => escapeHtml(text || '').replace(/\n/g, '<br/>');
+
+      const openPaidDetail = async () => {
+        if (paidUpsellBoxEl) paidUpsellBoxEl.style.display = 'none';
+        if (paidResultBoxEl) {
+          paidResultBoxEl.style.display = 'block';
+          if (paidResultBodyEl) {
+            paidResultBodyEl.innerHTML = '<p class="muted" style="margin:0; font-size:13px;">생성 중...</p>';
+          }
+          paidResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        const systemText = [
+          '당신은 최고의 전문 플로리스트입니다. 아래 정보를 바탕으로 유료용 디테일 확장 추천을 작성하세요.',
+          '형식은 아래 순서를 지켜 한국어로 작성해 주세요.',
+          '1) 꽃다발 이미지 설명(텍스트)',
+          '2) 대표꽃/컨셉/이유',
+          '3) 상황별 추천 멘트 5개',
+          '4) 제작 가이드(톤/포장/조합/대체 규칙)',
+          '5) 꽃집 전달용 상세 문장(복붙 1개)',
+          '6) 주의/피해야 할 포인트(3개 이내)'
+        ].join('\n');
+
+        const userText = [
+          '무료 설문 결과:',
+          JSON.stringify(paidPayload)
+        ].join('\n');
+
+        const paidImages = Array.isArray(paidPayload.images) ? paidPayload.images : [];
+        const userContent = [
+          { type: 'input_text', text: userText },
+          ...paidImages
+            .filter(v => typeof v === 'string' && v.trim())
+            .map(image_url => ({ type: 'input_image', image_url }))
+        ];
+
+        const input = [
+          { role: 'system', content: [{ type: 'input_text', text: systemText }] },
+          { role: 'user', content: userContent }
+        ];
+
+        try{
+          const res = await fetch('/api/pro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input })
+          });
+          if(!res.ok){
+            throw new Error(`status_${res.status}`);
+          }
+          const data = await res.json();
+          const text = data?.text || '';
+          if (paidResultBodyEl) {
+            paidResultBodyEl.innerHTML = `<div class="paidText">${formatLines(text)}</div>`;
+          }
+          toast('유료 추천을 열었어!');
+        }catch(e){
+          if (paidResultBodyEl) {
+            paidResultBodyEl.innerHTML = '<p class="muted" style="margin:0; font-size:13px;">생성에 실패했어. 잠시 후 다시 시도해줘.</p>';
+          }
+          toast('유료 추천 생성 실패');
+        }
+      };
+
+      if (btnOpenPaidEl) {
+        btnOpenPaidEl.onclick = (e) => {
+          e.stopPropagation();
+          openPaidDetail();
+        };
+      }
+      if (paidUpsellBoxEl) {
+        paidUpsellBoxEl.onclick = (e) => {
+          if (e.target && e.target.closest && e.target.closest('#btnOpenPaid')) return;
+          openPaidDetail();
         };
       }
 
@@ -2295,6 +2409,72 @@
       color:var(--text);
       font-weight:750;
       margin:4px 0;
+    }
+
+    /* ===== Paid Detail UI ===== */
+    .paidCard{
+      padding:16px;
+      border:1px dashed #cbd5f5;
+      background: linear-gradient(180deg, #f1f5ff 0%, #ffffff 100%);
+      cursor:pointer;
+    }
+
+    .paidHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .paidTitle{
+      font-size:16px;
+      font-weight:950;
+      letter-spacing:-.3px;
+      color: var(--text);
+    }
+
+    .paidPrice{
+      font-size:12px;
+      font-weight:900;
+      color: #1f2937;
+      border:1px solid #cbd5f5;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff;
+      flex:0 0 auto;
+    }
+
+    .paidDesc{
+      margin:10px 0 0;
+      font-size:13px;
+      font-weight:800;
+      color: var(--text);
+    }
+
+    .paidCta{
+      margin-top:12px;
+    }
+
+    .paidFineprint{
+      margin-top:8px;
+      font-size:12px;
+      color: var(--muted);
+      font-weight:650;
+    }
+
+    .paidResultBox h3{
+      margin:0 0 8px;
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:-.2px;
+    }
+
+    .paidText{
+      font-size:13px;
+      color:var(--text);
+      font-weight:650;
+      white-space: normal;
+      line-height:1.5;
     }
 
   </style>
