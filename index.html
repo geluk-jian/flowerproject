@@ -1969,13 +1969,12 @@
       const pickLine = `꽃집 누나 PICK: ${styleLabel} 톤으로 “${paletteLabel}” 가면 실패 확률 낮아.`;
 
       // 가격 정보: volume 없으면 기본(M)
-      const priceInfoMap = {
-        single: { label: '한송이(1 flower)', range: '약 1만~2만원' },
-        mini: { label: '미니(S)', range: '약 3만~5만원' },
-        basic: { label: '기본(M)', range: '약 5만~8만원' },
-        lush: { label: '풍성(L)', range: '약 8만~13만원' }
-      };
-      const priceInfo = priceInfoMap[state.volume] || priceInfoMap.basic;
+      const priceInfoList = [
+        { label: '한송이', range: '약 1만~2만원' },
+        { label: '미니(S)', range: '약 3만~5만원' },
+        { label: '기본(M)', range: '약 5만~8만원' },
+        { label: '대형(L)', range: '약 8만~13만원' }
+      ];
 
       // ====== 주문문장(미리보기 구성) ======
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(orderSentence)}<br/>📢 참고사항: ${escapeHtml(noteSentence)}`;
@@ -2050,9 +2049,10 @@
 
           <div class="box">
             <h3>예상 가격대</h3>
-            <p style="margin:0; font-size:13px; font-weight:750;">
-              <b>${escapeHtml(priceInfo.label)}</b> 기준: ${escapeHtml(priceInfo.range)} (지역/시즌/꽃값에 따라 달라질 수 있어요)
-            </p>
+            <ul class="list">
+              ${priceInfoList.map(p => `<li><b>${escapeHtml(p.label)}</b>: ${escapeHtml(p.range)}</li>`).join('')}
+            </ul>
+            <div class="muted" style="margin-top:8px; font-size:12px;">(지역/시즌/꽃값에 따라 달라질 수 있어요)</div>
           </div>
 
           <div class="box">
