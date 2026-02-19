@@ -72,8 +72,8 @@ export async function onRequestPost({ request, env }) {
       model: 'gpt-4o-mini',
       temperature: 0.7,
       input: [
-        { role: 'system', content: [{ type: 'text', text: systemPrompt }] },
-        { role: 'user', content: [{ type: 'text', text: userPrompt }] }
+        { role: 'system', content: [{ type: 'input_text', text: systemPrompt }] },
+        { role: 'user', content: [{ type: 'input_text', text: userPrompt }] }
       ],
       text: {
         format: {
