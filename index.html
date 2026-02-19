@@ -1884,7 +1884,9 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
-      const floristOrder = `화이트+그린 톤의 미니멀 부케로 부탁드려요.${state.finish ? ` 마무리는 ${state.finish} 느낌으로 부탁드려요.` : ''}${cautionText ? ` 참고사항: ${cautionText}.` : ''} 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
+      const orderSentence = '화이트+그린 톤의 미니멀 부케로 부탁드려요.';
+      const noteSentence = '화려함보단 깔끔한 게 좋아요. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
+      const floristOrder = `주문문장: ${orderSentence}\n참고사항: ${noteSentence}`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const storyTip = buildStoryTip({
         personality,
@@ -1972,8 +1974,8 @@
       };
       const priceInfo = priceInfoMap[state.volume] || priceInfoMap.basic;
 
-      // ====== 주문문장(기존 floristOrder 유지하되, 미리보기/전체보기 구성) ======
-      const orderPreviewText = floristOrder;
+      // ====== 주문문장(미리보기 구성) ======
+      const orderPreviewHtml = `📢 주문문장: ${escapeHtml(orderSentence)}<br/>📢 참고사항: ${escapeHtml(noteSentence)}`;
 
       const resultHtml = `
         <!-- [A] HERO 카드 -->
@@ -1999,12 +2001,7 @@
         <!-- [B] 메인 버튼 + 주문문장 미리보기/전체보기 -->
         <div class="box">
           <button id="btnCopyOrder" class="primaryFull" type="button">꽃집에 보내기(주문문장 복사)</button>
-          <p class="orderPreview">주문문장: ${escapeHtml(orderPreviewText)}</p>
-
-          <details class="detailsPlain">
-            <summary>주문문장 전체 보기</summary>
-            <div class="fullText">${escapeHtml(orderPreviewText)}</div>
-          </details>
+          <p class="orderPreview">${orderPreviewHtml}</p>
         </div>
 
         <!-- [C] 서브 버튼 (멘트 3개 복사) -->
