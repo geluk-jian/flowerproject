@@ -1884,6 +1884,10 @@
       const conceptFlowerName = pickConceptFlowerName(personality);
       const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
       const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
+
+      // ====== Hero 요약 데이터 만들기 ======
+      const mainAsset = getMainFlowerAsset(personality);
+
       const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 화이트+그린 톤의 미니멀 부케로 부탁드려요.`;
       const noteSentence = '화려함보단 깔끔한 게 좋아요. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
       const floristOrder = `주문문장: ${orderSentence}\n참고사항: ${noteSentence}`;
@@ -1900,9 +1904,6 @@
       const url = new URL(location.href);
       url.searchParams.set('r', code);
       history.replaceState(null, '', url.toString());
-
-      // ====== Hero 요약 데이터 만들기 ======
-      const mainAsset = getMainFlowerAsset(personality);
 
       const finishShort = (() => {
         // 사진 타입 기준: 포인트/깔끔만 간단히
