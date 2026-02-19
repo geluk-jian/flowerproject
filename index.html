@@ -2016,6 +2016,41 @@
           </ol>
         </div>
 
+        <!-- [PRO] 업셀 카드 + 버튼 -->
+        <div class="box proCard ctaPro" id="proUpsellBox">
+          <div class="proHead">
+            <div class="proLeft">
+              <span class="proPill">PRO</span>
+              <span class="proHeadTitle">주문서 완성하기</span>
+            </div>
+            <span class="proPrice">예정</span>
+          </div>
+
+          <p class="proDesc">레퍼 이미지 1장 + 꽃집 주문서(복붙 3종) + 멘트 10개</p>
+
+          <ul class="proBullets">
+            <li>꽃집이 그대로 만들 수 있는 <b>컨셉 레퍼 이미지 1장</b></li>
+            <li><b>제작용 주문서 3종</b> (짧게/디테일/당일픽업)</li>
+            <li><b>멘트 10개</b> (센스/진심/사과/가볍게)</li>
+          </ul>
+
+          <button id="btnOpenPro" class="primaryFull proCta" type="button">
+            PRO로 주문서 완성하기
+          </button>
+
+          <div class="proFineprint">
+            ※ 데모: 결제/AI 연결 전(버튼 클릭 시 PRO 샘플 영역만 열려요)
+          </div>
+        </div>
+
+        <!-- PRO 결과가 들어갈 자리(지금은 샘플) -->
+        <div class="box proResultBox" id="proResultBox" style="display:none;">
+          <h3>PRO 결과 (샘플)</h3>
+          <p class="muted" style="margin:0; font-size:13px;">
+            여기에 PRO 결과(레퍼 이미지/주문서/멘트 10개)가 들어가요.
+          </p>
+        </div>
+
         <!-- 아래는 일단 접어두는 상세(원하면 유지/삭제 가능) -->
         <details class="explain" style="margin-top:12px;">
           <summary>자세히 보기(컨셉/조합/가격/꽃말)</summary>
@@ -2087,6 +2122,32 @@
       `;
 
       $('resultArea').innerHTML = resultHtml;
+
+      // ====== PRO 업셀 버튼 바인딩 ======
+      const proUpsellBoxEl = $('proUpsellBox');
+      const proResultBoxEl = $('proResultBox');
+      const btnOpenProEl = $('btnOpenPro');
+
+      // 이미 pro=1 이거나 localStorage로 언락된 상태면: 업셀 숨기고 PRO영역 노출
+      if (isProUnlocked()) {
+        if (proUpsellBoxEl) proUpsellBoxEl.style.display = 'none';
+        if (proResultBoxEl) proResultBoxEl.style.display = 'block';
+      }
+
+      // 버튼 클릭 시: (데모) PRO 언락 + PRO 영역 펼치기
+      if (btnOpenProEl) {
+        btnOpenProEl.onclick = () => {
+          setProUnlocked(true);
+
+          if (proUpsellBoxEl) proUpsellBoxEl.style.display = 'none';
+          if (proResultBoxEl) {
+            proResultBoxEl.style.display = 'block';
+            proResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+
+          toast('PRO 데모를 열었어!');
+        };
+      }
 
       // ====== 버튼 바인딩: 없는 버튼은 안전하게 스킵 ======
       const btnCopyOrderEl = $('btnCopyOrder');
@@ -2311,6 +2372,96 @@
       color:var(--text);
       font-weight:750;
       margin:4px 0;
+    }
+
+    /* ===== PRO Upsell UI ===== */
+    .proCard{
+      padding: 16px;
+    }
+
+    .proHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .proLeft{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      min-width:0;
+    }
+
+    .proPill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#111827;
+      color:#fff;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:-.1px;
+      flex: 0 0 auto;
+    }
+
+    .proHeadTitle{
+      font-size:16px;
+      font-weight:950;
+      letter-spacing:-.3px;
+      color: var(--text);
+      white-space:nowrap;
+    }
+
+    .proPrice{
+      font-size:12px;
+      font-weight:900;
+      color: var(--muted);
+      border:1px solid var(--line);
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff;
+      flex: 0 0 auto;
+    }
+
+    .proDesc{
+      margin:10px 0 0;
+      font-size:13px;
+      font-weight:850;
+      color: var(--text);
+    }
+
+    .proBullets{
+      margin:10px 0 0;
+      padding-left:18px;
+      font-size:13px;
+      color: var(--text);
+      font-weight:650;
+    }
+
+    .proBullets li{
+      margin:4px 0;
+    }
+
+    .proCta{
+      margin-top:12px;
+    }
+
+    .proFineprint{
+      margin-top:8px;
+      font-size:12px;
+      color: var(--muted);
+      font-weight:650;
+    }
+
+    .proResultBox h3{
+      margin:0 0 8px;
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:-.2px;
     }
   </style>
 </body>
