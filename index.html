@@ -1889,7 +1889,10 @@
       const mainAsset = getMainFlowerAsset(personality);
 
       const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 화이트+그린 톤의 미니멀 부케로 부탁드려요.`;
-      const noteSentence = '화려함보단 깔끔한 게 좋아요. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
+      const baseNoteSentence = '화려함보단 깔끔한 게 좋아요. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
+      const noteSentence = cautionText
+        ? `${baseNoteSentence} 추가 참고: ${cautionText}.`
+        : baseNoteSentence;
       const floristOrder = `주문문장: ${orderSentence}\n참고사항: ${noteSentence}`;
       const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const storyTip = buildStoryTip({
