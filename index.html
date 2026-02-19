@@ -1894,7 +1894,6 @@
         ? `${baseNoteSentence} 추가 참고: ${cautionText}.`
         : baseNoteSentence;
       const floristOrder = `주문문장: ${orderSentence}\n참고사항: ${noteSentence}`;
-      const shareForGirlfriend = '내 남친 알고리즘에 이거 떠라 ㅋㅋ';
       const storyTip = buildStoryTip({
         personality,
         relation: state.relation,
@@ -2008,18 +2007,14 @@
           <p class="orderPreview">${orderPreviewHtml}</p>
         </div>
 
-        <!-- [C] 서브 버튼 (멘트 3개 복사) -->
+        <!-- [C] 멘트 3개 추천 -->
         <div class="box">
-          <button class="secondary primaryFull" id="btnCopyMent" type="button">그녀에게 보낼 멘트 3개 복사</button>
-
-          <details class="detailsPlain">
-            <summary>멘트 미리보기</summary>
-            <ol class="list" style="margin-top:10px;">
-              <li>${escapeHtml(msgs.simple)}</li>
-              <li>${escapeHtml(msgs.sense)}</li>
-              <li>${escapeHtml(msgs.sincere)}</li>
-            </ol>
-          </details>
+          <h3>꽃과 함께 그녀에게 보낼 멘트 추천(3개)</h3>
+          <ol class="list" style="margin-top:10px;">
+            <li>${escapeHtml(msgs.simple)}</li>
+            <li>${escapeHtml(msgs.sense)}</li>
+            <li>${escapeHtml(msgs.sincere)}</li>
+          </ol>
         </div>
 
         <!-- 아래는 일단 접어두는 상세(원하면 유지/삭제 가능) -->
@@ -2080,7 +2075,6 @@
             <div class="btnrow">
               <button class="secondary" id="btnCopyStoryTip">스토리 멘트 복사</button>
               <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
-              <button class="secondary" id="btnCopyShareForHer">여친한테 공유문구 복사</button>
             </div>
           </div>
 
@@ -2101,15 +2095,6 @@
       $('resultArea').innerHTML = resultHtml;
 
       // ====== 버튼 바인딩: 없는 버튼은 안전하게 스킵 ======
-      const btnCopyMentEl = $('btnCopyMent');
-      if(btnCopyMentEl){
-        btnCopyMentEl.onclick = async ()=>{
-          const text = [msgs.simple, msgs.sense, msgs.sincere].join('\n');
-          const ok = await copyText(text);
-          toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-        };
-      }
-
       const btnCopyOrderEl = $('btnCopyOrder');
       if(btnCopyOrderEl){
         btnCopyOrderEl.onclick = async ()=>{
@@ -2135,13 +2120,6 @@
         };
       }
 
-      const btnCopyShareForHerEl = $('btnCopyShareForHer');
-      if(btnCopyShareForHerEl){
-        btnCopyShareForHerEl.onclick = async ()=>{
-          const ok = await copyText(shareForGirlfriend);
-          toast(ok ? '공유문구를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-        };
-      }
 
       const btnAgainEl = $('btnAgain');
       if(btnAgainEl){
