@@ -102,7 +102,28 @@ export async function onRequestPost(context) {
     );
   }
 
-  return new Response(JSON.stringify({ text: data?.output_text || "" }), {
+  const extractText = (responseData) => {
+    if (!responseData || typeof responseData !== "object") return "";
+    if (typeof responseData.output_text === "string" && responseData.output_text.trim()) {
+      return responseData.output_text.trim();
+    }
+
+    const outputs = Array.isArray(responseData.output) ? responseData.output : [];
+    const parts = [];
+
+    for (const item of outputs) {
+      const contents = Array.isArray(item?.content) ? item.content : [];
+      for (const content of contents) {
+        if (typeof content?.text === "string" && content.text.trim()) {
+          parts.push(content.text.trim());
+        }
+      }
+    }
+
+    return parts.join("\n\n").trim();
+  };
+
+  return new Response(JSON.stringify({ text: extractText(data) }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
