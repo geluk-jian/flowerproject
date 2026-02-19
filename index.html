@@ -914,7 +914,7 @@
       </div>
     </section>
 
-    <div class="toneHandle"><a href="http://instargram.com/tone_art" target="_blank" rel="noopener noreferrer">@tone_art</a></div>
+    <div class="toneHandle"><a href="https://instagram.com/tone_art" target="_blank" rel="noopener noreferrer">@tone_art</a></div>
     <nav class="topnav" aria-label="사이트 탐색">
       <a href="#" data-info="about">소개</a>
       <a href="#" data-info="how">이용방법</a>
@@ -1838,18 +1838,6 @@
       const cautionValues = (state.cautions || []).filter(v => v !== 'none');
       const cautionText = cautionValues.map(v => cautionLabel[v] || v).join(', ');
 
-      const personalitySentence = (() => {
-        const adj = {
-          '러블리':'부드럽고 사랑스러운',
-          '세련됨':'도시적이고 깔끔한',
-          '귀여움':'발랄하고 귀여운',
-          '미니멀':'담백하고 절제된',
-          '우아함':'차분하고 우아한',
-          '활기':'에너지 넘치는'
-        }[personality] || '깔끔한';
-        return `${adj} 그녀에겐 ${styleLabel} 스타일을 추천드려요.`;
-      })();
-
       const reasonParts = [
         `관계: ${state.relation || '미선택'}`,
         `상황: ${state.occasion || '미선택'}`,
@@ -1864,17 +1852,13 @@
       const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
       const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
-      const pickTitleColor = pickMostSaturatedHex(palette);
-      const sampleImage = pickConceptPreviewPhoto(personality);
-      const conceptFlowerName = pickConceptFlowerName(personality);
-      const sampleImageFallback = pickFlowerPhoto(main) || fallbackSampleImage(profile.concept);
-      const sampleImageFallbackFinal = fallbackSampleImage(profile.concept);
 
       // ====== Hero 요약 데이터 만들기 ======
       const mainAsset = getMainFlowerAsset(personality);
 
-      const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 화이트+그린 톤의 미니멀 부케로 부탁드려요.`;
-      const baseNoteSentence = '화려함보단 깔끔한 게 좋아요. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.';
+      const orderToneLabel = state.palette ? paletteLabel : tone;
+      const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 ${orderToneLabel}의 ${styleLabel} 무드 부케로 부탁드려요.`;
+      const baseNoteSentence = `${wrap}. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
       const noteSentence = cautionText
         ? `${baseNoteSentence} 추가 참고: ${cautionText}.`
         : baseNoteSentence;

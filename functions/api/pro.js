@@ -1,12 +1,76 @@
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+const requestLog = new Map();
+
+function getClientKey(request) {
+  const rawForwarded = request.headers.get("x-forwarded-for") || "";
+  const forwardedIp = rawForwarded.split(",")[0].trim();
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    forwardedIp ||
+    request.headers.get("x-real-ip") ||
+    "anonymous"
+  );
+}
+
+function isRateLimited(clientKey, now = Date.now()) {
+  const recent = requestLog.get(clientKey) || [];
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const kept = recent.filter((ts) => ts > windowStart);
+  kept.push(now);
+  requestLog.set(clientKey, kept);
+  return kept.length > RATE_LIMIT_MAX_REQUESTS;
+}
+
+function isSameOrigin(candidate, origin) {
+  if (!candidate) return false;
+  try {
+    return new URL(candidate).origin === origin;
+  } catch {
+    return false;
+  }
+}
+
 export async function onRequestPost(context) {
+  const requestUrl = new URL(context.request.url);
+  const requestOrigin = requestUrl.origin;
+  const originHeader = context.request.headers.get("origin");
+  const refererHeader = context.request.headers.get("referer");
+  const allowedOrigin = isSameOrigin(originHeader, requestOrigin)
+    ? originHeader
+    : requestOrigin;
+  const originAllowed = !originHeader || isSameOrigin(originHeader, requestOrigin) || isSameOrigin(refererHeader, requestOrigin);
+
   const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    Vary: "Origin",
   };
 
   if (context.request.method === "OPTIONS") {
     return new Response("", { status: 204, headers: corsHeaders });
+  }
+
+  if (context.request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "method_not_allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  if (!originAllowed) {
+    return new Response(JSON.stringify({ error: "forbidden_origin" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  if (isRateLimited(getClientKey(context.request))) {
+    return new Response(JSON.stringify({ error: "rate_limited" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   let body = null;
@@ -71,6 +135,8 @@ export async function onRequestPost(context) {
   };
 
   let upstream;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20_000);
   try {
     upstream = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -79,12 +145,21 @@ export async function onRequestPost(context) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
   } catch (e) {
+    if (e && e.name === "AbortError") {
+      return new Response(JSON.stringify({ error: "upstream_timeout" }), {
+        status: 504,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: "upstream_fetch_failed" }), {
       status: 502,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   let data = null;
