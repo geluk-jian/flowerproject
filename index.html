@@ -1692,7 +1692,6 @@
       try{
         const params = new URLSearchParams(location.search);
         if(params.get('pro') === '1') return true;   // 시연용
-        return localStorage.getItem('pro_unlocked') === '1';
       }catch(e){
         return false;
       }
@@ -2134,20 +2133,19 @@
         if (proResultBoxEl) proResultBoxEl.style.display = 'block';
       }
 
-      // 버튼 클릭 시: (데모) PRO 언락 + PRO 영역 펼치기
-      if (btnOpenProEl) {
-        btnOpenProEl.onclick = () => {
-          setProUnlocked(true);
+      const openProDemo = () => {
+        setProUnlocked(true);
+        if (proUpsellBoxEl) proUpsellBoxEl.style.display = 'none';
+        if (proResultBoxEl) {
+          proResultBoxEl.style.display = 'block';
+          proResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        toast('PRO 데모를 열었어!');
+      };
 
-          if (proUpsellBoxEl) proUpsellBoxEl.style.display = 'none';
-          if (proResultBoxEl) {
-            proResultBoxEl.style.display = 'block';
-            proResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-
-          toast('PRO 데모를 열었어!');
-        };
-      }
+      // 클릭 시: (데모) PRO 언락 + PRO 영역 펼치기
+      if (btnOpenProEl) btnOpenProEl.onclick = openProDemo;
+      if (proUpsellBoxEl) proUpsellBoxEl.onclick = openProDemo;
 
       // ====== 버튼 바인딩: 없는 버튼은 안전하게 스킵 ======
       const btnCopyOrderEl = $('btnCopyOrder');
@@ -2377,6 +2375,7 @@
     /* ===== PRO Upsell UI ===== */
     .proCard{
       padding: 16px;
+      cursor: pointer;
     }
 
     .proHead{
