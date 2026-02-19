@@ -1692,6 +1692,7 @@
       try{
         const params = new URLSearchParams(location.search);
         if(params.get('pro') === '1') return true;   // 시연용
+        return false;
       }catch(e){
         return false;
       }
@@ -1978,6 +1979,21 @@
       // ====== 주문문장(미리보기 구성) ======
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(orderSentence)}<br/>📢 참고사항: ${escapeHtml(noteSentence)}`;
 
+      const proPayload = {
+        relation: state.relation,
+        occasion: state.occasion,
+        style: styleLabel,
+        palette: paletteLabel,
+        photoHabit: photoHabitLabel,
+        cautions: cautionText || '없음',
+        mainFlower: mainAsset.name,
+        tone,
+        wrap,
+        pickLine,
+        orderSentence,
+        noteSentence
+      };
+
       const resultHtml = `
         <!-- [A] HERO 카드 -->
         <div class="box heroCard">
@@ -2133,19 +2149,82 @@
         if (proResultBoxEl) proResultBoxEl.style.display = 'block';
       }
 
-      const openProDemo = () => {
+      const renderProResult = (data) => {
+        if (!proResultBoxEl) return;
+        const orders = data?.orders || {};
+        const messages = Array.isArray(data?.messages) ? data.messages : [];
+        proResultBoxEl.innerHTML = `
+          <h3>PRO 결과</h3>
+          <div class="proSection">
+            <div class="muted" style="font-size:12px; font-weight:800;">레퍼 이미지</div>
+            <p style="margin:6px 0 0; font-size:13px; font-weight:700;">${escapeHtml(data?.reference_image_prompt || '')}</p>
+          </div>
+          <div class="divider"></div>
+          <div class="proSection">
+            <div class="muted" style="font-size:12px; font-weight:800;">꽃집 주문서 (복붙 3종)</div>
+            <ol class="list" style="margin-top:8px;">
+              <li><b>짧게</b>: ${escapeHtml(orders.short || '')}</li>
+              <li><b>디테일</b>: ${escapeHtml(orders.detailed || '')}</li>
+              <li><b>당일픽업</b>: ${escapeHtml(orders.pickup || '')}</li>
+            </ol>
+          </div>
+          <div class="divider"></div>
+          <div class="proSection">
+            <div class="muted" style="font-size:12px; font-weight:800;">멘트 5개(상황별)</div>
+            <ol class="list" style="margin-top:8px;">
+              ${messages.map(m => `<li><b>${escapeHtml(m.situation || '')}</b>: ${escapeHtml(m.text || '')}</li>`).join('')}
+            </ol>
+          </div>
+        `;
+      };
+
+      const openProDemo = async () => {
         setProUnlocked(true);
         if (proUpsellBoxEl) proUpsellBoxEl.style.display = 'none';
         if (proResultBoxEl) {
           proResultBoxEl.style.display = 'block';
+          proResultBoxEl.innerHTML = `
+            <h3>PRO 결과</h3>
+            <p class="muted" style="margin:0; font-size:13px;">생성 중...</p>
+          `;
           proResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        toast('PRO 데모를 열었어!');
+        try{
+          const res = await fetch('/api/pro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(proPayload)
+          });
+          if(!res.ok){
+            throw new Error(`status_${res.status}`);
+          }
+          const data = await res.json();
+          renderProResult(data);
+          toast('PRO 데모를 열었어!');
+        }catch(e){
+          if (proResultBoxEl) {
+            proResultBoxEl.innerHTML = `
+              <h3>PRO 결과</h3>
+              <p class="muted" style="margin:0; font-size:13px;">생성에 실패했어. 잠시 후 다시 시도해줘.</p>
+            `;
+          }
+          toast('PRO 생성 실패');
+        }
       };
 
       // 클릭 시: (데모) PRO 언락 + PRO 영역 펼치기
-      if (btnOpenProEl) btnOpenProEl.onclick = openProDemo;
-      if (proUpsellBoxEl) proUpsellBoxEl.onclick = openProDemo;
+      if (btnOpenProEl) {
+        btnOpenProEl.onclick = (e) => {
+          e.stopPropagation();
+          openProDemo();
+        };
+      }
+      if (proUpsellBoxEl) {
+        proUpsellBoxEl.onclick = (e) => {
+          if (e.target && e.target.closest && e.target.closest('#btnOpenPro')) return;
+          openProDemo();
+        };
+      }
 
       // ====== 버튼 바인딩: 없는 버튼은 안전하게 스킵 ======
       const btnCopyOrderEl = $('btnCopyOrder');
