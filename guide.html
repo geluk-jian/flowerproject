@@ -316,7 +316,7 @@
       font-size: 14px;
       color: var(--text-dark);
       line-height: 1.7;
-      white-space: pre-wrap;
+      white-space: normal;
     }
 
     .result-body.loading {
@@ -341,6 +341,39 @@
 
     .result-image.show {
       display: block;
+    }
+
+    .result-section {
+      display: block;
+      font-weight: 800;
+      margin-top: 12px;
+      color: var(--text-dark);
+    }
+
+    .result-palette {
+      margin: 12px 0 6px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .result-palette-title {
+      font-size: 12px;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .result-palette .palette-row {
+      margin-top: 0;
+    }
+
+    .result-palette-label {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-mid);
+      font-weight: 700;
     }
   </style>
 </head>
@@ -519,6 +552,66 @@
       ].join('\n');
     }
 
+    function escapeHtml(value){
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getPaletteMeta(paletteKey){
+      const map = {
+        white_green: {
+          label: '화이트·그린',
+          colors: ['#F8F7F2', '#D9D9D6', '#C9D4C5']
+        },
+        pink_peach: {
+          label: '핑크·피치',
+          colors: ['#F7CAC9', '#F7B39B', '#F3E0BE']
+        },
+        lilac: {
+          label: '연보라·라일락',
+          colors: ['#E6D9F2', '#C7B6E6', '#9B84C9']
+        },
+        red_wine: {
+          label: '레드·버건디',
+          colors: ['#C94C5B', '#8B1E3F', '#F3D5DB']
+        },
+        yellow_orange: {
+          label: '옐로·오렌지',
+          colors: ['#FFD23F', '#FF8C42', '#FFE9CC']
+        }
+      };
+      return map[paletteKey] || null;
+    }
+
+    function paletteChipHtml(state){
+      const meta = getPaletteMeta(state && state.palette);
+      if (!meta) return '';
+      const dots = meta.colors
+        .map((hex) => `<div class="palette-dot" style="background:${escapeHtml(hex)};"></div>`)
+        .join('');
+      return [
+        '<div class="result-palette">',
+        '<div class="result-palette-title">무료결과 컬러칩</div>',
+        `<div class="palette-row">${dots}</div>`,
+        `<div class="result-palette-label">${escapeHtml(meta.label)}</div>`,
+        '</div>'
+      ].join('');
+    }
+
+    function formatPaidText(text, state){
+      const base = escapeHtml(text || '').replace(/\r\n/g, '\n');
+      const withSections = base.replace(/^\[(.+?)\]$/gm, '<strong class="result-section">[$1]</strong>');
+      const paletteHtml = paletteChipHtml(state);
+      const withPalette = paletteHtml
+        ? withSections.replace('<strong class="result-section">[제작 가이드]</strong>', `${paletteHtml}<strong class="result-section">[제작 가이드]</strong>`)
+        : withSections;
+      return withPalette.replace(/\n/g, '<br/>');
+    }
+
     async function runPaidGuide(){
       const btn = document.getElementById('btnRunPaid');
       const card = document.getElementById('paidResultCard');
@@ -555,7 +648,7 @@
 
         status.textContent = '완료';
         body.className = 'result-body';
-        body.textContent = text;
+        body.innerHTML = formatPaidText(text, state);
         if (imageUrl) {
           imageEl.src = imageUrl;
           imageEl.classList.add('show');
