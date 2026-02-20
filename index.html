@@ -2465,28 +2465,36 @@
       const resultHtml = `
         <!-- [A] HERO 카드 -->
         <div class="box heroCard">
-          <div class="heroLabel">🌷 누나가 골랐어</div>
-          <div class="heroImgWrap">
-            <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+          <div class="heroChatHead">
+            <div class="heroChatTitle">🌷 꽃집 누나</div>
           </div>
-          <div class="heroName">${escapeHtml(mainAsset.name)}</div>
-          <div class="heroPickLine">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
+          <div class="heroChatBody">
+            <div class="heroMsg heroMsgLeft">
+              <div class="heroMsgLine">골랐어! 이게 딱이야.</div>
+              <div class="heroMsgLine"><b>${escapeHtml(mainAsset.name)}</b> 🌸</div>
+            </div>
 
-          <div class="heroChips">
-            <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
-            <span class="chip">마무리: <b>${escapeHtml(finishShort)}</b></span>
-            ${cautionChipHtml}
-          </div>
-        </div>
+            <div class="heroPhotoCard">
+              <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+            </div>
 
-        <!-- [B] 주문문장 박스 -->
-        <div class="box orderBox">
-          <div class="orderBoxTitle">꽃집에 이렇게 보내봐</div>
-          <div class="orderPreviewWrap is-locked" id="orderPreviewWrap">
-            <div class="orderPreviewMask">복사 후 열림</div>
-            <p class="orderPreview" id="orderPreview">${orderPreviewHtml}</p>
+            <div class="heroMsg heroMsgLeft heroDescMsg">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
+
+            <div class="heroChips">
+              <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
+              <span class="chip">마무리: <b>${escapeHtml(finishShort)}</b></span>
+              ${cautionChipHtml}
+            </div>
+
+            <div class="heroMsg heroOrderMsg">
+              <div class="orderBoxTitle">꽃집에 이렇게 보내봐 📢</div>
+              <div class="orderPreviewWrap is-locked" id="orderPreviewWrap">
+                <div class="orderPreviewMask">복사 후 열림</div>
+                <p class="orderPreview" id="orderPreview">${orderPreviewHtml}</p>
+              </div>
+            </div>
+            <button id="btnCopyOrder" class="primaryFull heroCopyBtn" type="button">복사하기</button>
           </div>
-          <button id="btnCopyOrder" class="primaryFull" type="button">주문 문장 복사하기</button>
         </div>
 
         <!-- [C] 멘트 3개 추천 -->
@@ -2834,14 +2842,60 @@
   <style>
     /* ===== Result Top (Hero + Actions) ===== */
     .heroCard{
-      padding: 16px;
+      padding: 0;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#f5f6f8;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .heroChatHead{
+      background:#fff;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+    }
+    .heroChatTitle{
+      font-size:16px;
+      font-weight:900;
+      color:#111827;
+      letter-spacing:-.2px;
+    }
+    .heroChatBody{
+      padding:14px;
       display:flex;
       flex-direction:column;
-      align-items:center;
-      text-align:center;
+      gap:12px;
     }
-    .heroImgWrap{
-      margin-top:10px;
+    .heroMsg{
+      position:relative;
+      width:fit-content;
+      max-width:90%;
+      border-radius:14px;
+      border-top-left-radius:8px;
+      background:#fff;
+      border:1px solid var(--line);
+      padding:10px 12px;
+      color:#1f2937;
+      font-size:14px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .heroMsg::before{
+      content:"";
+      position:absolute;
+      top:10px;
+      left:-6px;
+      width:10px;
+      height:10px;
+      background:#fff;
+      border-left:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      transform:rotate(45deg);
+    }
+    .heroMsgLine + .heroMsgLine{
+      margin-top:2px;
+    }
+    .heroPhotoCard{
       width: 184px;
       height: 184px;
       border:1px solid var(--line);
@@ -2851,39 +2905,32 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      flex: 0 0 auto;
     }
-    .heroImgWrap img{
+    .heroPhotoCard img{
       width:100%;
       height:100%;
       object-fit:contain;
       background:#fff;
     }
-    .heroLabel{
-      font-size:24px;
-      font-weight:900;
-      color: var(--muted);
-      letter-spacing:-.1px;
-    }
-    .heroName{
-      margin-top:2px;
-      font-size:18px;
-      font-weight:950;
-      letter-spacing:-.3px;
-      color: var(--text);
-    }
-    .heroPickLine{
-      margin-top:6px;
-      font-size:13px;
-      font-weight:850;
-      color: var(--text);
+    .heroDescMsg{
+      white-space:normal;
     }
     .heroChips{
-      margin-top:10px;
       display:flex;
       flex-wrap:wrap;
       gap:8px;
-      justify-content:center;
+      justify-content:flex-start;
+    }
+    .heroCard .chip{
+      background:#fff;
+    }
+    .heroOrderMsg{
+      width:100%;
+      max-width:none;
+      box-sizing:border-box;
+    }
+    .heroCopyBtn{
+      margin-top:2px;
     }
 
     .primaryFull{
@@ -2908,9 +2955,6 @@
       font-size:14px;
       font-weight:900;
       color: var(--text);
-    }
-    .orderBox .primaryFull{
-      margin-top: 12px;
     }
     .orderPreviewWrap{
       position: relative;
