@@ -31,6 +31,77 @@ function isSameOrigin(candidate, origin) {
   }
 }
 
+function extractText(responseData) {
+  if (!responseData || typeof responseData !== "object") return "";
+  if (typeof responseData.output_text === "string" && responseData.output_text.trim()) {
+    return responseData.output_text.trim();
+  }
+
+  const outputs = Array.isArray(responseData.output) ? responseData.output : [];
+  const parts = [];
+
+  for (const item of outputs) {
+    const contents = Array.isArray(item?.content) ? item.content : [];
+    for (const content of contents) {
+      if (typeof content?.text === "string" && content.text.trim()) {
+        parts.push(content.text.trim());
+      }
+    }
+  }
+
+  return parts.join("\n\n").trim();
+}
+
+async function generateBouquetImage({ apiKey, text, prompt }) {
+  const source = String(text || prompt || "").trim().slice(0, 1200);
+  if (!source) return null;
+
+  const imagePrompt = [
+    "Korean florist bouquet photo, premium realistic style.",
+    "Single bouquet centered, clean cream background, soft natural light.",
+    "No text, no watermark, no logo, no people, no hands.",
+    "Use this concept and mood:",
+    source,
+  ].join("\n");
+
+  let imageRes;
+  try {
+    imageRes = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-image-1",
+        prompt: imagePrompt,
+        size: "1024x1024",
+      }),
+    });
+  } catch (e) {
+    return null;
+  }
+
+  if (!imageRes.ok) return null;
+
+  let imageData = null;
+  try {
+    imageData = await imageRes.json();
+  } catch (e) {
+    return null;
+  }
+
+  const first = Array.isArray(imageData?.data) ? imageData.data[0] : null;
+  if (typeof first?.url === "string" && first.url.trim()) {
+    return first.url.trim();
+  }
+  if (typeof first?.b64_json === "string" && first.b64_json.trim()) {
+    return `data:image/png;base64,${first.b64_json.trim()}`;
+  }
+
+  return null;
+}
+
 export async function onRequestPost(context) {
   const requestUrl = new URL(context.request.url);
   const requestOrigin = requestUrl.origin;
@@ -177,28 +248,10 @@ export async function onRequestPost(context) {
     );
   }
 
-  const extractText = (responseData) => {
-    if (!responseData || typeof responseData !== "object") return "";
-    if (typeof responseData.output_text === "string" && responseData.output_text.trim()) {
-      return responseData.output_text.trim();
-    }
+  const text = extractText(data);
+  const image_url = await generateBouquetImage({ apiKey, text, prompt });
 
-    const outputs = Array.isArray(responseData.output) ? responseData.output : [];
-    const parts = [];
-
-    for (const item of outputs) {
-      const contents = Array.isArray(item?.content) ? item.content : [];
-      for (const content of contents) {
-        if (typeof content?.text === "string" && content.text.trim()) {
-          parts.push(content.text.trim());
-        }
-      }
-    }
-
-    return parts.join("\n\n").trim();
-  };
-
-  return new Response(JSON.stringify({ text: extractText(data) }), {
+  return new Response(JSON.stringify({ text, image_url }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });

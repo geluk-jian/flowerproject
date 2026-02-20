@@ -327,6 +327,21 @@
     .result-body.error {
       color: #C0392B;
     }
+
+    .result-image {
+      display: none;
+      width: 100%;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      object-fit: cover;
+      aspect-ratio: 1 / 1;
+    }
+
+    .result-image.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -415,6 +430,7 @@
         <div class="result-title">누나의 유료 꽃추천 결과</div>
         <div class="result-status" id="paidResultStatus">준비됨</div>
       </div>
+      <img id="paidResultImage" class="result-image" alt="추천 꽃다발 이미지" loading="lazy" />
       <div class="result-body" id="paidResultBody"></div>
     </section>
   </main>
@@ -508,7 +524,8 @@
       const card = document.getElementById('paidResultCard');
       const body = document.getElementById('paidResultBody');
       const status = document.getElementById('paidResultStatus');
-      if (!btn || !card || !body || !status) return;
+      const imageEl = document.getElementById('paidResultImage');
+      if (!btn || !card || !body || !status || !imageEl) return;
 
       const state = getStateFromQuery();
       const prompt = buildPromptFromState(state);
@@ -519,6 +536,8 @@
       status.textContent = '생성 중';
       body.className = 'result-body loading';
       body.textContent = '누나가 유료 추천을 정리하고 있어...';
+      imageEl.classList.remove('show');
+      imageEl.removeAttribute('src');
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       try {
@@ -532,14 +551,21 @@
         const data = await res.json();
         const text = (data && data.text) ? data.text.trim() : '';
         if (!text) throw new Error('empty_text');
+        const imageUrl = (data && data.image_url) ? String(data.image_url).trim() : '';
 
         status.textContent = '완료';
         body.className = 'result-body';
         body.textContent = text;
+        if (imageUrl) {
+          imageEl.src = imageUrl;
+          imageEl.classList.add('show');
+        }
       } catch (e) {
         status.textContent = '실패';
         body.className = 'result-body error';
         body.textContent = '결과 생성에 실패했어. 잠시 후 다시 눌러줘.';
+        imageEl.classList.remove('show');
+        imageEl.removeAttribute('src');
       } finally {
         btn.disabled = false;
         btn.style.opacity = '1';
