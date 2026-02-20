@@ -221,6 +221,49 @@
       border:1px solid #e5e7eb;
     }
 
+    .guideBanner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-radius:14px;
+      background: var(--green-light);
+      color: var(--text-dark);
+      text-decoration:none;
+      border:1px solid #d9eee2;
+      box-shadow: var(--shadow);
+    }
+    .guideBannerTitle{
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:-.2px;
+    }
+    .guideBannerSub{
+      margin-top:2px;
+      font-size:12px;
+      color:#2f5c3b;
+      font-weight:700;
+    }
+    .guideBannerArrow{
+      font-size:18px;
+      font-weight:900;
+      color:#2f5c3b;
+    }
+    .guideBannerPhoto{
+      margin-top:10px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background: #f4faf6;
+    }
+    .guideBannerPhoto img{
+      display:block;
+      width:100%;
+      height:160px;
+      object-fit:cover;
+    }
+
     .bar > div{
       height:100%;
       width:0%;
@@ -1528,7 +1571,7 @@
       const closeBtn = $('btnCloseTopInfo');
       if(!panel || !titleEl || !bodyEl) return;
 
-      const links = Array.from(document.querySelectorAll('.topnav a[data-info]'));
+      const links = Array.from(document.querySelectorAll('.topnav a[data-info], .guideBanner[data-info]'));
       let openKey = '';
 
       const hidePanel = () => {
@@ -2429,6 +2472,18 @@
       const msgList = [msgs.simple, msgs.sense, msgs.sincere];
 
       const resultHtml = `
+        <!-- [Guide] 누나의 전체 가이드 보기 -->
+        <a href="#" class="guideBanner" data-info="guide" aria-label="누나의 전체 가이드 보기">
+          <div>
+            <div class="guideBannerTitle">🌿 누나의 전체 가이드 보기</div>
+            <div class="guideBannerSub">꽃 조합 · 가격대 · 꽃말 포함</div>
+          </div>
+          <div class="guideBannerArrow">→</div>
+        </a>
+        <div class="guideBannerPhoto" aria-hidden="true">
+          <img src="./${escapeHtml(mainAsset.img)}" alt="가이드 미리보기 꽃" loading="lazy" />
+        </div>
+
         <!-- [A] HERO 카드 -->
         <div class="box heroCard">
           <div class="heroRow">
