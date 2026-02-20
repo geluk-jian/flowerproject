@@ -604,11 +604,24 @@
 
     function formatPaidText(text, state){
       const base = escapeHtml(text || '').replace(/\r\n/g, '\n');
-      const withSections = base.replace(/^\[(.+?)\]$/gm, '<strong class="result-section">[$1]</strong>');
+      const withSections = base.replace(
+        /^\s*(?:\*\*)?\[(.+?)\](?:\*\*)?\s*$/gm,
+        '<strong class="result-section">[$1]</strong>'
+      );
       const paletteHtml = paletteChipHtml(state);
-      const withPalette = paletteHtml
-        ? withSections.replace('<strong class="result-section">[제작 가이드]</strong>', `${paletteHtml}<strong class="result-section">[제작 가이드]</strong>`)
-        : withSections;
+      let withPalette = withSections;
+      if (paletteHtml) {
+        const guideHeadingPattern = /<strong class="result-section">\[\s*제작\s*가이드\s*\]<\/strong>/;
+        if (guideHeadingPattern.test(withSections)) {
+          withPalette = withSections.replace(
+            guideHeadingPattern,
+            `${paletteHtml}$&`
+          );
+        } else {
+          // 출력이 예상 형식을 조금 벗어나도 컬러칩은 보이게 처리
+          withPalette = `${paletteHtml}${withSections}`;
+        }
+      }
       return withPalette.replace(/\n/g, '<br/>');
     }
 
