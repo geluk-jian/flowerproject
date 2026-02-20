@@ -448,19 +448,59 @@
     }
 
     function buildPromptFromState(state){
-      if (!state || typeof state !== 'object') {
-        return '연인을 위한 세련된 꽃다발 유료 추천을 작성해줘.';
-      }
       const payload = {
-        relation: state.relation || '미선택',
-        occasion: state.occasion || '미선택',
-        style: state.style || state.personality || '미선택',
-        palette: state.palette || '미선택',
-        finish: state.finish || '미선택',
-        photoHabit: state.photoHabit || '미선택',
-        taboos: Array.isArray(state.taboos) ? state.taboos.join(', ') : (state.taboos || '없음')
+        relation: (state && state.relation) || '미선택',
+        occasion: (state && state.occasion) || '미선택',
+        style: (state && (state.style || state.personality)) || '미선택',
+        palette: (state && state.palette) || '미선택',
+        finish: (state && state.finish) || '미선택',
+        photoHabit: (state && state.photoHabit) || '미선택',
+        taboos: (state && (Array.isArray(state.taboos) ? state.taboos.join(', ') : (state.taboos || '없음'))) || '없음'
       };
-      return `무료 설문 결과: ${JSON.stringify(payload)}`;
+      return [
+        '당신은 10년차 꽃집 사장 누나입니다.',
+        '친한 남동생에게 말하듯 반말로,',
+        '따뜻하고 친근하게 설명해주세요.',
+        '',
+        '결과는 반드시 아래 형식으로만 출력하세요:',
+        '',
+        '[꽃다발 설명]',
+        '(2~3문장, 반말, 감성적으로)',
+        '',
+        '[대표꽃 · 컨셉 · 이유]',
+        '대표꽃:',
+        '컨셉:',
+        '이유: (1문장, 반말)',
+        '',
+        '[멘트 5개]',
+        '1. "..."',
+        '2. "..."',
+        '3. "..."',
+        '4. "..."',
+        '5. "..."',
+        '',
+        '[제작 가이드]',
+        '톤:',
+        '포장:',
+        '조합:',
+        '대체 규칙:',
+        '',
+        '[꽃집 전달 문장]',
+        '"..." (복붙용 한 문단)',
+        '',
+        '[주의사항]',
+        '· ...',
+        '· ...',
+        '· ...',
+        '',
+        '말투 예시 비교',
+        '현재개선"사랑과 애정을 상징하며 적합합니다""사랑한다는 말 대신 이 꽃으로 전달해봐""최적화된 조합입니다""이 조합이면 진짜 실패 없어""피해야 합니다""이건 좀 피해줘, 부담스러워 보여"',
+        '',
+        `무료 설문 결과: ${JSON.stringify(payload)}`,
+        '',
+        '절대 존댓말 쓰지 말고,',
+        '"-입니다", "-합니다" 쓰지 마세요.'
+      ].join('\n');
     }
 
     async function runPaidGuide(){
