@@ -2463,32 +2463,19 @@
       const msgList = [msgs.simple, msgs.sense, msgs.sincere];
 
       const resultHtml = `
-        <!-- [Guide] 누나의 전체 가이드 보기 -->
-        <a href="#" class="guideBanner" data-info="guide" aria-label="누나의 전체 가이드 보기">
-          <div class="guideBannerText">
-            <div class="guideBannerTitle">🌿 누나의 전체 가이드 보기</div>
-            <div class="guideBannerSub">꽃 조합 · 가격대 · 꽃말 포함</div>
-          </div>
-          <div class="guideBannerArrow">→</div>
-        </a>
-
         <!-- [A] HERO 카드 -->
         <div class="box heroCard">
-          <div class="heroRow">
-            <div class="heroImgWrap">
-              <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
-            </div>
-            <div class="heroMeta">
-              <div class="heroLabel">🌷 누나가 골랐어</div>
-              <div class="heroName">${escapeHtml(mainAsset.name)}</div>
-              <div class="heroPickLine">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
+          <div class="heroLabel">🌷 누나가 골랐어</div>
+          <div class="heroImgWrap">
+            <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+          </div>
+          <div class="heroName">${escapeHtml(mainAsset.name)}</div>
+          <div class="heroPickLine">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
 
-              <div class="heroChips">
-                <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
-                <span class="chip">마무리: <b>${escapeHtml(finishShort)}</b></span>
-                ${cautionChipHtml}
-              </div>
-            </div>
+          <div class="heroChips">
+            <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
+            <span class="chip">마무리: <b>${escapeHtml(finishShort)}</b></span>
+            ${cautionChipHtml}
           </div>
         </div>
 
@@ -2848,13 +2835,13 @@
     /* ===== Result Top (Hero + Actions) ===== */
     .heroCard{
       padding: 16px;
-    }
-    .heroRow{
       display:flex;
-      gap:14px;
+      flex-direction:column;
       align-items:center;
+      text-align:center;
     }
     .heroImgWrap{
+      margin-top:10px;
       width: 92px;
       height: 92px;
       border:1px solid var(--line);
@@ -2871,10 +2858,6 @@
       height:100%;
       object-fit:contain;
       background:#fff;
-    }
-    .heroMeta{
-      flex:1;
-      min-width:0;
     }
     .heroLabel{
       font-size:12px;
@@ -2900,6 +2883,7 @@
       display:flex;
       flex-wrap:wrap;
       gap:8px;
+      justify-content:center;
     }
 
     .primaryFull{
