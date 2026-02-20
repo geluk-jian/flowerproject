@@ -1591,7 +1591,7 @@
       {
         id:'style',
         type:'single',
-        title:'그 사람 어떤 스타일이야? 딱 봤을 때.',
+        title:'그 사람 어떤 스타일이야?',
         sub:'평소 느낌 떠올리고 제일 가까운 쪽으로 골라줘.',
         options:[
           {value:'soft_feminine', title:'청순/여리한', desc:'맑고 부드러운 분위기'},
@@ -1618,7 +1618,7 @@
         id:'photoHabit',
         type:'single',
         title:'사진 잘 찍어? SNS에 자주 올려?',
-        sub:'사진 스타일에 맞춰 마감 느낌까지 맞춰줄게.',
+        sub:'포장/ 연출 스타일이 달라져.',
         options:[
           { value: 'sns_often', title: 'SNS에 자주 올림', desc: '피드/스토리 자주' },
           { value: 'sns_sometimes', title: '가끔 올림', desc: '기념일/특별한 날' },
@@ -1629,8 +1629,8 @@
       {
         id:'cautions',
         type:'multi',
-        title:'혹시 이런 거 있어? 알아야 실수 안 해.',
-        sub:'해당되는 것만 체크해줘. 없으면 “없음” 누르면 돼. (복수 선택 가능)',
+        title:'혹시 꼭 알아야 할거 있어?',
+        sub:'해당되는 것만 체크해줘. 없으면 “없음”. (복수 선택 가능)',
         options:[
           {value:'scent_light', title:'향은 약한 쪽이 좋아요', desc:'향 민감'},
           {value:'allergy_sensitive', title:'알레르기/민감이 있어요', desc:'꽃가루/향 최소'},
@@ -1840,7 +1840,7 @@
       $('barFill').style.width = `${pct}%`;
 
       $('stepHint').textContent = (currentStep().type === 'multi')
-        ? '복수 선택 후 “다음”'
+        ? '복수 선택 후 “다음” 필수'
         : '선택하면 다음으로 넘어가요';
     }
 
@@ -1856,6 +1856,13 @@
 
       $('btnBack').style.visibility = (stepIdx === 0) ? 'hidden' : 'visible';
       $('btnNext').style.display = (s.type === 'multi') ? 'inline-flex' : 'none';
+      if(s.type === 'multi'){
+        $('btnNext').disabled = !canGoNext();
+        $('btnNext').setAttribute('aria-disabled', String(!canGoNext()));
+      }else{
+        $('btnNext').disabled = false;
+        $('btnNext').removeAttribute('aria-disabled');
+      }
 
       const opts = $('options');
       opts.innerHTML = '';
