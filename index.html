@@ -1890,7 +1890,11 @@
             ${opt.desc ? `<div class="abDesc">${escapeHtml(opt.desc)}</div>` : ''}
           `;
         } else {
-          div.innerHTML = `
+        const noneDivider = (s.id === 'cautions' && opt.value === 'none')
+          ? '<div class="noneDivider" aria-hidden="true"></div>'
+          : '';
+        div.innerHTML = `
+            ${noneDivider}
             <div>
               <div class="title">${escapeHtml(opt.title)}</div>
               ${opt.desc ? `<div class="desc">${escapeHtml(opt.desc)}</div>` : ''}
@@ -2110,7 +2114,10 @@
       const rel = relationTail[relation] || '잘 어울리면 좋겠다는 마음으로 골랐어.';
       const occ = occasionTail[occasion] || '';
 
-      return `추천 멘트: "${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}"`;
+      const short = `${opener} ${rel}`.replace(/\s+/g, ' ').trim();
+      const long = `${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}`.replace(/\s+/g, ' ').trim();
+
+      return { short, long };
     }
 
     function hexToRgb(hex){
@@ -2339,6 +2346,8 @@
         occasion: state.occasion,
         tone
       });
+      const storyTipShort = storyTip.short;
+      const storyTipLong = storyTip.long;
 
       const shareState = {...state};
       const code = base64UrlEncode(shareState);
@@ -2405,7 +2414,11 @@
         `;
       })();
 
-      const pickLine = `꽃집 누나 PICK: ${styleLabel} 톤으로 “${paletteLabel}” 가면 실패 확률 낮아.`;
+      const pickLineLines = [
+        `${styleLabel} 스타일에 ${paletteLabel} 좋아하면`,
+        '이게 딱이야. 장미보다 세련돼 보이고',
+        '처음 꽃 주는 남자한테 오히려 더 임팩트 있어.'
+      ];
 
       // 가격 정보: volume 없으면 기본(M)
       const priceInfoList = [
@@ -2417,6 +2430,7 @@
 
       // ====== 주문문장(미리보기 구성) ======
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(orderSentence)}<br/>📢 참고사항: ${escapeHtml(noteSentence)}`;
+      const msgList = [msgs.simple, msgs.sense, msgs.sincere];
 
       const resultHtml = `
         <!-- [A] HERO 카드 -->
@@ -2426,9 +2440,9 @@
               <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
             </div>
             <div class="heroMeta">
-              <div class="heroLabel">대표 꽃 1송이</div>
+              <div class="heroLabel">🌷 누나가 골랐어</div>
               <div class="heroName">${escapeHtml(mainAsset.name)}</div>
-              <div class="heroPickLine">${escapeHtml(pickLine)}</div>
+              <div class="heroPickLine">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
 
               <div class="heroChips">
                 <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
@@ -2439,19 +2453,26 @@
           </div>
         </div>
 
-        <!-- [B] 메인 버튼 + 주문문장 미리보기/전체보기 -->
-        <div class="box">
-          <button id="btnCopyOrder" class="primaryFull" type="button">꽃집에 보내기(주문문장 복사)</button>
-          <p class="orderPreview">${orderPreviewHtml}</p>
+        <!-- [B] 주문문장 박스 -->
+        <div class="box orderBox">
+          <div class="orderBoxTitle">꽃집에 이렇게 보내봐</div>
+          <div class="orderPreviewWrap is-locked" id="orderPreviewWrap">
+            <div class="orderPreviewMask">복사 후 열림</div>
+            <p class="orderPreview" id="orderPreview">${orderPreviewHtml}</p>
+          </div>
+          <button id="btnCopyOrder" class="primaryFull" type="button">주문 문장 복사하기</button>
         </div>
 
         <!-- [C] 멘트 3개 추천 -->
         <div class="box">
           <h3>꽃과 함께 그녀에게 보낼 멘트 추천(3개)</h3>
-          <ol class="list" style="margin-top:10px;">
-            <li>${escapeHtml(msgs.simple)}</li>
-            <li>${escapeHtml(msgs.sense)}</li>
-            <li>${escapeHtml(msgs.sincere)}</li>
+          <ol class="list msgList" style="margin-top:10px;">
+            ${msgList.map((m, i)=>`
+              <li>
+                <span class="msgText">${escapeHtml(m)}</span>
+                <button class="msgCopy" type="button" data-idx="${i}">복사</button>
+              </li>
+            `).join('')}
           </ol>
         </div>
 
@@ -2518,7 +2539,7 @@
 
           <div class="box">
             <h3>왜 이게 맞냐면</h3>
-            <details class="explain">
+            <details class="explain" open>
               <summary>접기/펼치기</summary>
               <p>${reasonParts.map(escapeHtml).join(' ')}</p>
             </details>
@@ -2526,11 +2547,22 @@
 
           <div class="box">
             <h3>선물 스토리/전달 메시지 팁</h3>
-            <p style="margin:0; font-size:13px; font-weight:700; color:var(--text);">${escapeHtml(storyTip)}</p>
-            <div class="btnrow">
-              <button class="secondary" id="btnCopyStoryTip">스토리 멘트 복사</button>
-              <button class="secondary" id="btnCopyLink">결과 링크 복사</button>
+            <div class="storyTipBlock">
+              <div class="storyTipRow">
+                <div class="storyTipLabel">짧은 버전</div>
+                <div class="storyTipText" id="storyTipShort">${escapeHtml(storyTipShort)}</div>
+                <button class="secondary storyTipBtn" id="btnCopyStoryTipShort">짧게 복사</button>
+              </div>
+              <div class="storyTipRow">
+                <div class="storyTipLabel">긴 버전</div>
+                <div class="storyTipText" id="storyTipLong">${escapeHtml(storyTipLong)}</div>
+                <button class="secondary storyTipBtn" id="btnCopyStoryTipLong">길게 복사</button>
+              </div>
             </div>
+            <div class="btnrow">
+              <button class="secondary" id="btnCopyLink">여친에게 결과 공유하기(링크 복사)</button>
+            </div>
+            <div class="muted" style="margin-top:6px; font-size:12px;">링크를 보내면 결과 화면을 그대로 공유할 수 있어요.</div>
           </div>
 
         </details>
@@ -2549,8 +2581,23 @@
         btnCopyOrderEl.onclick = async ()=>{
           const ok = await copyText(floristOrder);
           toast(ok ? '주문문장을 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          if(ok){
+            const wrapEl = $('orderPreviewWrap');
+            if(wrapEl) wrapEl.classList.remove('is-locked');
+          }
         };
       }
+
+      const msgCopyBtns = Array.from(document.querySelectorAll('.msgCopy'));
+      msgCopyBtns.forEach((btn)=>{
+        const idx = Number(btn.dataset.idx);
+        const text = msgList[idx];
+        if(!text) return;
+        btn.addEventListener('click', async ()=>{
+          const ok = await copyText(text);
+          toast(ok ? '멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        });
+      });
 
       const btnCopyLinkEl = $('btnCopyLink');
       if(btnCopyLinkEl){
@@ -2561,11 +2608,18 @@
         };
       }
 
-      const btnCopyStoryTipEl = $('btnCopyStoryTip');
-      if(btnCopyStoryTipEl){
-        btnCopyStoryTipEl.onclick = async ()=>{
-          const ok = await copyText(storyTip);
-          toast(ok ? '스토리 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+      const btnCopyStoryTipShortEl = $('btnCopyStoryTipShort');
+      if(btnCopyStoryTipShortEl){
+        btnCopyStoryTipShortEl.onclick = async ()=>{
+          const ok = await copyText(storyTipShort);
+          toast(ok ? '짧은 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        };
+      }
+      const btnCopyStoryTipLongEl = $('btnCopyStoryTipLong');
+      if(btnCopyStoryTipLongEl){
+        btnCopyStoryTipLongEl.onclick = async ()=>{
+          const ok = await copyText(storyTipLong);
+          toast(ok ? '긴 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
         };
       }
 
@@ -2827,6 +2881,80 @@
       -webkit-box-orient:vertical;
       overflow:hidden;
     }
+    .orderBoxTitle{
+      font-size:14px;
+      font-weight:900;
+      color: var(--text);
+    }
+    .orderBox .primaryFull{
+      margin-top: 12px;
+    }
+    .orderPreviewWrap{
+      position: relative;
+      margin-top: 12px;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 12px 12px;
+      min-height: 64px;
+      border: 1px solid var(--line);
+    }
+    .orderPreviewWrap.is-locked .orderPreview{
+      filter: blur(6px);
+      opacity: .5;
+    }
+    .orderPreviewWrap:not(.is-locked) .orderPreview{
+      display:block;
+      -webkit-line-clamp: unset;
+      line-clamp: unset;
+      overflow: visible;
+    }
+    .orderPreviewMask{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:800;
+      color: var(--muted);
+      background: rgba(255,255,255,.7);
+      border-radius: 12px;
+      pointer-events:none;
+    }
+    .orderPreviewWrap:not(.is-locked) .orderPreviewMask{
+      display:none;
+    }
+
+    .msgList li{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .msgText{
+      flex:1;
+    }
+    .msgCopy{
+      flex-shrink:0;
+      border:1px solid var(--line);
+      background:#fff;
+      color: var(--text);
+      font-size:12px;
+      font-weight:800;
+      padding:6px 10px;
+      border-radius: 10px;
+      cursor:pointer;
+    }
+    .msgCopy:hover{
+      background:#f8fafc;
+      transform:none;
+    }
+
+    .noneDivider{
+      height:1px;
+      background:#e5e7eb;
+      margin: 6px 0 10px;
+    }
 
     .detailsPlain{
       margin-top:10px;
@@ -2845,6 +2973,39 @@
       color:var(--text);
       font-weight:650;
       white-space: pre-wrap;
+    }
+
+    .storyTipBlock{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:6px;
+    }
+    .storyTipRow{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .storyTipLabel{
+      flex-shrink:0;
+      font-size:11px;
+      font-weight:800;
+      color: var(--muted);
+      background:#f1f5f9;
+      padding:4px 8px;
+      border-radius: 999px;
+    }
+    .storyTipText{
+      flex:1;
+      font-size:13px;
+      font-weight:700;
+      color: var(--text);
+      line-height:1.5;
+    }
+    .storyTipBtn{
+      flex-shrink:0;
+      padding:6px 10px;
+      font-size:12px;
     }
 
     /* chip처럼 클릭 가능한 주의사항 */
