@@ -280,60 +280,52 @@
       font-size: 14px;
     }
 
-    .overlay {
+    .result-card {
       display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .overlay.show {
-      display: flex;
-    }
-
-    .popup {
       background: var(--white);
-      border-radius: 24px 24px 0 0;
-      padding: 32px 24px 40px;
-      width: 100%;
-      max-width: 480px;
-      text-align: center;
-      animation: slideUp 0.3s ease;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
     }
 
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to   { transform: translateY(0); }
+    .result-card.show {
+      display: block;
     }
 
-    .popup-emoji { font-size: 48px; margin-bottom: 12px; }
-    .popup h2 {
-      font-family: 'Noto Serif KR', serif;
-      font-size: 20px;
-      font-weight: 900;
-      margin-bottom: 8px;
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    .popup p {
+
+    .result-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .result-status {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .result-body {
+      font-size: 14px;
+      color: var(--text-dark);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .result-body.loading {
       font-size: 14px;
       color: var(--text-mid);
-      line-height: 1.6;
-      margin-bottom: 24px;
     }
 
-    .btn-popup-close {
-      width: 100%;
-      padding: 16px;
-      background: var(--green);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Noto Sans KR', sans-serif;
+    .result-body.error {
+      color: #C0392B;
     }
   </style>
 </head>
@@ -417,31 +409,104 @@
       <div class="price-amount"><span>₩</span>1,900</div>
       <div class="price-desc">일회성 결제 · 꽃 줄 때마다 쓸 수 있어</div>
     </div>
+
+    <section class="result-card" id="paidResultCard">
+      <div class="result-head">
+        <div class="result-title">누나의 유료 꽃추천 결과</div>
+        <div class="result-status" id="paidResultStatus">준비됨</div>
+      </div>
+      <div class="result-body" id="paidResultBody"></div>
+    </section>
   </main>
 
   <div class="fixed-cta">
-    <button class="btn-pay" onclick="showPopup()">
+    <button class="btn-pay" id="btnRunPaid">
       누나의 전체 가이드 받기
       <span class="price-tag">1,900원</span>
     </button>
   </div>
 
-  <div class="overlay" id="overlay" onclick="hidePopup()">
-    <div class="popup" onclick="event.stopPropagation()">
-      <div class="popup-emoji">🌷</div>
-      <h2>곧 결제 오픈해!</h2>
-      <p>지금 준비 중이야.<br>오픈되면 바로 알려줄게 😊</p>
-      <button class="btn-popup-close" onclick="hidePopup()">알겠어, 돌아갈게</button>
-    </div>
-  </div>
-
   <script>
-    function showPopup() {
-      document.getElementById('overlay').classList.add('show');
+    function base64UrlDecode(str){
+      const b64 = str.replace(/-/g,'+').replace(/_/g,'/');
+      const pad = b64 + '==='.slice((b64.length + 3) % 4);
+      const bin = atob(pad);
+      const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+      const json = new TextDecoder().decode(bytes);
+      return JSON.parse(json);
     }
-    function hidePopup() {
-      document.getElementById('overlay').classList.remove('show');
+
+    function getStateFromQuery(){
+      const params = new URLSearchParams(location.search);
+      const encoded = params.get('r');
+      if (!encoded) return null;
+      try {
+        return base64UrlDecode(encoded);
+      } catch (e) {
+        return null;
+      }
     }
+
+    function buildPromptFromState(state){
+      if (!state || typeof state !== 'object') {
+        return '연인을 위한 세련된 꽃다발 유료 추천을 작성해줘.';
+      }
+      const payload = {
+        relation: state.relation || '미선택',
+        occasion: state.occasion || '미선택',
+        style: state.style || state.personality || '미선택',
+        palette: state.palette || '미선택',
+        finish: state.finish || '미선택',
+        photoHabit: state.photoHabit || '미선택',
+        taboos: Array.isArray(state.taboos) ? state.taboos.join(', ') : (state.taboos || '없음')
+      };
+      return `무료 설문 결과: ${JSON.stringify(payload)}`;
+    }
+
+    async function runPaidGuide(){
+      const btn = document.getElementById('btnRunPaid');
+      const card = document.getElementById('paidResultCard');
+      const body = document.getElementById('paidResultBody');
+      const status = document.getElementById('paidResultStatus');
+      if (!btn || !card || !body || !status) return;
+
+      const state = getStateFromQuery();
+      const prompt = buildPromptFromState(state);
+
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      card.classList.add('show');
+      status.textContent = '생성 중';
+      body.className = 'result-body loading';
+      body.textContent = '누나가 유료 추천을 정리하고 있어...';
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      try {
+        const res = await fetch('/api/pro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        if (!res.ok) throw new Error(`status_${res.status}`);
+
+        const data = await res.json();
+        const text = (data && data.text) ? data.text.trim() : '';
+        if (!text) throw new Error('empty_text');
+
+        status.textContent = '완료';
+        body.className = 'result-body';
+        body.textContent = text;
+      } catch (e) {
+        status.textContent = '실패';
+        body.className = 'result-body error';
+        body.textContent = '결과 생성에 실패했어. 잠시 후 다시 눌러줘.';
+      } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    document.getElementById('btnRunPaid')?.addEventListener('click', runPaidGuide);
   </script>
 </body>
 </html>
