@@ -2469,16 +2469,25 @@
             <div class="heroChatTitle">🌷 꽃집 누나</div>
           </div>
           <div class="heroChatBody">
-            <div class="heroMsg heroMsgLeft">
-              <div class="heroMsgLine">골랐어! 이게 딱이야.</div>
-              <div class="heroMsgLine"><b>${escapeHtml(mainAsset.name)}</b> 🌸</div>
+            <div class="heroChatItem">
+              <div class="heroMsg heroMsgLeft">
+                <div class="heroMsgLine">골랐어! 이게 딱이야.</div>
+                <div class="heroMsgLine"><b>${escapeHtml(mainAsset.name)}</b> 🌸</div>
+              </div>
+              <span class="heroChatMeta">지금</span>
             </div>
 
-            <div class="heroPhotoCard">
-              <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+            <div class="heroChatItem">
+              <div class="heroPhotoCard">
+                <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+              </div>
+              <span class="heroChatMeta">지금</span>
             </div>
 
-            <div class="heroMsg heroMsgLeft heroDescMsg">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
+            <div class="heroChatItem">
+              <div class="heroMsg heroMsgLeft heroDescMsg">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
+              <span class="heroChatMeta">지금</span>
+            </div>
 
             <div class="heroChips">
               <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
@@ -2865,6 +2874,19 @@
       display:flex;
       flex-direction:column;
       gap:12px;
+    }
+    .heroChatItem{
+      display:flex;
+      align-items:flex-end;
+      gap:6px;
+    }
+    .heroChatMeta{
+      font-size:11px;
+      color:#8b95a1;
+      font-weight:700;
+      line-height:1;
+      margin-bottom:4px;
+      flex:0 0 auto;
     }
     .heroMsg{
       position:relative;
