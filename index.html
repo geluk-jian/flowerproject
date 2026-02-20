@@ -1269,10 +1269,6 @@
             </div>
             <div class="lpBenefitItem">
               <div class="lpCheck">✓</div>
-              <span>꽃집 전달용 톤/무드 가이드</span>
-            </div>
-            <div class="lpBenefitItem">
-              <div class="lpCheck">✓</div>
               <span>꽃집 DM 복붙 문장 1개</span>
             </div>
             <div class="lpBenefitItem">
@@ -1284,7 +1280,7 @@
           <!-- CTA -->
           <div class="lpCta">
             <!-- ✅ 기존 기능 버튼 id 유지 -->
-            <button class="lpBtnMain" id="btnStart" type="button">🌷 30초로 추천받기</button>
+            <button class="lpBtnMain" id="btnStart" type="button">👉 30초로 추천받기</button>
             <button class="lpBtnSub" id="btnShareSite" type="button">남친에게 보내기 (링크 복사)</button>
             <button class="lpBtnPreview" id="btnLoadExample" type="button">예시 결과 미리보기</button>
             <div class="lpMeta">※ 결과에서 멘트 복사 + 링크 공유 가능</div>
@@ -1836,7 +1832,7 @@
 
     function updateProgress(){
       $('stepText').textContent = `${stepIdx+1}/${steps.length}`;
-      const pct = Math.round((stepIdx / (steps.length - 1)) * 100);
+      const pct = Math.max(10, Math.round((stepIdx / (steps.length - 1)) * 100));
       $('barFill').style.width = `${pct}%`;
 
       $('stepHint').textContent = (currentStep().type === 'multi')
