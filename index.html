@@ -1188,6 +1188,153 @@
       color: var(--text-light);
     }
 
+    /* 제품 비교 섹션 */
+    #screenStart .lpSection{
+      margin-top: 24px;
+      padding: 18px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    }
+    #screenStart .lpSectionTitle{
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+      color: var(--text-dark);
+    }
+    #screenStart .lpSectionSub{
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+    #screenStart .lpMetaBlock{
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    #screenStart .lpMetaTag{
+      background: var(--green-light);
+      color: var(--green-dark);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    #screenStart .lpCompareGrid{
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    #screenStart .lpCompareCard{
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    #screenStart .lpCompareCard h3{
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+    #screenStart .lpCompareCard p{
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+    #screenStart .lpTableWrap{
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: auto;
+      background: #fff;
+    }
+    #screenStart .lpTable{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 520px;
+      font-size: 12px;
+      color: var(--text-mid);
+    }
+    #screenStart .lpTable th,
+    #screenStart .lpTable td{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    #screenStart .lpTable th{
+      background: #F7FBF8;
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+    #screenStart .lpChecklist{
+      margin-top: 14px;
+    }
+    #screenStart .lpChecklist h3{
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+    #screenStart .lpChecklist ul{
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+    #screenStart .lpChecklist li{
+      margin: 4px 0;
+    }
+    #screenStart .lpPolicyCard{
+      margin-top: 14px;
+      padding: 12px;
+      background: #F7FBF8;
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+    #screenStart .lpNotice{
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+    #screenStart .lpGuideCta{
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-start;
+    }
+    #screenStart .lpBtnLink{
+      display: inline-block;
+      text-decoration: none;
+      border: 1px solid var(--green);
+      background: var(--green);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 14px;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    }
+    #screenStart .lpBtnLink:hover{
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      transform: translateY(-1px);
+    }
+    @media (max-width: 560px){
+      #screenStart .lpCompareGrid{ grid-template-columns: 1fr; }
+    }
+
     /* 푸터 */
     #screenStart .lpFooter{
       margin-top: 24px;
@@ -1293,6 +1440,104 @@
             </div>
 
           </div>
+
+          <!-- 제품 비교 가이드 -->
+          <section class="lpSection" id="compareGuide">
+            <div class="lpSectionTitle">제품 비교 가이드</div>
+            <p class="lpSectionSub">
+              꽃다발/꽃선물 카테고리를 기준으로, 상황과 예산에 맞는 선택을 빠르게 비교하도록 정리한 실전 가이드입니다.
+            </p>
+            <div class="lpMetaBlock">
+              <span class="lpMetaTag">작성자: 10년차 꽃집 누나</span>
+              <span>마지막 업데이트: 2026년 2월 21일</span>
+              <span>비교 대상: 꽃다발 유형 · 포장 · 가격대</span>
+            </div>
+
+            <div class="lpCompareGrid">
+              <div class="lpCompareCard">
+                <h3>가성비형 vs 프리미엄형</h3>
+                <p>가성비형은 볼륨 중심, 프리미엄형은 희소 꽃과 톤 매칭이 핵심입니다.</p>
+              </div>
+              <div class="lpCompareCard">
+                <h3>단일 품종 vs 믹스</h3>
+                <p>단일은 인상이 또렷하고, 믹스는 분위기와 컬러 조합이 강점입니다.</p>
+              </div>
+              <div class="lpCompareCard">
+                <h3>컬러 톤 선택</h3>
+                <p>화이트는 깔끔함, 핑크는 사랑스러움, 오렌지는 활기 이미지에 유리합니다.</p>
+              </div>
+              <div class="lpCompareCard">
+                <h3>포장 스타일</h3>
+                <p>내추럴 랩은 부드러운 인상, 새틴 포장은 격식 있는 선물에 잘 맞습니다.</p>
+              </div>
+            </div>
+
+            <div class="lpTableWrap" role="region" aria-label="꽃다발 타입 비교표">
+              <table class="lpTable">
+                <thead>
+                  <tr>
+                    <th>타입</th>
+                    <th>예상 가격대</th>
+                    <th>장점</th>
+                    <th>추천 상황</th>
+                    <th>주의점</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>스탠다드 믹스</td>
+                    <td>중간</td>
+                    <td>안정적인 볼륨과 색감</td>
+                    <td>첫 선물, 무난한 기념일</td>
+                    <td>평범해 보일 수 있음</td>
+                  </tr>
+                  <tr>
+                    <td>프리미엄 믹스</td>
+                    <td>중상</td>
+                    <td>희소 꽃 비중, 사진발</td>
+                    <td>프로포즈, 특별한 날</td>
+                    <td>재고/시즌 영향 큼</td>
+                  </tr>
+                  <tr>
+                    <td>단일 품종</td>
+                    <td>중</td>
+                    <td>메시지 집중, 깔끔함</td>
+                    <td>미니멀 취향, 포멀한 자리</td>
+                    <td>톤 선택 실패 시 밋밋</td>
+                  </tr>
+                  <tr>
+                    <td>시즌 픽</td>
+                    <td>중하</td>
+                    <td>가격 대비 풍성함</td>
+                    <td>가성비, 캐주얼 선물</td>
+                    <td>원하는 색이 어려울 수 있음</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="lpChecklist">
+              <h3>구매 전 체크리스트</h3>
+              <ul>
+                <li>받는 사람의 취향과 피하고 싶은 꽃을 먼저 확인한다.</li>
+                <li>예산과 필요한 볼륨(크기)을 먼저 정한다.</li>
+                <li>사진에 잘 나오길 원하면 대비 색감을 높인다.</li>
+                <li>향에 민감한 경우 무향 또는 약향 꽃을 선택한다.</li>
+                <li>포장 소재(새틴/내추럴)를 분위기에 맞춘다.</li>
+              </ul>
+            </div>
+
+            <div class="lpPolicyCard">
+              비교/편집 정책: 협찬이나 광고 없이 기준을 공개하고 비교합니다. 기준은
+              볼륨/색감/지속성/가격대이며, 실제 방문 상담과 시즌 시세를 반영해 업데이트합니다.
+            </div>
+            <div class="lpNotice">
+              가격/재고/시세는 지역과 계절에 따라 달라질 수 있습니다. 실제 주문 전 꽃집과 최종 확인을 권장합니다.
+            </div>
+            <div class="lpGuideCta">
+              <a class="lpBtnLink" href="premium.html">전체 가이드 보기</a>
+            </div>
+          </section>
 
           <!-- 무료 혜택 -->
           <div class="lpBenefits">

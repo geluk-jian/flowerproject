@@ -375,6 +375,114 @@
       color: var(--text-mid);
       font-weight: 700;
     }
+
+    .guide-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    }
+
+    .guide-title {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .guide-desc {
+      font-size: 13px;
+      color: var(--text-mid);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .guide-item {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.5;
+    }
+
+    .compare-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: auto;
+      margin-bottom: 12px;
+      background: var(--white);
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 480px;
+      font-size: 12px;
+      color: var(--text-mid);
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .compare-table th {
+      background: var(--green-light);
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+
+    .guide-checklist {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    .guide-meta {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .page-footer {
+      margin-top: 24px;
+      padding: 14px 0 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      font-size: 12px;
+      color: var(--text-mid);
+    }
+
+    .page-footer a {
+      color: var(--text-mid);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .page-footer a:hover {
+      color: var(--text-dark);
+    }
+
+    @media (max-width: 520px) {
+      .guide-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -452,6 +560,60 @@
       </div>
     </div>
 
+    <section class="guide-card" aria-label="제품 비교 심화 가이드">
+      <div class="guide-title">제품 비교 심화 가이드</div>
+      <p class="guide-desc">
+        상황과 예산에 맞춰 선택하도록 핵심 기준을 정리했습니다. 선택 기준을 먼저 고르면 꽃집과 커뮤니케이션이 훨씬 쉬워집니다.
+      </p>
+      <div class="guide-grid">
+        <div class="guide-item">가격 대비 볼륨: 상대에게 보이는 크기와 밀도의 균형을 먼저 결정합니다.</div>
+        <div class="guide-item">색감 메시지: 화이트는 깔끔, 핑크는 사랑스러움, 오렌지는 활기를 강조합니다.</div>
+        <div class="guide-item">지속성: 계절 꽃은 풍성하지만 유지 기간이 짧을 수 있습니다.</div>
+        <div class="guide-item">포장 톤: 새틴은 포멀, 크라프트는 내추럴 무드에 적합합니다.</div>
+      </div>
+
+      <div class="compare-table-wrap" role="region" aria-label="프리미엄 비교표">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>타입</th>
+              <th>장점</th>
+              <th>추천 상황</th>
+              <th>주의점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>프리미엄 믹스</td>
+              <td>희소 꽃 포함, 사진 퀄리티</td>
+              <td>기념일, 중요한 행사</td>
+              <td>재고 변동 가능</td>
+            </tr>
+            <tr>
+              <td>톤 집중형</td>
+              <td>취향 맞춤이 쉬움</td>
+              <td>상대 취향이 뚜렷할 때</td>
+              <td>색 선택 실패 시 아쉬움</td>
+            </tr>
+            <tr>
+              <td>볼륨 우선형</td>
+              <td>가성비, 풍성함</td>
+              <td>가볍게 건네는 선물</td>
+              <td>디테일 인상 약함</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="guide-checklist">
+        <li>받는 사람의 취향과 피하고 싶은 꽃을 먼저 체크한다.</li>
+        <li>사진 촬영 목적이 있으면 톤 대비를 높인다.</li>
+        <li>예산을 밝히고 볼륨 우선인지 톤 우선인지 정한다.</li>
+        <li>향에 민감하면 약향/무향 꽃을 우선한다.</li>
+      </ul>
+      <div class="guide-meta">마지막 업데이트: 2026년 2월 21일</div>
+    </section>
+
     <div class="price-card">
       <div class="price-label">지금 바로 받을 수 있어</div>
       <div class="price-amount"><span>₩</span>1,900</div>
@@ -466,6 +628,13 @@
       <img id="paidResultImage" class="result-image" alt="추천 꽃다발 이미지" loading="lazy" />
       <div class="result-body" id="paidResultBody"></div>
     </section>
+
+    <footer class="page-footer">
+      <a href="index.html">메인</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="terms.html">이용약관</a>
+      <a href="mailto:tone_art@hanmail.net">문의</a>
+    </footer>
   </main>
 
   <div class="fixed-cta">
