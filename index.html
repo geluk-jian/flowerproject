@@ -1377,7 +1377,7 @@
 
           <div class="btnrow">
             <button class="secondary" id="btnBack" type="button">이전</button>
-            <button id="btnNext" type="button" style="display:none;">다음</button>
+            <button id="btnNext" type="button" style="display:none;" onclick="goNext()">다음</button>
             <button class="secondary" id="btnRestart" type="button">처음으로</button>
           </div>
 
@@ -1896,8 +1896,6 @@
 
       const opts = $('options');
       opts.innerHTML = '';
-      opts.setAttribute('role', s.type === 'multi' ? 'group' : 'radiogroup');
-      opts.setAttribute('aria-label', s.title);
       opts.className = 'options ' + ((s.type === 'ab') ? 'two' : '');
 
       const selected = getAnswer(s.id);
@@ -1909,10 +1907,6 @@
         const isSelected = (s.type === 'multi')
           ? (selected || []).includes(opt.value)
           : (selected === opt.value);
-
-        div.setAttribute('role', s.type === 'multi' ? 'checkbox' : 'radio');
-        div.setAttribute('aria-checked', String(isSelected));
-        div.tabIndex = (s.type === 'multi') ? 0 : (isSelected || idx === 0 ? 0 : -1);
 
         div.dataset.selected = isSelected ? 'true' : 'false';
 
@@ -1942,13 +1936,6 @@
           setAnswer(s.id, opt.value);
           renderStep();
           if(s.type !== 'multi') setTimeout(()=>goNext(), 120);
-        });
-
-        div.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            div.click();
-          }
         });
 
         opts.appendChild(div);
@@ -2067,34 +2054,6 @@
         'calm|cute':'러블리'
       };
       return table[key] || '세련됨';
-    }
-
-    function mapPersonalityFromState({ style, palette }) {
-      // 스타일이 강한 힌트
-      if (style === 'minimal') return '미니멀';
-
-      // 색감이 컨셉을 크게 좌우
-      if (palette === 'red_wine') return '우아함';
-
-      if (palette === 'yellow_orange') {
-        return (style === 'romantic' || style === 'soft_feminine') ? '귀여움' : '활기';
-      }
-
-      if (palette === 'pink_peach') {
-        return (style === 'trendy') ? '귀여움' : '러블리';
-      }
-
-      if (palette === 'white_green') {
-        return (style === 'soft_feminine') ? '미니멀' : '세련됨';
-      }
-
-      if (palette === 'lilac') {
-        return (style === 'romantic') ? '러블리' : '세련됨';
-      }
-
-      // 폴백
-      if (style === 'romantic' || style === 'soft_feminine') return '러블리';
-      return '세련됨';
     }
 
     function pickFlowers(profile){
@@ -2325,7 +2284,7 @@
     }
 
     function showResult(){
-      const personality = mapPersonalityFromState(state);
+      const personality = mapPersonality(state.brightness, state.style);
       const profile = profiles[personality];
 
       const { main, sub, tex } = pickFlowers(profile);
@@ -2402,34 +2361,14 @@
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
 
       // ====== Hero 요약 데이터 만들기 ======
-      let mainAsset = getMainFlowerAsset(personality);
-
-      const cautionArr = Array.isArray(state.cautions) ? state.cautions : [];
-      if (cautionArr.includes('no_rose') && /장미/.test(mainAsset.name)) {
-        // 장미 대신 “무드 유지” 가능한 안전 꽃으로 대체
-        mainAsset = { name: '리시안셔스', img: 'image/lisianthus.png' };
-      }
+      const mainAsset = getMainFlowerAsset(personality);
 
       const orderToneLabel = state.palette ? paletteLabel : tone;
       const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 ${orderToneLabel}의 ${styleLabel} 무드 부케로 부탁드려요.`;
-
-      // 꽃집이 바로 이해하는 참고사항 문장으로 정리
-      const cautionOrderNotes = [];
-      if (cautionArr.includes('scent_light')) {
-        cautionOrderNotes.push('향은 약한 쪽으로 부탁드려요.');
-      }
-      if (cautionArr.includes('allergy_sensitive')) {
-        cautionOrderNotes.push('알레르기/민감이 있어서 꽃가루 최소 + 수술 정리(가능하면 제거) 부탁드려요.');
-      }
-      if (cautionArr.includes('no_rose')) {
-        cautionOrderNotes.push('장미는 제외 부탁드려요.');
-      }
-      if (cautionArr.includes('clean_over_flashy')) {
-        cautionOrderNotes.push('화려함보단 깔끔하게 정돈해서 부탁드려요.');
-      }
-
       const baseNoteSentence = `${wrap}. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
-      const noteSentence = [baseNoteSentence, ...cautionOrderNotes].join(' ');
+      const noteSentence = cautionText
+        ? `${baseNoteSentence} 추가 참고: ${cautionText}.`
+        : baseNoteSentence;
       const floristOrder = `주문문장: ${orderSentence}\n참고사항: ${noteSentence}`;
       const storyTip = buildStoryTip({
         personality,
@@ -2583,10 +2522,11 @@
         <!-- [PAID] 디테일 확장 -->
         <div class="box paidCard" id="paidUpsellBox">
           <div class="paidHead">
-            <div class="paidTitle">🌷 누나가 더 챙겨줄게</div>
+            <div class="paidTitle">유료: 디테일 확장 추천</div>
+            <div class="paidPrice">결제 필요</div>
           </div>
-          <p class="paidDesc">꽃다발 이미지 · 멘트 5개 · DM 고급버전 · 컬러 팔레트</p>
-          <button id="btnOpenPaid" class="primaryFull paidCta" type="button">전체 가이드 받기 &nbsp; 1,900원</button>
+          <p class="paidDesc">꽃다발 이미지 제공, 상황별 멘트, 꽃집 DM 고급 버전(컬러 파레트, 포장 가이드)</p>
+          <button id="btnOpenPaid" class="primaryFull paidCta" type="button">유료 추천 열기</button>
         </div>
 
         <div class="box paidResultBox" id="paidResultBox" style="display:none;">
@@ -2728,7 +2668,7 @@
       const paidUpsellBoxEl = $('paidUpsellBox');
       const btnOpenPaidEl = $('btnOpenPaid');
       const openPaidGuide = () => {
-        const guideUrl = new URL('./premium.html', location.href);
+        const guideUrl = new URL('./guide.html', location.href);
         if (code) guideUrl.searchParams.set('r', code);
         location.href = guideUrl.toString();
       };
