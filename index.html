@@ -2509,13 +2509,17 @@
         mainList: main
       });
 
+      const basicMoodLine = `${styleLabel}한 ${paletteLabel} 톤이 어울려요.`;
+      const basicMessage = msgs.simple;
+      const basicOrderSentence = `${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
+      const floristOrder = `주문문장: ${basicOrderSentence}`;
+
       const orderToneLabel = state.palette ? paletteLabel : tone;
-      const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 ${orderToneLabel}의 ${styleLabel} 무드 부케로 부탁드려요.`;
+      const premiumOrderSentence = `대표 꽃 ${mainAsset.name} 포함해서 ${orderToneLabel}의 ${styleLabel} 무드 부케로 부탁드려요.`;
       const baseNoteSentence = `${wrap}. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
-      const noteSentence = cautionText
+      const premiumNoteSentence = cautionText
         ? `${baseNoteSentence} 추가 참고: ${cautionText}.`
         : baseNoteSentence;
-      const floristOrder = `주문문장: ${orderSentence}\n참고사항: ${noteSentence}`;
       const storyTip = buildStoryTip({
         personality,
         relation: state.relation,
@@ -2590,12 +2594,6 @@
         `;
       })();
 
-      const pickLineLines = [
-        `${styleLabel} 스타일에 ${paletteLabel} 좋아하면`,
-        '이게 딱이야. 장미보다 세련돼 보이고',
-        '처음 꽃 주는 남자한테 오히려 더 임팩트 있어.'
-      ];
-
       // 가격 정보: volume 없으면 기본(M)
       const priceInfoList = [
         { label: '한송이', range: '약 1만~2만원' },
@@ -2605,8 +2603,96 @@
       ];
 
       // ====== 주문문장(미리보기 구성) ======
-      const orderPreviewHtml = `📢 주문문장: ${escapeHtml(orderSentence)}<br/>📢 참고사항: ${escapeHtml(noteSentence)}`;
-      const msgList = [msgs.simple, msgs.sense, msgs.sincere];
+      const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}`;
+      const basicMsgList = [basicMessage];
+      const premiumMsgList = [msgs.simple, msgs.sense, msgs.sincere];
+      const paidResultHtml = `
+        <div class="box" style="margin-top:12px;">
+          <h3>꽃집 DM 고급 버전</h3>
+          <p class="orderPreview">📢 주문문장: ${escapeHtml(premiumOrderSentence)}<br/>📢 참고사항: ${escapeHtml(premiumNoteSentence)}</p>
+        </div>
+
+        <div class="box">
+          <h3>꽃과 함께 그녀에게 보낼 멘트 추천(3개)</h3>
+          <ol class="list msgList" style="margin-top:10px;">
+            ${premiumMsgList.map((m, i)=>`
+              <li>
+                <span class="msgText">${escapeHtml(m)}</span>
+                <button class="msgCopy paidMsgCopy" type="button" data-idx="${i}">복사</button>
+              </li>
+            `).join('')}
+          </ol>
+        </div>
+
+        <div class="box">
+          <h3>컨셉 디테일</h3>
+          <div class="muted" style="font-size:13px;">
+            톤/색감: <b>${escapeHtml(tone)}</b><br/>
+            포장: <b>${escapeHtml(wrap)}</b>
+          </div>
+          <div class="palette" style="margin-top:10px;">
+            ${(palette || []).map(p => `
+              <div class="swatch">
+                <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
+                <div class="swatchMeta">${escapeHtml(p.name)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
+          <ul class="list">
+            <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
+            <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
+            <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
+          </ul>
+          <div class="divider"></div>
+          <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
+        </div>
+
+        <div class="box">
+          <h3>예상 가격대</h3>
+          <ul class="list">
+            ${priceInfoList.map(p => `<li><b>${escapeHtml(p.label)}</b>: ${escapeHtml(p.range)}</li>`).join('')}
+          </ul>
+          <div class="muted" style="margin-top:8px; font-size:12px;">(지역/시즌/꽃값에 따라 달라질 수 있어요)</div>
+        </div>
+
+        <div class="box">
+          <h3>꽃 의미 한 줄</h3>
+          <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
+          <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
+        </div>
+
+        <div class="box">
+          <h3>왜 이게 맞냐면</h3>
+          <details class="explain" open>
+            <summary>접기/펼치기</summary>
+            <p>${reasonParts.map(escapeHtml).join(' ')}</p>
+          </details>
+        </div>
+
+        <div class="box">
+          <h3>선물 스토리/전달 메시지 팁</h3>
+          <div class="storyTipBlock">
+            <div class="storyTipRow">
+              <div class="storyTipLabel">짧은 버전</div>
+              <div class="storyTipText" id="storyTipShort">${escapeHtml(storyTipShort)}</div>
+              <button class="secondary storyTipBtn" id="btnCopyStoryTipShort">짧게 복사</button>
+            </div>
+            <div class="storyTipRow">
+              <div class="storyTipLabel">긴 버전</div>
+              <div class="storyTipText" id="storyTipLong">${escapeHtml(storyTipLong)}</div>
+              <button class="secondary storyTipBtn" id="btnCopyStoryTipLong">길게 복사</button>
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="secondary" id="btnCopyLink">여친에게 결과 공유하기(링크 복사)</button>
+          </div>
+          <div class="muted" style="margin-top:6px; font-size:12px;">링크를 보내면 결과 화면을 그대로 공유할 수 있어요.</div>
+        </div>
+      `;
 
       const resultHtml = `
         <!-- [A] HERO 카드 -->
@@ -2631,7 +2717,7 @@
             </div>
 
             <div class="heroChatItem">
-              <div class="heroMsg heroMsgLeft heroDescMsg">${pickLineLines.map(escapeHtml).join('<br/>')}</div>
+              <div class="heroMsg heroMsgLeft heroDescMsg">${escapeHtml(`기본 무드: ${basicMoodLine}`)}</div>
               <span class="heroChatMeta">지금</span>
             </div>
 
@@ -2652,11 +2738,13 @@
           </div>
         </div>
 
-        <!-- [C] 멘트 3개 추천 -->
+        <!-- [C] 무료: 기대감 형성 및 방향성 제시 -->
         <div class="box">
-          <h3>꽃과 함께 그녀에게 보낼 멘트 추천(3개)</h3>
+          <h3>무료 결과 (기대감 형성 및 방향성 제시)</h3>
+          <p class="muted" style="margin-top:6px;">한 송이 추천 + 기본 무드 + 베이직 문장까지 먼저 확인하세요.</p>
+          <h3 style="margin-top:12px;">건넬 때 멘트 추천(1개)</h3>
           <ol class="list msgList" style="margin-top:10px;">
-            ${msgList.map((m, i)=>`
+            ${basicMsgList.map((m, i)=>`
               <li>
                 <span class="msgText">${escapeHtml(m)}</span>
                 <button class="msgCopy" type="button" data-idx="${i}">복사</button>
@@ -2677,83 +2765,8 @@
 
         <div class="box paidResultBox" id="paidResultBox" style="display:none;">
           <h3>유료 추천 결과</h3>
-          <div class="paidResultBody" id="paidResultBody"></div>
+          <div class="paidResultBody" id="paidResultBody">${paidResultHtml}</div>
         </div>
-
-        <!-- 아래는 일단 접어두는 상세(원하면 유지/삭제 가능) -->
-        <details class="explain" style="margin-top:12px;" open>
-          <summary>자세히 보기(컨셉/조합/가격/꽃말)</summary>
-
-          <div class="box" style="margin-top:12px;">
-            <h3>컨셉 디테일</h3>
-            <div class="muted" style="font-size:13px;">
-              톤/색감: <b>${escapeHtml(tone)}</b><br/>
-              포장: <b>${escapeHtml(wrap)}</b>
-            </div>
-            <div class="palette" style="margin-top:10px;">
-              ${(palette || []).map(p => `
-                <div class="swatch">
-                  <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
-                  <div class="swatchMeta">${escapeHtml(p.name)}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="box">
-            <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
-            <ul class="list">
-              <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
-              <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
-              <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
-            </ul>
-            <div class="divider"></div>
-            <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
-          </div>
-
-          <div class="box">
-            <h3>예상 가격대</h3>
-            <ul class="list">
-              ${priceInfoList.map(p => `<li><b>${escapeHtml(p.label)}</b>: ${escapeHtml(p.range)}</li>`).join('')}
-            </ul>
-            <div class="muted" style="margin-top:8px; font-size:12px;">(지역/시즌/꽃값에 따라 달라질 수 있어요)</div>
-          </div>
-
-          <div class="box">
-            <h3>꽃 의미 한 줄</h3>
-            <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
-            <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
-          </div>
-
-          <div class="box">
-            <h3>왜 이게 맞냐면</h3>
-            <details class="explain" open>
-              <summary>접기/펼치기</summary>
-              <p>${reasonParts.map(escapeHtml).join(' ')}</p>
-            </details>
-          </div>
-
-          <div class="box">
-            <h3>선물 스토리/전달 메시지 팁</h3>
-            <div class="storyTipBlock">
-              <div class="storyTipRow">
-                <div class="storyTipLabel">짧은 버전</div>
-                <div class="storyTipText" id="storyTipShort">${escapeHtml(storyTipShort)}</div>
-                <button class="secondary storyTipBtn" id="btnCopyStoryTipShort">짧게 복사</button>
-              </div>
-              <div class="storyTipRow">
-                <div class="storyTipLabel">긴 버전</div>
-                <div class="storyTipText" id="storyTipLong">${escapeHtml(storyTipLong)}</div>
-                <button class="secondary storyTipBtn" id="btnCopyStoryTipLong">길게 복사</button>
-              </div>
-            </div>
-            <div class="btnrow">
-              <button class="secondary" id="btnCopyLink">여친에게 결과 공유하기(링크 복사)</button>
-            </div>
-            <div class="muted" style="margin-top:6px; font-size:12px;">링크를 보내면 결과 화면을 그대로 공유할 수 있어요.</div>
-          </div>
-
-        </details>
 
         <div class="btnrow" style="margin-top:16px;">
           <button id="btnAgain">다시 하기</button>
@@ -2776,10 +2789,10 @@
         };
       }
 
-      const msgCopyBtns = Array.from(document.querySelectorAll('.msgCopy'));
+      const msgCopyBtns = Array.from(document.querySelectorAll('.msgCopy:not(.paidMsgCopy)'));
       msgCopyBtns.forEach((btn)=>{
         const idx = Number(btn.dataset.idx);
-        const text = msgList[idx];
+        const text = basicMsgList[idx];
         if(!text) return;
         btn.addEventListener('click', async ()=>{
           const ok = await copyText(text);
@@ -2787,48 +2800,62 @@
         });
       });
 
-      const btnCopyLinkEl = $('btnCopyLink');
-      if(btnCopyLinkEl){
-        btnCopyLinkEl.onclick = async ()=>{
-          const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
-          const ok = await copyText(shareText);
-          toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-        };
-      }
-
-      const btnCopyStoryTipShortEl = $('btnCopyStoryTipShort');
-      if(btnCopyStoryTipShortEl){
-        btnCopyStoryTipShortEl.onclick = async ()=>{
-          const ok = await copyText(storyTipShort);
-          toast(ok ? '짧은 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-        };
-      }
-      const btnCopyStoryTipLongEl = $('btnCopyStoryTipLong');
-      if(btnCopyStoryTipLongEl){
-        btnCopyStoryTipLongEl.onclick = async ()=>{
-          const ok = await copyText(storyTipLong);
-          toast(ok ? '긴 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-        };
-      }
-
       const paidUpsellBoxEl = $('paidUpsellBox');
+      const paidResultBoxEl = $('paidResultBox');
       const btnOpenPaidEl = $('btnOpenPaid');
-      const openPaidGuide = () => {
-        const guideUrl = new URL('./guide.html', location.href);
-        if (code) guideUrl.searchParams.set('r', code);
-        location.href = guideUrl.toString();
+      const bindPaidResultActions = () => {
+        const paidMsgCopyBtns = Array.from(document.querySelectorAll('.paidMsgCopy'));
+        paidMsgCopyBtns.forEach((btn)=>{
+          const idx = Number(btn.dataset.idx);
+          const text = premiumMsgList[idx];
+          if(!text) return;
+          btn.onclick = async ()=>{
+            const ok = await copyText(text);
+            toast(ok ? '유료 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          };
+        });
+
+        const btnCopyLinkEl = $('btnCopyLink');
+        if(btnCopyLinkEl){
+          btnCopyLinkEl.onclick = async ()=>{
+            const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
+            const ok = await copyText(shareText);
+            toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          };
+        }
+
+        const btnCopyStoryTipShortEl = $('btnCopyStoryTipShort');
+        if(btnCopyStoryTipShortEl){
+          btnCopyStoryTipShortEl.onclick = async ()=>{
+            const ok = await copyText(storyTipShort);
+            toast(ok ? '짧은 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          };
+        }
+        const btnCopyStoryTipLongEl = $('btnCopyStoryTipLong');
+        if(btnCopyStoryTipLongEl){
+          btnCopyStoryTipLongEl.onclick = async ()=>{
+            const ok = await copyText(storyTipLong);
+            toast(ok ? '긴 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          };
+        }
+      };
+      const openPaidResult = () => {
+        if(!paidResultBoxEl) return;
+        paidResultBoxEl.style.display = 'block';
+        bindPaidResultActions();
+        paidResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
 
       if (btnOpenPaidEl) {
         btnOpenPaidEl.onclick = (e) => {
           e.stopPropagation();
-          openPaidGuide();
+          openPaidResult();
         };
       }
       if (paidUpsellBoxEl) {
         paidUpsellBoxEl.onclick = (e) => {
           if (e.target && e.target.closest && e.target.closest('#btnOpenPaid')) return;
-          openPaidGuide();
+          openPaidResult();
         };
       }
 
