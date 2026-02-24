@@ -1325,7 +1325,7 @@
             </div>
             <div class="lpBenefitItem">
               <div class="lpCheck">✓</div>
-              <span>그녀에게 보내는 멘트 3개 (복사)</span>
+              <span>그녀에게 보내는 멘트 1개 (복사)</span>
             </div>
           </div>
 
@@ -1351,10 +1351,6 @@
             <div class="lpReviewItem">
               <div class="lpStars" aria-hidden="true">★★★★★</div>
               <p>"취향 몰라서 항상 망설였는데 이번엔 한 번에 골랐어요."</p>
-            </div>
-            <div class="lpReviewItem">
-              <div class="lpStars" aria-hidden="true">★★★★★</div>
-              <p>"30초 테스트로 고른 조합인데 실제 반응이 제일 좋았습니다."</p>
             </div>
           </div>
 
@@ -2509,9 +2505,9 @@
         mainList: main
       });
 
-      const basicMoodLine = `${styleLabel}한 ${paletteLabel} 톤이 어울려요.`;
+      const basicMoodLine = `${paletteLabel} 컬러 컨셉이 가장 잘 어울려요.`;
       const basicMessage = msgs.simple;
-      const basicOrderSentence = `${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
+      const basicOrderSentence = `${mainAsset.name} 중심으로 ${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
       const floristOrder = `주문문장: ${basicOrderSentence}`;
 
       const orderToneLabel = state.palette ? paletteLabel : tone;
@@ -2738,11 +2734,9 @@
           </div>
         </div>
 
-        <!-- [C] 무료: 기대감 형성 및 방향성 제시 -->
+        <!-- [C] 무료: 멘트 1개 -->
         <div class="box">
-          <h3>무료 결과 (기대감 형성 및 방향성 제시)</h3>
-          <p class="muted" style="margin-top:6px;">한 송이 추천 + 기본 무드 + 베이직 문장까지 먼저 확인하세요.</p>
-          <h3 style="margin-top:12px;">건넬 때 멘트 추천(1개)</h3>
+          <h3>건넬 때 멘트 추천(1개)</h3>
           <ol class="list msgList" style="margin-top:10px;">
             ${basicMsgList.map((m, i)=>`
               <li>
