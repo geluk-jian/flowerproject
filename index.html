@@ -2217,18 +2217,124 @@
       return best.hex;
     }
 
-    /* ===== FREE 대표 꽃 1송이 이미지 매핑 (너 레포 경로/파일명 기준) ===== */
-    const mainFlowerByPersonality = {
-      '러블리': { name: '라넌큘러스', img: 'image/ranunculus.png' },
-      '귀여움': { name: '거베라', img: 'image/gerbera.png' },
-      '활기':   { name: '튤립', img: 'image/tulip.png' },
-      '세련됨': { name: '카라(칼라)', img: 'image/calla.png' },
-      '미니멀': { name: '리시안셔스', img: 'image/lisianthus.png' },
-      '우아함': { name: '장미', img: 'image/rose.png' }
+    /* ===== FREE 대표 꽃 1송이 정밀 매핑 ===== */
+    const flowerAssetByKey = {
+      rose: { name: '장미', img: 'image/rose.png' },
+      calla: { name: '카라(칼라)', img: 'image/calla.png' },
+      gerbera: { name: '거베라', img: 'image/gerbera.png' },
+      lisianthus: { name: '리시안셔스', img: 'image/lisianthus.png' },
+      tulip: { name: '튤립', img: 'image/tulip.png' },
+      ranunculus: { name: '라넌큘러스', img: 'image/ranunculus.png' },
+      carnation: { name: '카네이션', img: 'image/carnation.png' },
+      hydrangea: { name: '수국', img: 'image/hydrangea.png' }
     };
 
-    function getMainFlowerAsset(personality){
-      return mainFlowerByPersonality[personality] || { name:'튤립', img:'image/tulip.png' };
+    const flowerKeyOrder = ['rose', 'calla', 'gerbera', 'lisianthus', 'tulip', 'ranunculus', 'carnation', 'hydrangea'];
+
+    function flowerKeyFromText(text){
+      const t = String(text || '');
+      if(t.includes('장미')) return 'rose';
+      if(t.includes('카라') || t.includes('칼라')) return 'calla';
+      if(t.includes('거베라')) return 'gerbera';
+      if(t.includes('리시안셔스') || t.includes('유스토마')) return 'lisianthus';
+      if(t.includes('튤립')) return 'tulip';
+      if(t.includes('라넌큘러스')) return 'ranunculus';
+      if(t.includes('카네이션')) return 'carnation';
+      if(t.includes('수국')) return 'hydrangea';
+      return null;
+    }
+
+    function addWeightedScores(scoreMap, keys, weight){
+      (keys || []).forEach((key)=>{
+        if(!scoreMap[key]) scoreMap[key] = 0;
+        scoreMap[key] += weight;
+      });
+    }
+
+    function getMainFlowerAsset({ personality, state, mainList }){
+      const scores = {};
+      flowerKeyOrder.forEach((key)=>{ scores[key] = 0; });
+
+      const personalityBoost = {
+        '러블리': ['ranunculus', 'rose', 'carnation'],
+        '귀여움': ['gerbera', 'tulip', 'carnation'],
+        '활기': ['tulip', 'gerbera', 'hydrangea'],
+        '세련됨': ['calla', 'lisianthus', 'hydrangea'],
+        '미니멀': ['lisianthus', 'calla', 'tulip'],
+        '우아함': ['rose', 'calla', 'hydrangea']
+      };
+      addWeightedScores(scores, personalityBoost[personality], 24);
+
+      const styleBoost = {
+        soft_feminine: ['lisianthus', 'ranunculus', 'tulip'],
+        romantic: ['rose', 'ranunculus', 'carnation'],
+        chic_elegant: ['calla', 'lisianthus', 'hydrangea'],
+        trendy: ['gerbera', 'hydrangea', 'tulip'],
+        minimal: ['lisianthus', 'calla', 'tulip']
+      };
+      addWeightedScores(scores, styleBoost[state.style], 18);
+
+      const paletteBoost = {
+        white_green: ['calla', 'lisianthus', 'hydrangea'],
+        pink_peach: ['rose', 'ranunculus', 'carnation'],
+        lilac: ['hydrangea', 'lisianthus', 'ranunculus'],
+        red_wine: ['rose', 'carnation', 'calla'],
+        yellow_orange: ['gerbera', 'tulip', 'ranunculus']
+      };
+      addWeightedScores(scores, paletteBoost[state.palette], 16);
+
+      const occasionBoost = {
+        '생일/기념일': ['rose', 'ranunculus', 'hydrangea'],
+        '사과(미안해)': ['lisianthus', 'calla', 'tulip'],
+        '축하(합격/승진/새출발)': ['tulip', 'gerbera', 'hydrangea'],
+        '첫 선물': ['tulip', 'lisianthus', 'carnation'],
+        '그냥(고맙고 응원)': ['carnation', 'gerbera', 'tulip']
+      };
+      addWeightedScores(scores, occasionBoost[state.occasion], 14);
+
+      const relationBoost = {
+        '썸/소개팅': ['tulip', 'ranunculus', 'lisianthus'],
+        '여자친구(연인)': ['rose', 'ranunculus', 'hydrangea'],
+        '아내/배우자': ['carnation', 'rose', 'calla'],
+        '친구/동료': ['gerbera', 'tulip', 'lisianthus']
+      };
+      addWeightedScores(scores, relationBoost[state.relation], 10);
+
+      const photoHabitBoost = {
+        sns_often: ['hydrangea', 'gerbera', 'rose'],
+        sns_sometimes: ['hydrangea', 'ranunculus', 'tulip'],
+        private_photo: ['calla', 'lisianthus', 'rose'],
+        no_photo: ['lisianthus', 'tulip', 'carnation']
+      };
+      addWeightedScores(scores, photoHabitBoost[state.photoHabit], 8);
+
+      const cautions = Array.isArray(state.cautions) ? state.cautions : [];
+      if(cautions.includes('no_rose')) scores.rose -= 100;
+      if(cautions.includes('allergy_sensitive') || cautions.includes('scent_light')){
+        scores.rose -= 35;
+        scores.ranunculus -= 12;
+        scores.calla += 12;
+        scores.lisianthus += 12;
+      }
+      if(cautions.includes('clean_over_flashy')){
+        scores.calla += 12;
+        scores.lisianthus += 10;
+        scores.gerbera -= 8;
+        scores.hydrangea -= 4;
+      }
+
+      (mainList || []).forEach((flower, idx)=>{
+        const key = flowerKeyFromText(flower);
+        if(!key) return;
+        scores[key] += (idx === 0 ? 34 : 26);
+      });
+
+      const bestKey = flowerKeyOrder.reduce((best, key)=>{
+        if(scores[key] > scores[best]) return key;
+        return best;
+      }, 'tulip');
+
+      return flowerAssetByKey[bestKey] || flowerAssetByKey.tulip;
     }
 
     /* ===== 다운로드: TXT ===== */
@@ -2397,7 +2503,11 @@
       const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
 
       // ====== Hero 요약 데이터 만들기 ======
-      const mainAsset = getMainFlowerAsset(personality);
+      const mainAsset = getMainFlowerAsset({
+        personality,
+        state,
+        mainList: main
+      });
 
       const orderToneLabel = state.palette ? paletteLabel : tone;
       const orderSentence = `대표 꽃 ${mainAsset.name} 포함해서 ${orderToneLabel}의 ${styleLabel} 무드 부케로 부탁드려요.`;
