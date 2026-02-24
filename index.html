@@ -1189,6 +1189,9 @@
       text-align:center;
       animation: lpFadeSlideIn 0.6s ease 0.7s both;
     }
+    #screenStart .lpReviewItem + .lpReviewItem{
+      margin-top: 12px;
+    }
     #screenStart .lpStars{
       color: #FFB800;
       font-size: 16px;
@@ -1198,6 +1201,7 @@
     #screenStart .lpSocialProof p{
       font-size: 13px;
       color: var(--text-light);
+      margin: 0;
     }
 
     /* 푸터 */
@@ -1336,8 +1340,22 @@
 
           <!-- 소셜 프루프 -->
           <div class="lpSocialProof">
-            <div class="lpStars" aria-hidden="true">★★★★★</div>
-            <p>"진짜 여친이 좋아했어요. 믿고 써요 🌷"</p>
+            <div class="lpReviewItem">
+              <div class="lpStars" aria-hidden="true">★★★★★</div>
+              <p>"진짜 여친이 좋아했어요. 믿고 써요 🌷"</p>
+            </div>
+            <div class="lpReviewItem">
+              <div class="lpStars" aria-hidden="true">★★★★★</div>
+              <p>"꽃집 DM 그대로 보냈는데 답장 속도가 달라졌어요."</p>
+            </div>
+            <div class="lpReviewItem">
+              <div class="lpStars" aria-hidden="true">★★★★★</div>
+              <p>"취향 몰라서 항상 망설였는데 이번엔 한 번에 골랐어요."</p>
+            </div>
+            <div class="lpReviewItem">
+              <div class="lpStars" aria-hidden="true">★★★★★</div>
+              <p>"30초 테스트로 고른 조합인데 실제 반응이 제일 좋았습니다."</p>
+            </div>
           </div>
 
         </main>
@@ -1456,7 +1474,7 @@
         dots = Array.from(dotsW.querySelectorAll('.dot'));
       }
 
-      setInterval(()=> goTo(idx + 1), 3500);
+      setInterval(()=> goTo(idx + 1), 1500);
     }
 
     function escapeHtml(value) {
