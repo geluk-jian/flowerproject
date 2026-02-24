@@ -2757,11 +2757,6 @@
           <button id="btnOpenPaid" class="primaryFull paidCta" type="button">유료 추천 열기</button>
         </div>
 
-        <div class="box paidResultBox" id="paidResultBox" style="display:none;">
-          <h3>유료 추천 결과</h3>
-          <div class="paidResultBody" id="paidResultBody">${paidResultHtml}</div>
-        </div>
-
         <div class="btnrow" style="margin-top:16px;">
           <button id="btnAgain">다시 하기</button>
           <button class="secondary" id="btnHome">처음으로</button>
@@ -2795,61 +2790,26 @@
       });
 
       const paidUpsellBoxEl = $('paidUpsellBox');
-      const paidResultBoxEl = $('paidResultBox');
       const btnOpenPaidEl = $('btnOpenPaid');
-      const bindPaidResultActions = () => {
-        const paidMsgCopyBtns = Array.from(document.querySelectorAll('.paidMsgCopy'));
-        paidMsgCopyBtns.forEach((btn)=>{
-          const idx = Number(btn.dataset.idx);
-          const text = premiumMsgList[idx];
-          if(!text) return;
-          btn.onclick = async ()=>{
-            const ok = await copyText(text);
-            toast(ok ? '유료 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-          };
-        });
-
-        const btnCopyLinkEl = $('btnCopyLink');
-        if(btnCopyLinkEl){
-          btnCopyLinkEl.onclick = async ()=>{
-            const shareText = `꽃을 만지는 누나 결과 링크: ${url.toString()}`;
-            const ok = await copyText(shareText);
-            toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-          };
-        }
-
-        const btnCopyStoryTipShortEl = $('btnCopyStoryTipShort');
-        if(btnCopyStoryTipShortEl){
-          btnCopyStoryTipShortEl.onclick = async ()=>{
-            const ok = await copyText(storyTipShort);
-            toast(ok ? '짧은 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-          };
-        }
-        const btnCopyStoryTipLongEl = $('btnCopyStoryTipLong');
-        if(btnCopyStoryTipLongEl){
-          btnCopyStoryTipLongEl.onclick = async ()=>{
-            const ok = await copyText(storyTipLong);
-            toast(ok ? '긴 멘트를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-          };
-        }
-      };
-      const openPaidResult = () => {
-        if(!paidResultBoxEl) return;
-        paidResultBoxEl.style.display = 'block';
-        bindPaidResultActions();
-        paidResultBoxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const openPaidGuide = () => {
+        try {
+          sessionStorage.setItem('paid_detail_html', paidResultHtml);
+        } catch(e){}
+        const guideUrl = new URL('./guide.html', location.href);
+        if (code) guideUrl.searchParams.set('r', code);
+        location.href = guideUrl.toString();
       };
 
       if (btnOpenPaidEl) {
         btnOpenPaidEl.onclick = (e) => {
           e.stopPropagation();
-          openPaidResult();
+          openPaidGuide();
         };
       }
       if (paidUpsellBoxEl) {
         paidUpsellBoxEl.onclick = (e) => {
           if (e.target && e.target.closest && e.target.closest('#btnOpenPaid')) return;
-          openPaidResult();
+          openPaidGuide();
         };
       }
 

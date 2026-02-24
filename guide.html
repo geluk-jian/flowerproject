@@ -375,6 +375,50 @@
       color: var(--text-mid);
       font-weight: 700;
     }
+
+    .moved-paid-detail {
+      display: none;
+      margin-bottom: 16px;
+    }
+    .moved-paid-detail.show {
+      display: block;
+    }
+    .moved-paid-detail-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 0 0 10px;
+    }
+    .moved-paid-detail .box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+    .moved-paid-detail .msgCopy,
+    .moved-paid-detail .secondary {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .moved-paid-detail .msgList {
+      list-style: decimal;
+      padding-left: 20px;
+    }
+    .moved-paid-detail .msgList li {
+      margin-bottom: 8px;
+    }
+    .moved-paid-detail .msgText {
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .moved-paid-detail .btnrow {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -465,6 +509,11 @@
       </div>
       <img id="paidResultImage" class="result-image" alt="추천 꽃다발 이미지" loading="lazy" />
       <div class="result-body" id="paidResultBody"></div>
+    </section>
+
+    <section class="moved-paid-detail" id="movedPaidDetail">
+      <h3 class="moved-paid-detail-title">유료 추천 상세</h3>
+      <div id="movedPaidDetailBody"></div>
     </section>
   </main>
 
@@ -625,6 +674,78 @@
       return withPalette.replace(/\n/g, '<br/>');
     }
 
+    async function copyText(text){
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      }catch(e){}
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      }catch(e){
+        return false;
+      }
+    }
+
+    function bindMovedPaidActions(root){
+      if(!root) return;
+
+      root.querySelectorAll('.paidMsgCopy').forEach((btn)=>{
+        btn.onclick = async () => {
+          const text = btn.closest('li')?.querySelector('.msgText')?.textContent?.trim() || '';
+          if(text) await copyText(text);
+        };
+      });
+
+      const btnCopyLink = root.querySelector('#btnCopyLink');
+      if(btnCopyLink){
+        btnCopyLink.onclick = async () => {
+          await copyText(location.href);
+        };
+      }
+
+      const btnCopyStoryTipShort = root.querySelector('#btnCopyStoryTipShort');
+      if(btnCopyStoryTipShort){
+        btnCopyStoryTipShort.onclick = async () => {
+          const text = root.querySelector('#storyTipShort')?.textContent?.trim() || '';
+          if(text) await copyText(text);
+        };
+      }
+
+      const btnCopyStoryTipLong = root.querySelector('#btnCopyStoryTipLong');
+      if(btnCopyStoryTipLong){
+        btnCopyStoryTipLong.onclick = async () => {
+          const text = root.querySelector('#storyTipLong')?.textContent?.trim() || '';
+          if(text) await copyText(text);
+        };
+      }
+    }
+
+    function renderMovedPaidDetail(){
+      const wrap = document.getElementById('movedPaidDetail');
+      const body = document.getElementById('movedPaidDetailBody');
+      if(!wrap || !body) return;
+      let html = '';
+      try{
+        html = sessionStorage.getItem('paid_detail_html') || '';
+      }catch(e){}
+      if(!html) return;
+      body.innerHTML = html;
+      wrap.classList.add('show');
+      bindMovedPaidActions(body);
+    }
+
     async function runPaidGuide(){
       const btn = document.getElementById('btnRunPaid');
       const card = document.getElementById('paidResultCard');
@@ -679,6 +800,7 @@
     }
 
     document.getElementById('btnRunPaid')?.addEventListener('click', runPaidGuide);
+    renderMovedPaidDetail();
   </script>
 </body>
 </html>
