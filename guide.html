@@ -918,6 +918,14 @@
 
     document.getElementById('btnRunPaid')?.addEventListener('click', runPaidGuide);
     renderMovedPaidDetail();
+
+    // Auto-run when arriving from the paid CTA
+    try {
+      const params = new URLSearchParams(location.search);
+      if (params.get('auto') === '1') {
+        setTimeout(runPaidGuide, 0);
+      }
+    } catch (e) {}
   </script>
 </body>
 </html>
