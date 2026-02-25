@@ -1547,43 +1547,53 @@
       about: {
         title: '소개',
         lines: [
-          '이 사이트는 꽃 선택을 30초 질문으로 정리해주는 무료 가이드입니다.',
-          '결과는 꽃집 주문에 바로 전달할 수 있는 톤/포장/멘트 힌트를 제공합니다.'
+          '꽃 선택이 어려운 분들을 위해 10년차 플로리스트 누나가 30초 만에 취향을 분석해 드립니다.',
+          '기본 추천과 꽃집 주문 멘트는 무료로 제공되며, 더 완벽한 선물을 위한 상세 가이드(이미지, 맞춤 멘트, 컬러 팔레트 등)는 유료로 제공됩니다.'
         ]
       },
       how: {
         title: '이용방법',
         lines: [
-          '1) 질문에 답하기: 관계/상황/무드를 고릅니다.',
-          '2) 결과 확인: 꽃 조합과 멘트를 확인합니다.',
-          '3) 꽃집 전달: 복사한 문장으로 빠르게 주문합니다.'
+          '1) 질문에 답하기: 받는 분과의 관계, 상황, 무드를 고릅니다.',
+          '2) 결과 확인: 무료로 추천 꽃과 기본 멘트를 확인합니다.',
+          '3) 디테일 확인(선택): 유료 결제 시 시안 이미지와 상세 포장 가이드를 확인합니다.',
+          '4) 꽃집 전달: 복사한 주문 문장으로 내 주변 꽃집에 빠르고 정확하게 주문합니다.'
         ]
       },
       guide: {
         title: '가이드',
         lines: [
-          '핵심은 무드 + 톤 + 금기 3가지를 함께 말하는 것입니다.',
-          '향/알레르기/피하고 싶은 꽃이 있으면 먼저 알려주세요.'
+          '주문 핵심은 "무드 + 톤 + 주의사항" 3가지를 함께 말하는 것입니다.',
+          '제공해 드리는 주문 문장을 그대로 복사해서 보내시면 가장 정확합니다.',
+          '꽃집 방문 전 향/알레르기/피하고 싶은 꽃이 있다면 꼭 한 번 더 말씀해 주세요.'
         ]
       },
       faq: {
         title: 'FAQ',
         lines: [
-          'Q. 결과가 매번 같나요? A. 선택한 조건에 따라 달라집니다.',
-          'Q. 바로 주문 가능한가요? A. 네, 예산/재고에 맞게 미세 조정하면 됩니다.'
+          'Q. 실제 꽃이 배송되는 건가요?',
+          'A. 아닙니다. 본 서비스는 꽃집에 직접 주문할 수 있도록 "맞춤형 꽃 디자인과 주문 멘트"를 제공하는 디지털 가이드입니다.',
+          'Q. 유료 결제하면 무엇이 좋나요?',
+          'A. 텍스트로만 제공되던 무료 결과에 더해, 참고용 꽃다발 이미지, 상황별 디테일 멘트 3종, 플로리스트용 고급 주문서가 추가로 열람됩니다.',
+          'Q. 결제 후 환불이 되나요?',
+          'A. 디지털 콘텐츠 특성상 결제 완료 즉시 결과가 노출되므로 결제 이후에는 환불이 불가합니다.'
         ]
       },
       policy: {
         title: '정책',
         lines: [
-          '개인정보: 입력값은 브라우저 내에서 처리됩니다.',
-          '정책 문서: 개인정보처리방침, 이용약관 페이지를 확인해주세요.'
+          '개인정보: 고객님이 입력하신 성향 데이터는 브라우저 내에서만 안전하게 처리됩니다.',
+          '환불정책: 본 서비스는 즉시 열람되는 디지털 상품으로 전자상거래법에 의거 결제 후 환불이 제한됩니다.',
+          '상세 정책은 하단의 이용약관 및 개인정보처리방침을 확인해 주세요.'
         ]
       },
       contact: {
         title: '문의',
         lines: [
-          '피드백/문의 메일: tone_art@hanmail.net'
+          '결제 오류 및 서비스 이용 문의는 아래 이메일로 부탁드립니다.',
+          '• 이메일: tone_art@hanmail.net',
+          '• 상담시간: 평일 10:00 ~ 17:00 (주말 및 공휴일 휴무)',
+          '순차적으로 확인하여 답변 드리겠습니다.'
         ]
       }
     };
@@ -3243,23 +3253,37 @@
 
   </style>
 
-  <section class="service-period" aria-label="서비스 제공기간 안내">
-    <div class="service-period__box">
-      <strong>서비스 제공기간</strong>:
-      온라인상품 구매 후 바로 사용 가능(결제 완료 즉시 사용)
+  <section class="service-period" aria-label="서비스 제공기간 및 환불 안내" style="max-width: 760px; margin: 0 auto; padding: 0 16px;">
+    <div class="service-period__box" style="font-size: 13px;">
+      <strong>[서비스 제공 및 환불 안내]</strong><br>
+      • <b>제공기간</b>: 결제 완료 즉시 웹페이지 내에서 유료 추천 결과 제공<br>
+      • <b>환불규정</b>: 본 상품은 디지털 콘텐츠로, <b>결제 후 서비스(결과)가 즉시 제공/열람되므로 결제 완료 후에는 전자상거래법에 의거하여 청약철회 및 환불이 불가</b>합니다.
     </div>
   </section>
 
-  <footer style="padding:24px 16px; border-top:1px solid #eee; font-size:13px; line-height:1.6;">
-    <div style="max-width:960px; margin:0 auto;">
+  <footer style="padding:24px 16px; border-top:1px solid #eee; font-size:13px; line-height:1.6; background-color: #fff;">
+    <div style="max-width:760px; margin:0 auto;">
+      
+      <div style="margin-bottom: 16px; display:flex; gap: 14px; font-weight:750; flex-wrap:wrap;">
+        <a href="/terms.html" style="color:#0f172a; text-decoration:underline; text-underline-offset:3px;">이용약관</a>
+        <a href="/privacy.html" style="color:#0f172a; text-decoration:underline; text-underline-offset:3px;">개인정보처리방침</a>
+        <a href="/refund.html" style="color:#0f172a; text-decoration:underline; text-underline-offset:3px;">서비스제공/환불규정</a>
+      </div>
+
       <div style="font-weight:700; margin-bottom:8px;">사업자 정보</div>
-      <div><b>상호명</b>: 톤아트</div>
-      <div><b>대표자명</b>: 김지안</div>
-      <div><b>사업장주소</b>: 서울시 서초구 마방로6길 13 범정빌딩 지하1층</div>
-      <div><b>사업자등록번호</b>: 886-08-00225</div>
-      <div><b>대표전화번호</b>: 010-3494-7141</div>
-      <div><b>대표이메일</b>: tone_art@hanmail.net</div>
+      <div style="color: #475569;">
+        <div><b>상호명</b>: 톤아트</div>
+        <div><b>대표자명</b>: 김지안</div>
+        <div><b>사업장주소</b>: 서울시 서초구 마방로6길 13 범정빌딩 지하1층</div>
+        <div><b>사업자등록번호</b>: 886-08-00225</div>
+        <div><b>대표전화번호</b>: (번호 발급 후 수정 예정)</div>
+        <div><b>대표이메일</b>: tone_art@hanmail.net</div>
+      </div>
+
+      <div style="margin-top: 16px; color: #94a3b8; font-size: 12px;">
+        <a href="https://instagram.com/tone_art" target="_blank" rel="noopener noreferrer" style="color:#94a3b8; text-decoration:none;">@tone_art</a> · © TONE ART
+      </div>
     </div>
   </footer>
-</body>
+  </body>
 </html>
