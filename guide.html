@@ -718,6 +718,114 @@
       ].join('\n');
     }
 
+    function labelFromMap(map, value, fallback){
+      if (!value) return fallback;
+      return map[value] || value || fallback;
+    }
+
+    function buildLocalPaidText(state){
+      const relationMap = {
+        '썸/소개팅': '썸/소개팅',
+        '여자친구(연인)': '연인',
+        '아내/배우자': '배우자',
+        '친구/동료': '친구/동료'
+      };
+      const occasionMap = {
+        '생일/기념일': '생일/기념일',
+        '사과(미안해)': '사과',
+        '축하(합격/승진/새출발)': '축하',
+        '첫 선물': '첫 선물',
+        '그냥(고맙고 응원)': '고마움/응원'
+      };
+      const styleMap = {
+        soft_feminine: '청순/여리',
+        romantic: '러블리',
+        chic_elegant: '세련/우아',
+        trendy: '트렌디/힙',
+        minimal: '미니멀/깔끔'
+      };
+      const photoMap = {
+        sns_often: '사진발 중요',
+        sns_sometimes: '가끔 촬영',
+        private_photo: '기록용 위주',
+        no_photo: '사진 관심 없음'
+      };
+      const cautionMap = {
+        scent_light: '향 약한 꽃 선호',
+        allergy_sensitive: '알레르기/민감',
+        no_rose: '장미 제외',
+        clean_over_flashy: '화려함보단 깔끔',
+        none: '없음'
+      };
+      const paletteMeta = getPaletteMeta(state && state.palette);
+
+      const relation = labelFromMap(relationMap, state && state.relation, '받는 분');
+      const occasion = labelFromMap(occasionMap, state && state.occasion, '특별한 날');
+      const style = labelFromMap(styleMap, state && (state.style || state.personality), '무난/깔끔');
+      const photoHabit = labelFromMap(photoMap, state && state.photoHabit, '무난');
+      const paletteLabel = paletteMeta ? paletteMeta.label : '선택 안함';
+
+      const cautionsRaw = Array.isArray(state && state.cautions) ? state.cautions : [];
+      const cautions = (cautionsRaw.length === 0 || cautionsRaw.includes('none'))
+        ? ['없음']
+        : cautionsRaw.map(v => labelFromMap(cautionMap, v, v));
+
+      const toneByStyle = {
+        '청순/여리': '맑고 여리한 톤',
+        '러블리': '달콤하고 사랑스러운 톤',
+        '세련/우아': '도시적이고 품격 있는 톤',
+        '트렌디/힙': '감각적이고 쿨한 톤',
+        '미니멀/깔끔': '담백하고 정돈된 톤'
+      };
+      const wrapByPhoto = {
+        '사진발 중요': '광택/리본 포인트로 사진발 강조',
+        '가끔 촬영': '포인트 1~2개만 가볍게',
+        '기록용 위주': '실용적이고 단정한 포장',
+        '사진 관심 없음': '간결하고 깔끔한 포장'
+      };
+
+      const repFlowerByPalette = {
+        '화이트·그린': '리시안서스 · 유칼립투스',
+        '핑크·피치': '피치 장미 · 작약',
+        '연보라·라일락': '라벤더 톤 리시안서스',
+        '레드·버건디': '버건디 장미 · 카네이션',
+        '옐로·오렌지': '거베라 · 미니 해바라기'
+      };
+      const repFlower = repFlowerByPalette[paletteLabel] || '계절 믹스 플라워';
+
+      return [
+        '[꽃다발 설명]',
+        `${relation}에게 ${occasion} 분위기로 맞춘 ${style} 무드야.`,
+        `${paletteLabel} 톤으로 정리하면 분위기 깨끗하고 선명하게 잡혀.`,
+        '',
+        '[대표꽃 · 컨셉 · 이유]',
+        `대표꽃: ${repFlower}`,
+        `컨셉: ${style} + ${paletteLabel}`,
+        `이유: ${occasion}에는 이 톤이 가장 실패 없고 안정적이야.`,
+        '',
+        '[멘트 5개]',
+        `1. "${occasion}에 딱 어울리는 색감으로 준비했어."`,
+        `2. "${relation} 생각하면서 고른 무드야, 부담 없이 받아줘."`,
+        `3. "${paletteLabel} 톤이라 오래 봐도 질리지 않을 거야."`,
+        `4. "${style} 느낌으로 정리했으니까 자연스럽게 예뻐."`,
+        `5. "오늘은 그냥 기분 좋게 받아줬으면 해."`,
+        '',
+        '[제작 가이드]',
+        `톤: ${toneByStyle[style] || '무난하고 깔끔한 톤'}`,
+        `포장: ${wrapByPhoto[photoHabit] || '심플 포장'}`,
+        `조합: ${paletteLabel} 중심으로 2~3톤 믹스`,
+        `대체 규칙: 계절 꽃으로 대체하되 톤만 유지`,
+        '',
+        '[꽃집 전달 문장]',
+        `"${occasion} 선물이에요. ${style} 무드로 ${paletteLabel} 톤 중심으로 부탁드리고, ${cautions.join(', ')}만 신경 써 주세요."`,
+        '',
+        '[주의사항]',
+        `· 주의사항: ${cautions.join(', ')}`,
+        '· 포인트는 1~2개만, 과하면 촌스러워져.',
+        '· 향 강한 꽃은 가능하면 피해서 가볍게.'
+      ].join('\n');
+    }
+
     function escapeHtml(value){
       return String(value || '')
         .replace(/&/g, '&amp;')
@@ -873,6 +981,8 @@
 
       const state = getStateFromQuery();
       const prompt = buildPromptFromState(state);
+      const params = new URLSearchParams(location.search);
+      const isAuto = params.get('auto') === '1';
 
       btn.disabled = true;
       btn.style.opacity = '0.7';
@@ -885,6 +995,16 @@
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       try {
+        if (isAuto) {
+          const text = buildLocalPaidText(state);
+          status.textContent = '완료';
+          body.className = 'result-body';
+          body.innerHTML = formatPaidText(text, state);
+          imageEl.classList.remove('show');
+          imageEl.removeAttribute('src');
+          return;
+        }
+
         const res = await fetch('/api/pro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
