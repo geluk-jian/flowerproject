@@ -2023,7 +2023,7 @@
         mood: ['따뜻', '사랑스러움', '부드러움'],
         tone: '핑크/크림/연한 코랄 중심',
         wrap: '파스텔 포장 + 얇은 리본(과하지 않게)',
-        flowers: { main: ['튤립','라넌큘러스','리시안셔스(유스토마)','거베라(핑크)'], sub: ['스프레이 카네이션','알스트로메리아'], texture: ['유칼립투스','왁스플라워'] },
+        flowers: { main: ['튤립','라넌큘러스','리시안셔스(유스토마)','거베라(핑크)','장미'], sub: ['스프레이 카네이션','알스트로메리아'], texture: ['유칼립투스','왁스플라워'] },
         meaning: '‘다정함’과 ‘설렘’ 무드'
       },
       '세련됨': {
@@ -2031,7 +2031,7 @@
         mood: ['깔끔', '세련', '정돈'],
         tone: '화이트/그린 + 톤다운 포인트',
         wrap: '무광 종이 + 톤다운 포장(정돈된 느낌)',
-        flowers: { main: ['리시안셔스(화이트)','카라(칼라)','아네모네','튤립(화이트)'], sub: ['알스트로메리아','스카비오사'], texture: ['유칼립투스','러스커스(그린)'] },
+        flowers: { main: ['리시안셔스(화이트)','카라(칼라)','아네모네','튤립(화이트)','수국'], sub: ['알스트로메리아','스카비오사'], texture: ['유칼립투스','러스커스(그린)'] },
         meaning: '‘존중’과 ‘센스’ 무드'
       },
       '귀여움': {
@@ -2039,7 +2039,7 @@
         mood: ['발랄', '명랑', '귀여움'],
         tone: '밝은 컬러(옐로/핑크/라이트 오렌지) 1~2색',
         wrap: '컬러 포인트 포장(과하지 않게)',
-        flowers: { main: ['거베라','튤립','라넌큘러스'], sub: ['알스트로메리아','스프레이 카네이션'], texture: ['유칼립투스','왁스플라워'] },
+        flowers: { main: ['거베라','튤립','라넌큘러스','카네이션'], sub: ['알스트로메리아','스프레이 카네이션'], texture: ['유칼립투스','왁스플라워'] },
         meaning: '‘기분 업’과 ‘응원’ 무드'
       },
       '미니멀': {
@@ -2047,7 +2047,7 @@
         mood: ['심플', '담백', '차분'],
         tone: '원톤(화이트/크림/연핑크 중 1) + 그린 최소',
         wrap: '무광/크라프트 계열 + 리본 최소',
-        flowers: { main: ['리시안셔스(유스토마)','튤립','아네모네'], sub: ['알스트로메리아'], texture: ['유칼립투스','러스커스(그린)'] },
+        flowers: { main: ['리시안셔스(유스토마)','튤립','아네모네','수국'], sub: ['알스트로메리아'], texture: ['유칼립투스','러스커스(그린)'] },
         meaning: '‘편안함’과 ‘정성’ 무드'
       },
       '우아함': {
@@ -2055,7 +2055,7 @@
         mood: ['우아', '차분', '고급'],
         tone: '크림/화이트/톤다운 핑크 + 그린',
         wrap: '톤다운 포장 + 고급스러운 리본(과하지 않게)',
-        flowers: { main: ['리시안셔스(유스토마)','라넌큘러스','튤립'], sub: ['스카비오사','알스트로메리아'], texture: ['유칼립투스','왁스플라워'] },
+        flowers: { main: ['리시안셔스(유스토마)','라넌큘러스','튤립','카라(칼라)','장미'], sub: ['스카비오사','알스트로메리아'], texture: ['유칼립투스','왁스플라워'] },
         meaning: '‘품격’과 ‘존중’ 무드'
       },
       '활기': {
@@ -2063,7 +2063,7 @@
         mood: ['에너지', '밝음', '활기'],
         tone: '옐로/라이트 오렌지 + 화이트로 정리',
         wrap: '밝은 포인트 포장 + 깔끔한 마감',
-        flowers: { main: ['해바라기','거베라','튤립'], sub: ['알스트로메리아','스프레이 카네이션'], texture: ['유칼립투스','러스커스(그린)'] },
+        flowers: { main: ['해바라기','거베라','튤립','수국'], sub: ['알스트로메리아','스프레이 카네이션'], texture: ['유칼립투스','러스커스(그린)'] },
         meaning: '‘응원’과 ‘기분전환’ 무드'
       }
     };
@@ -2090,23 +2090,70 @@
       return 'chic';
     }
 
-    function mapPersonality(brightness, style){
+    function mapPersonality(brightness, style, palette, occasion, photoHabit){
       const b = normalizeBrightness(brightness);
       const s = normalizeStyle(style);
-      const key = `${b}|${s}`;
-      const table = {
-        'bright|cute':'러블리',
-        'bright|chic':'세련됨',
-        'calm|chic':'미니멀',
-        'calm|cute':'러블리'
-      };
-      return table[key] || '세련됨';
+
+      if(style === 'trendy'){
+        if(palette === 'yellow_orange' || occasion === '축하(합격/승진/새출발)') return '활기';
+        return '귀여움';
+      }
+      if(style === 'romantic') return '러블리';
+      if(style === 'soft_feminine'){
+        if(palette === 'lilac' || palette === 'red_wine') return '우아함';
+        return '러블리';
+      }
+      if(style === 'minimal'){
+        if(palette === 'white_green' || photoHabit === 'no_photo') return '미니멀';
+        return '세련됨';
+      }
+      if(s === 'chic'){
+        if(palette === 'yellow_orange') return '활기';
+        if(palette === 'lilac' || palette === 'red_wine') return '우아함';
+        if(palette === 'pink_peach' && occasion === '생일/기념일') return '러블리';
+        return b === 'calm' ? '미니멀' : '세련됨';
+      }
+
+      if(s === 'cute') return b === 'calm' ? '러블리' : '귀여움';
+      return '세련됨';
     }
 
-    function pickFlowers(profile){
-      const main = (profile.flowers.main || ['리시안셔스(유스토마)','튤립']).slice(0,2);
-      const sub = (profile.flowers.sub || ['알스트로메리아','스프레이 카네이션']).slice(0,2);
-      const tex = (profile.flowers.texture || ['유칼립투스','러스커스(그린)']).slice(0,2);
+    function hashString(input){
+      let h = 2166136261;
+      const str = String(input || '');
+      for(let i=0; i<str.length; i++){
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return (h >>> 0);
+    }
+
+    function rotatePick(pool, count, seed){
+      const list = Array.isArray(pool) ? pool.filter(Boolean) : [];
+      if(list.length <= count) return list.slice();
+      const start = seed % list.length;
+      const rotated = list.slice(start).concat(list.slice(0, start));
+      return rotated.slice(0, count);
+    }
+
+    function pickFlowers(profile, currentState){
+      const seedBase = [
+        currentState.relation,
+        currentState.occasion,
+        currentState.style,
+        currentState.palette,
+        currentState.photoHabit,
+        (currentState.cautions || []).join(',')
+      ].join('|');
+      const seed = hashString(seedBase);
+
+      const mainPool = profile.flowers.main || ['리시안셔스(유스토마)','튤립','장미'];
+      const subPool = profile.flowers.sub || ['알스트로메리아','스프레이 카네이션'];
+      const texPool = profile.flowers.texture || ['유칼립투스','러스커스(그린)'];
+
+      const main = rotatePick(mainPool, 2, seed + 11);
+      const sub = rotatePick(subPool, 2, seed + 23);
+      const tex = rotatePick(texPool, 2, seed + 37);
       return { main, sub, tex };
     }
 
@@ -2437,10 +2484,10 @@
     }
 
     function showResult(){
-      const personality = mapPersonality(state.brightness, state.style);
+      const personality = mapPersonality(state.brightness, state.style, state.palette, state.occasion, state.photoHabit);
       const profile = profiles[personality];
 
-      const { main, sub, tex } = pickFlowers(profile);
+      const { main, sub, tex } = pickFlowers(profile, state);
       const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
 
       let tone = profile.tone;
