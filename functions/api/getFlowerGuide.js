@@ -41,7 +41,7 @@ const paletteMap = {
   }
 };
 
-export async function onRequestPost(context) {
+export async function onRequest(context) {
   const { request, env } = context;
 
   let body = {};
