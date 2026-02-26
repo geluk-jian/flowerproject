@@ -1410,7 +1410,7 @@
 
           <div class="btnrow">
             <button class="secondary" id="btnBack" type="button">이전</button>
-            <button id="btnNext" type="button" style="display:none;" onclick="goNext()">다음</button>
+      <button id="btnNext" type="button" style="display:none;">다음</button>
             <button class="secondary" id="btnRestart" type="button">처음으로</button>
           </div>
 
@@ -1485,6 +1485,30 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function nl2brSafe(text){
+      // 1) HTML escape 2) 줄바꿈만 <br>로 변환
+      return escapeHtml(text || '').replace(/\n/g, '<br>');
+    }
+
+    function sanitizeUrl(url){
+      // img src 등에 들어갈 URL은 http/https/data만 허용(나머지는 차단)
+      try{
+        const u = new URL(String(url || ''), location.origin);
+        const allowed = ['http:', 'https:', 'data:'];
+        if(!allowed.includes(u.protocol)) return '';
+        return u.href;
+      }catch(e){
+        return '';
+      }
+    }
+
+    function sanitizeHex(hex){
+      const h = String(hex || '').trim();
+      // #RGB 또는 #RRGGBB만 허용
+      if(/^#([0-9a-fA-F]{3}){1,2}$/.test(h)) return h;
+      return '#22c55e'; // fallback
     }
 
     function toast(msg){
@@ -2882,6 +2906,13 @@
       }
 
       function renderVipResult(data) {
+        const messages = Array.isArray(data.messages) ? data.messages : [];
+        const palettes = Array.isArray(data.palettes) ? data.palettes : [];
+
+        // 이미지 URL 안전 처리 (비정상 스킴 차단)
+        const safeImg = sanitizeUrl(data.imageUrl);
+        const heroImg = safeImg || fallbackSampleImage(data.moodLabel || '꽃다발 시안');
+
         const paidResultHtml = `
     <style>
       .vip-container { display: flex; flex-direction: column; gap: 20px; padding: 10px 0; }
@@ -2904,35 +2935,35 @@
 
     <div class="vip-container">
       <div class="vip-box vip-hero">
-        <img src="${escapeHtml(data.imageUrl)}" alt="꽃다발 시안" class="vip-hero-img" />
+        <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
         <div class="vip-hero-text">
-          ${escapeHtml(data.targetName)}에게 어울리는 세련되고 우아한<br>
-          <span style="color:#22c55e;">${escapeHtml(data.moodLabel)} 무드</span>입니다.
+          ${escapeHtml(data.targetName || '그분')}에게 어울리는 세련되고 우아한<br>
+          <span style="color:#22c55e;">${escapeHtml(data.moodLabel || '추천')} 무드</span>입니다.
         </div>
       </div>
 
       <div class="vip-box">
         <h3>📋 1초 복붙! 플로리스트 주문서</h3>
-        <div class="vip-order-text" id="vipOrderContent">${data.orderText.replace(/\n/g, '<br>')}</div>
-        <button class="vip-btn-full" onclick="copyText(document.getElementById('vipOrderContent').innerText); alert('주문서가 복사되었습니다!');">주문서 전체 복사하기</button>
+        <div class="vip-order-text" id="vipOrderContent">${nl2brSafe(data.orderText)}</div>
+        <button class="vip-btn-full" id="btnCopyVipOrder" type="button">주문서 전체 복사하기</button>
       </div>
 
       <div class="vip-box">
         <h3>🎨 시크릿 디테일 가이드</h3>
         <div class="vip-detail-row">
           <div class="vip-detail-label">포장</div>
-          <div class="vip-detail-value">${escapeHtml(data.wrapGuide)}</div>
+          <div class="vip-detail-value">${escapeHtml(data.wrapGuide || '')}</div>
         </div>
         <div class="vip-detail-row">
           <div class="vip-detail-label">꽃조합</div>
-          <div class="vip-detail-value">${data.flowerMix.replace(/\n/g, '<br>')}</div>
+          <div class="vip-detail-value">${nl2brSafe(data.flowerMix)}</div>
         </div>
 
         <div class="palette" style="margin-top:14px;">
-          ${(data.palettes || []).map(p => `
+          ${palettes.map(p => `
             <div class="swatch">
-              <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
-              <div class="swatchMeta">${escapeHtml(p.name)}</div>
+              <div class="swatchColor" style="background:${sanitizeHex(p.hex)};"></div>
+              <div class="swatchMeta">${escapeHtml(p.name || '')}</div>
             </div>
           `).join('')}
         </div>
@@ -2941,10 +2972,10 @@
       <div class="vip-box">
         <h3>💬 분위기 살려주는 멘트 추천</h3>
         <ul class="vip-msg-list">
-          ${(data.messages || []).map(msg => `
+          ${messages.map((msg, i) => `
             <li class="vip-msg-item">
               <div class="vip-msg-text">${escapeHtml(msg)}</div>
-              <button class="vip-msg-btn" onclick="copyText('${escapeHtml(msg).replace(/'/g, "\\'")}'); alert('복사 완료!');">복사</button>
+              <button class="vip-msg-btn" type="button" data-idx="${i}">복사</button>
             </li>
           `).join('')}
         </ul>
@@ -2954,17 +2985,38 @@
         <h3>💡 실전 참고 팁</h3>
         <div class="vip-detail-row">
           <div class="vip-detail-label" style="width:70px;">예상가격</div>
-          <div class="vip-detail-value">${escapeHtml(data.priceInfo)}</div>
+          <div class="vip-detail-value">${escapeHtml(data.priceInfo || '')}</div>
         </div>
         <div class="vip-detail-row">
           <div class="vip-detail-label" style="width:70px;">꽃의 의미</div>
-          <div class="vip-detail-value">${escapeHtml(data.meaning)}</div>
+          <div class="vip-detail-value">${escapeHtml(data.meaning || '')}</div>
         </div>
       </div>
     </div>
   `;
+
         $('resultArea').innerHTML = paidResultHtml;
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // ✅ 주문서 복사 버튼(기존 inline onclick 제거)
+        const btnCopyVipOrder = document.getElementById('btnCopyVipOrder');
+        if(btnCopyVipOrder){
+          btnCopyVipOrder.addEventListener('click', async ()=>{
+            const text = document.getElementById('vipOrderContent')?.innerText || '';
+            const ok = await copyText(text);
+            toast(ok ? '주문서를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          });
+        }
+
+        // ✅ 멘트 복사 버튼들(문장에 따옴표/특수문자 있어도 안 깨짐)
+        document.querySelectorAll('.vip-msg-btn').forEach(btn=>{
+          btn.addEventListener('click', async ()=>{
+            const i = Number(btn.dataset.idx);
+            const text = messages[i] || '';
+            const ok = await copyText(text);
+            toast(ok ? '복사했어!' : '복사 실패(브라우저 권한 확인)');
+          });
+        });
       }
 
       function showLoadingUI() {
