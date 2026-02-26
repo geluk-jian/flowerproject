@@ -2858,26 +2858,158 @@
 
       const paidUpsellBoxEl = $('paidUpsellBox');
       const btnOpenPaidEl = $('btnOpenPaid');
-      const openPaidGuide = () => {
+
+      async function fetchToneArtAPI(userState) {
+        const apiUrl = "https://asia-northeast3-대표님프로젝트명.cloudfunctions.net/getFlowerGuide";
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            relation: userState.relation,
+            occasion: userState.occasion,
+            style: userState.style,
+            palette: userState.palette,
+            photoHabit: userState.photoHabit,
+            cautions: userState.cautions
+          })
+        });
+        if (!response.ok) {
+          throw new Error('API 응답 실패');
+        }
+        return await response.json();
+      }
+
+      function renderVipResult(data) {
+        const paidResultHtml = `
+    <style>
+      .vip-container { display: flex; flex-direction: column; gap: 20px; padding: 10px 0; }
+      .vip-box { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+      .vip-box h3 { margin: 0 0 12px; font-size: 16px; font-weight: 900; color: #111827; letter-spacing: -0.3px; }
+      .vip-hero { text-align: center; border: none; box-shadow: none; padding: 0; }
+      .vip-hero-img { width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin-bottom: 12px; }
+      .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
+      .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
+      .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
+      .vip-detail-row { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 13px; line-height:1.5; }
+      .vip-detail-label { width: 60px; font-weight: 800; color: #6b7280; flex-shrink: 0; }
+      .vip-detail-value { font-weight: 700; color: #111827; }
+      .vip-msg-list { list-style: none; padding: 0; margin: 0; }
+      .vip-msg-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 10px; }
+      .vip-msg-item:last-child { border-bottom: none; padding-bottom: 0; }
+      .vip-msg-text { font-size: 14px; font-weight: 700; color: #374151; line-height: 1.5; }
+      .vip-msg-btn { flex-shrink: 0; padding: 6px 10px; font-size: 12px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    </style>
+
+    <div class="vip-container">
+      <div class="vip-box vip-hero">
+        <img src="${escapeHtml(data.imageUrl)}" alt="꽃다발 시안" class="vip-hero-img" />
+        <div class="vip-hero-text">
+          ${escapeHtml(data.targetName)}에게 어울리는 세련되고 우아한<br>
+          <span style="color:#22c55e;">${escapeHtml(data.moodLabel)} 무드</span>입니다.
+        </div>
+      </div>
+
+      <div class="vip-box">
+        <h3>📋 1초 복붙! 플로리스트 주문서</h3>
+        <div class="vip-order-text" id="vipOrderContent">${data.orderText.replace(/\n/g, '<br>')}</div>
+        <button class="vip-btn-full" onclick="copyText(document.getElementById('vipOrderContent').innerText); alert('주문서가 복사되었습니다!');">주문서 전체 복사하기</button>
+      </div>
+
+      <div class="vip-box">
+        <h3>🎨 시크릿 디테일 가이드</h3>
+        <div class="vip-detail-row">
+          <div class="vip-detail-label">포장</div>
+          <div class="vip-detail-value">${escapeHtml(data.wrapGuide)}</div>
+        </div>
+        <div class="vip-detail-row">
+          <div class="vip-detail-label">꽃조합</div>
+          <div class="vip-detail-value">${data.flowerMix.replace(/\n/g, '<br>')}</div>
+        </div>
+
+        <div class="palette" style="margin-top:14px;">
+          ${(data.palettes || []).map(p => `
+            <div class="swatch">
+              <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
+              <div class="swatchMeta">${escapeHtml(p.name)}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="vip-box">
+        <h3>💬 분위기 살려주는 멘트 추천</h3>
+        <ul class="vip-msg-list">
+          ${(data.messages || []).map(msg => `
+            <li class="vip-msg-item">
+              <div class="vip-msg-text">${escapeHtml(msg)}</div>
+              <button class="vip-msg-btn" onclick="copyText('${escapeHtml(msg).replace(/'/g, "\\'")}'); alert('복사 완료!');">복사</button>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+
+      <div class="vip-box" style="background:#f8fafc; border:none;">
+        <h3>💡 실전 참고 팁</h3>
+        <div class="vip-detail-row">
+          <div class="vip-detail-label" style="width:70px;">예상가격</div>
+          <div class="vip-detail-value">${escapeHtml(data.priceInfo)}</div>
+        </div>
+        <div class="vip-detail-row">
+          <div class="vip-detail-label" style="width:70px;">꽃의 의미</div>
+          <div class="vip-detail-value">${escapeHtml(data.meaning)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+        $('resultArea').innerHTML = paidResultHtml;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showLoadingUI() {
+        if (!document.getElementById('apiLoadingOverlay')) {
+          const overlay = document.createElement('div');
+          overlay.id = 'apiLoadingOverlay';
+          overlay.innerHTML = `
+      <div style="position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="font-size:40px; animation: spin 1.5s linear infinite;">🌸</div>
+        <div style="margin-top:20px; font-weight:800; font-size:16px; color:#111827;">플로리스트 누나가 큐레이션 중...</div>
+        <div style="margin-top:8px; font-weight:700; font-size:13px; color:#6b7280;">딱 5초만 기다려줘!</div>
+        <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+      </div>
+    `;
+          document.body.appendChild(overlay);
+        }
+        document.getElementById('apiLoadingOverlay').style.display = 'flex';
+      }
+
+      function hideLoadingUI() {
+        const overlay = document.getElementById('apiLoadingOverlay');
+        if (overlay) overlay.style.display = 'none';
+      }
+
+      const openPaidGuide = async (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        showLoadingUI();
         try {
-          sessionStorage.setItem('paid_detail_html', paidResultHtml);
-        } catch(e){}
-        const guideUrl = new URL('./guide.html', location.href);
-        if (code) guideUrl.searchParams.set('r', code);
-        guideUrl.searchParams.set('auto', '1');
-        location.href = guideUrl.toString();
+          const apiResult = await fetchToneArtAPI(state);
+          renderVipResult(apiResult);
+        } catch (error) {
+          console.error('API 호출 에러:', error);
+          alert('결과를 불러오는 중 문제가 발생했어요. 다시 시도해 주세요.');
+        } finally {
+          hideLoadingUI();
+        }
       };
 
       if (btnOpenPaidEl) {
         btnOpenPaidEl.onclick = (e) => {
-          e.stopPropagation();
-          openPaidGuide();
+          openPaidGuide(e);
         };
       }
       if (paidUpsellBoxEl) {
         paidUpsellBoxEl.onclick = (e) => {
           if (e.target && e.target.closest && e.target.closest('#btnOpenPaid')) return;
-          openPaidGuide();
+          openPaidGuide(e);
         };
       }
 
