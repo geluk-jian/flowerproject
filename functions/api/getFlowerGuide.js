@@ -66,6 +66,7 @@ async function buildGuide(body, env) {
   const relation = String(body.relation || "상대").trim();
   const occasion = String(body.occasion || "선물").trim();
   const rawStyle = String(body.style || "세련된").trim();
+  const mainFlower = String(body.mainFlower || "").trim();
   const paletteKey = String(body.palette || "").trim();
   const rawPhotoHabit = String(body.photoHabit || "사진을 자주 남김").trim();
   const rawCautions = Array.isArray(body.cautions) ? body.cautions : [];
@@ -110,20 +111,28 @@ async function buildGuide(body, env) {
 
   const orderText = [
     `${relation}에게 ${occasion} 선물이에요.`,
+    `메인 꽃은 "${mainFlower || "추천 메인 꽃"}" 꼭 포함해서 부탁드려요.`,
     `${style} 무드로 부탁드리고 ${paletteMeta.label} 톤 중심으로 부탁드려요.`,
     `사진은 ${photoHabit} 편이라 디테일이 잘 보이게 정리해주세요.`,
     cautions.length ? `주의사항: ${cautions.join(", ")}` : "주의사항: 너무 화려하지 않게, 과하지 않게.",
     "포인트 꽃 1~2개로 고급스럽게 잡아주세요."
   ].join("\n");
 
+  const flowerMix = [
+    `메인: ${mainFlower || "시즌 메인 꽃(꽃집 추천)"}`,
+    "서브: 스프레이 장미 또는 알스트로메리아(톤 맞춤)",
+    "필러: 유칼립투스/그린(가볍게)"
+  ].join("\n");
+
   const response = {
     __build: "TEST-IMAGE-CHECK-1",
+    mainFlower,
     imageUrl: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80",
     targetName: relation,
     moodLabel: paletteMeta.label,
     orderText,
     wrapGuide: "무광 크라프트지 + 얇은 리본, 포장 과하지 않게.",
-    flowerMix: "메인: 라넌큘러스\n서브: 스프레이 장미\n필러: 유칼립투스",
+    flowerMix,
     palettes: paletteMeta.colors,
     messages: [
       `${relation}에게 잘 어울릴 것 같아 준비했어.`,
@@ -151,7 +160,7 @@ async function buildGuide(body, env) {
     });
 
     response.imageUrl = `data:image/webp;base64,${b64}`;
-    console.log("[usage] image_generated", { model: "gpt-image-1", size: "1024x1024" });
+    console.log("[usage] image_generated", { model: "gpt-image-1", size: "512x512" });
   } catch (e) {
     console.error("[getFlowerGuide] image generation failed:", e?.message || e);
   }

@@ -52,7 +52,7 @@ function extractText(responseData) {
   return parts.join("\n\n").trim();
 }
 
-async function generateBouquetImage({ apiKey, text, prompt }) {
+async function generateBouquetImage({ apiKey, text, prompt, mainFlower }) {
   const source = String(text || prompt || "").trim().slice(0, 1200);
   if (!source) return null;
 
@@ -60,9 +60,10 @@ async function generateBouquetImage({ apiKey, text, prompt }) {
     "Korean florist bouquet photo, premium realistic style.",
     "Single bouquet centered, clean cream background, soft natural light.",
     "No text, no watermark, no logo, no people, no hands.",
+    mainFlower ? `Main flower MUST be clearly visible: ${mainFlower}.` : "",
     "Use this concept and mood:",
     source,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 
   let imageRes;
   try {
@@ -150,6 +151,7 @@ export async function onRequestPost(context) {
   } catch (e) {}
 
   const prompt = String(body?.prompt || "").trim();
+  const mainFlower = String(body?.mainFlower || "").trim();
   const input = Array.isArray(body?.input) ? body.input : null;
   if (!prompt && !input) {
     return new Response(JSON.stringify({ error: "prompt_required" }), {
@@ -249,7 +251,7 @@ export async function onRequestPost(context) {
   }
 
   const text = extractText(data);
-  const image_url = await generateBouquetImage({ apiKey, text, prompt });
+  const image_url = await generateBouquetImage({ apiKey, text, prompt, mainFlower });
 
   return new Response(JSON.stringify({ text, image_url }), {
     status: 200,
