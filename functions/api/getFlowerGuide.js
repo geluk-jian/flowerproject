@@ -117,6 +117,7 @@ async function buildGuide(body, env) {
   ].join("\n");
 
   const response = {
+    __build: "TEST-IMAGE-CHECK-1",
     imageUrl: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80",
     targetName: relation,
     moodLabel: paletteMeta.label,
