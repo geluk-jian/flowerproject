@@ -2860,7 +2860,7 @@
       const btnOpenPaidEl = $('btnOpenPaid');
 
       async function fetchToneArtAPI(userState) {
-        const apiUrl = "https://asia-northeast3-대표님프로젝트명.cloudfunctions.net/getFlowerGuide";
+        const apiUrl = "/api/getFlowerGuide";
         const response = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
