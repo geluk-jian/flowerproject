@@ -2870,7 +2870,9 @@
             style: userState.style,
             palette: userState.palette,
             photoHabit: userState.photoHabit,
-            cautions: userState.cautions
+            cautions: userState.cautions,
+            mainFlower: mainAsset.name,
+            instruction: `유저가 퀴즈에서 선택한 6가지 데이터를 기반으로 나온 무료버전의 꽃(${mainAsset.name})을 메인으로 해서 서치 후 내용을 작성해줘. 한글로 써줘.`
           })
         });
         if (!response.ok) {
