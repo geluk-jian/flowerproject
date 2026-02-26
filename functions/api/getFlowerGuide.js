@@ -125,32 +125,27 @@ async function buildGuide(body) {
 }
 
 /** 텍스트 결과를 기반으로 "제품컷 스타일 꽃다발 이미지" 프롬프트 생성 */
-function makeBouquetPrompt(guide) {
-  const palettes = Array.isArray(guide.palettes) ? guide.palettes : [];
-  const paletteHint = palettes
+function makeBouquetPrompt({ moodLabel, wrapGuide, flowerMix, palettes }) {
+  const paletteHint = (palettes || [])
     .slice(0, 3)
     .map(p => `${p.name}(${p.hex})`)
     .join(", ");
 
-  const flowerMixLine = String(guide.flowerMix || "").replace(/\n/g, ", ");
-
-  // “위 사진처럼” = 흰 배경 + 중앙 + 살짝 그림자 + 제품 사진 느낌
   return [
-    "Create a realistic florist bouquet product photo.",
-    "Centered composition on a clean white background with a soft natural shadow.",
-    "No text, no watermark, no logo, no people, no hands.",
-    "The bouquet should look like a real arrangement (not an illustration).",
-    `Color mood: ${guide.moodLabel || "soft pastel tone"}.`,
-    `Flower mix: ${flowerMixLine || "seasonal mixed bouquet"}.`,
-    `Wrapping style: ${guide.wrapGuide || "matte paper wrapping with a thin ribbon, not flashy"}.`,
+    "Realistic florist bouquet product photo, centered.",
+    "Clean white background, soft natural shadow, studio lighting.",
+    "No text, no watermark, no people, no hands.",
+    `Color tone: ${moodLabel}.`,
+    `Flower mix: ${String(flowerMix).replace(/\n/g, ", ")}.`,
+    `Wrapping: ${wrapGuide}.`,
     paletteHint ? `Palette hints: ${paletteHint}.` : "",
-    "Camera: straight-on, studio lighting, bouquet occupies about 60% of the frame height, centered.",
+    "Bouquet occupies about 60% of the frame height, straight-on camera."
   ].filter(Boolean).join(" ");
 }
 
 /** OpenAI Images API 호출 → base64(webp) 반환 */
-async function generateBouquetImageB64({ apiKey, model, prompt }) {
-  if (!apiKey) throw new Error("OPENAI_API_KEY is missing");
+async function generateBouquetImageB64({ apiKey, prompt }) {
+  if (!apiKey) throw new Error("OPENAI_API_KEY missing");
 
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
@@ -159,13 +154,11 @@ async function generateBouquetImageB64({ apiKey, model, prompt }) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
+      model: "gpt-image-1",
       prompt,
       size: "1024x1024",
       output_format: "webp",
-      // JSON이 너무 커질 수 있어서 압축(0~100)
       output_compression: 80,
-      // quality는 모델/엔진에 따라 옵션이 다를 수 있어 생략(호환성 우선)
     }),
   });
 
@@ -176,7 +169,7 @@ async function generateBouquetImageB64({ apiKey, model, prompt }) {
 
   const data = await res.json();
   const b64 = data?.data?.[0]?.b64_json;
-  if (!b64) throw new Error("No b64_json returned from OpenAI image API");
+  if (!b64) throw new Error("No b64_json returned");
   return b64;
 }
 
