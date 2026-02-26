@@ -121,6 +121,7 @@ async function buildGuide(body, env) {
     });
 
     response.imageUrl = `data:image/webp;base64,${b64}`;
+    console.log("[usage] image_generated", { model: "gpt-image-1", size: "1024x1024" });
   } catch (e) {
     console.error("[getFlowerGuide] image generation failed:", e?.message || e);
   }
