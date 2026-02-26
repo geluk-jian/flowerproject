@@ -65,10 +65,39 @@ export async function onRequest(context) {
 async function buildGuide(body, env) {
   const relation = String(body.relation || "상대").trim();
   const occasion = String(body.occasion || "선물").trim();
-  const style = String(body.style || "세련된").trim();
+  const rawStyle = String(body.style || "세련된").trim();
   const paletteKey = String(body.palette || "").trim();
-  const photoHabit = String(body.photoHabit || "사진을 자주 남김").trim();
-  const cautions = Array.isArray(body.cautions) ? body.cautions : [];
+  const rawPhotoHabit = String(body.photoHabit || "사진을 자주 남김").trim();
+  const rawCautions = Array.isArray(body.cautions) ? body.cautions : [];
+
+  const styleLabelMap = {
+    cute: "귀여움",
+    chic: "세련/우아",
+    romantic: "러블리",
+    minimal: "미니멀",
+    soft_feminine: "청순",
+    chic_elegant: "세련/우아",
+    trendy: "트렌디/힙"
+  };
+  const photoHabitLabelMap = {
+    sns_often: "SNS 자주",
+    sns_sometimes: "가끔 업로드",
+    private_photo: "찍고 보관",
+    no_photo: "사진 관심 없음"
+  };
+  const cautionLabelMap = {
+    scent_light: "향은 약한 쪽이 좋아요",
+    allergy_sensitive: "알레르기/민감(꽃가루/향 최소)",
+    no_rose: "장미는 다른 꽃이면 더 좋아요",
+    clean_over_flashy: "화려함보단 깔끔한 게 좋아요",
+    none: "없음"
+  };
+
+  const style = styleLabelMap[rawStyle] || rawStyle || "세련된";
+  const photoHabit = photoHabitLabelMap[rawPhotoHabit] || rawPhotoHabit || "사진을 자주 남김";
+  const cautions = rawCautions
+    .map(v => cautionLabelMap[v] || String(v))
+    .filter(v => v && v !== "없음" && v !== "none");
 
   const paletteMeta = paletteMap[paletteKey] || {
     label: "내추럴",
