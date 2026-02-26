@@ -181,6 +181,7 @@ function makeBouquetPrompt({ moodLabel, wrapGuide, flowerMix, palettes }) {
 /** OpenAI Images API 호출 → base64(webp) 반환 */
 async function generateBouquetImageB64({ apiKey, prompt }) {
   if (!apiKey) throw new Error("OPENAI_API_KEY missing");
+  const imagePrompt = prompt;
 
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
@@ -190,10 +191,11 @@ async function generateBouquetImageB64({ apiKey, prompt }) {
     },
     body: JSON.stringify({
       model: "gpt-image-1",
-      prompt,
-      size: "1024x1024",
+      prompt: imagePrompt,
+      size: "512x512",
       output_format: "webp",
       output_compression: 80,
+      // quality: "low",
     }),
   });
 
