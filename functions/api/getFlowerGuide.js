@@ -41,36 +41,51 @@ const paletteMap = {
   }
 };
 
-function withCors(headers) {
-  headers.set("Access-Control-Allow-Origin", "*");
-  headers.set("Access-Control-Allow-Headers", "Content-Type");
-  headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  return headers;
-}
+export async function onRequestPost(context) {
+  const { request, env } = context;
 
-function safeArray(value) {
-  return Array.isArray(value) ? value : [];
-}
-
-export async function onRequest(context) {
-  const { request } = context;
-  if (request.method === "OPTIONS") {
-    return new Response("", { status: 204, headers: withCors(new Headers()) });
+  let body = {};
+  try {
+    body = await request.json();
+  } catch (e) {
+    return json({ error: "Invalid JSON body" }, 400);
   }
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "method_not_allowed" }), {
-      status: 405,
-      headers: withCors(new Headers({ "Content-Type": "application/json" }))
+
+  // 1) 텍스트 결과(JSON) 만들기: 너 기존 로직을 여기 넣어
+  const guide = await buildGuide(body);
+
+  // 2) 이미지 생성 (실패해도 텍스트 결과는 반환)
+  try {
+    const prompt = makeBouquetPrompt(guide);
+
+    const b64 = await generateBouquetImageB64({
+      apiKey: env.OPENAI_API_KEY,
+      model: env.OPENAI_IMAGE_MODEL || "gpt-image-1",
+      prompt,
     });
+
+    // 프론트 변경 없이 바로 표시 가능 (data URL)
+    guide.imageUrl = `data:image/webp;base64,${b64}`;
+  } catch (err) {
+    console.error("[getFlowerGuide] image generation failed:", err?.message || err);
+    // 실패 시 기존 guide.imageUrl(unsplash 등) 유지
   }
 
-  const body = await request.json().catch(() => ({}));
+  return json(guide);
+}
+
+/**
+ * ✅ 너 기존 "텍스트 결과 생성" 로직을 여기 넣어.
+ * 반드시 아래 키들은 유지해줘(프론트 renderVipResult가 기대함):
+ * imageUrl, targetName, moodLabel, orderText, wrapGuide, flowerMix, palettes, messages, priceInfo, meaning
+ */
+async function buildGuide(body) {
   const relation = String(body.relation || "상대").trim();
   const occasion = String(body.occasion || "선물").trim();
   const style = String(body.style || "세련된").trim();
   const paletteKey = String(body.palette || "").trim();
   const photoHabit = String(body.photoHabit || "사진을 자주 남김").trim();
-  const cautions = safeArray(body.cautions);
+  const cautions = Array.isArray(body.cautions) ? body.cautions : [];
 
   const paletteMeta = paletteMap[paletteKey] || {
     label: "내추럴",
@@ -89,7 +104,7 @@ export async function onRequest(context) {
     "포인트 꽃 1~2개로 고급스럽게 잡아주세요."
   ].join("\n");
 
-  const response = {
+  return {
     imageUrl: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80",
     targetName: relation,
     moodLabel: paletteMeta.label,
@@ -107,9 +122,72 @@ export async function onRequest(context) {
     priceInfo: "M 사이즈 기준 약 5만~8만 원",
     meaning: "다정함과 설렘의 무드"
   };
+}
 
-  return new Response(JSON.stringify(response), {
-    status: 200,
-    headers: withCors(new Headers({ "Content-Type": "application/json" }))
+/** 텍스트 결과를 기반으로 "제품컷 스타일 꽃다발 이미지" 프롬프트 생성 */
+function makeBouquetPrompt(guide) {
+  const palettes = Array.isArray(guide.palettes) ? guide.palettes : [];
+  const paletteHint = palettes
+    .slice(0, 3)
+    .map(p => `${p.name}(${p.hex})`)
+    .join(", ");
+
+  const flowerMixLine = String(guide.flowerMix || "").replace(/\n/g, ", ");
+
+  // “위 사진처럼” = 흰 배경 + 중앙 + 살짝 그림자 + 제품 사진 느낌
+  return [
+    "Create a realistic florist bouquet product photo.",
+    "Centered composition on a clean white background with a soft natural shadow.",
+    "No text, no watermark, no logo, no people, no hands.",
+    "The bouquet should look like a real arrangement (not an illustration).",
+    `Color mood: ${guide.moodLabel || "soft pastel tone"}.`,
+    `Flower mix: ${flowerMixLine || "seasonal mixed bouquet"}.`,
+    `Wrapping style: ${guide.wrapGuide || "matte paper wrapping with a thin ribbon, not flashy"}.`,
+    paletteHint ? `Palette hints: ${paletteHint}.` : "",
+    "Camera: straight-on, studio lighting, bouquet occupies about 60% of the frame height, centered.",
+  ].filter(Boolean).join(" ");
+}
+
+/** OpenAI Images API 호출 → base64(webp) 반환 */
+async function generateBouquetImageB64({ apiKey, model, prompt }) {
+  if (!apiKey) throw new Error("OPENAI_API_KEY is missing");
+
+  const res = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      prompt,
+      size: "1024x1024",
+      output_format: "webp",
+      // JSON이 너무 커질 수 있어서 압축(0~100)
+      output_compression: 80,
+      // quality는 모델/엔진에 따라 옵션이 다를 수 있어 생략(호환성 우선)
+    }),
+  });
+
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`OpenAI image API error ${res.status}: ${t}`);
+  }
+
+  const data = await res.json();
+  const b64 = data?.data?.[0]?.b64_json;
+  if (!b64) throw new Error("No b64_json returned from OpenAI image API");
+  return b64;
+}
+
+function json(obj, status = 200) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      // 같은 도메인에서만 쓰면 CORS 불필요.
+      // 외부에서 호출할 계획이면 아래 주석 해제:
+      // "access-control-allow-origin": "*",
+    },
   });
 }
