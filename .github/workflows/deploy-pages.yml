@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   deployments: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -24,3 +25,38 @@ jobs:
           projectName: flowerproject1
           directory: .
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for Cloudflare Pages deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/flowerproject1/deployments?env=production&per_page=1"
+
+          for i in {1..30}; do
+            resp="$(curl -sS -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" "$api")"
+            if [ "$(echo "$resp" | jq -r '.success')" != "true" ]; then
+              echo "Cloudflare API error: $(echo "$resp" | jq -c '.errors // .')"
+              exit 1
+            fi
+
+            status="$(echo "$resp" | jq -r '.result[0].latest_stage.status // empty')"
+            url="$(echo "$resp" | jq -r '.result[0].url // empty')"
+            echo "Latest deployment status: ${status:-unknown} ${url:+url=$url}"
+
+            case "$status" in
+              success)
+                echo "Deployment successful: $url"
+                exit 0
+                ;;
+              failure|canceled|error)
+                echo "Deployment failed with status: $status"
+                exit 1
+                ;;
+              *)
+                sleep 10
+                ;;
+            esac
+          done
+
+          echo "Timed out waiting for deployment."
+          exit 1

@@ -983,6 +983,7 @@
       const prompt = buildPromptFromState(state);
       const params = new URLSearchParams(location.search);
       const isAuto = params.get('auto') === '1';
+      const disablePaidApi = true;
 
       btn.disabled = true;
       btn.style.opacity = '0.7';
@@ -1000,6 +1001,15 @@
           status.textContent = '완료';
           body.className = 'result-body';
           body.innerHTML = formatPaidText(text, state);
+          imageEl.classList.remove('show');
+          imageEl.removeAttribute('src');
+          return;
+        }
+
+        if (disablePaidApi) {
+          status.textContent = '완료';
+          body.className = 'result-body';
+          body.textContent = '유료 추천 API 연동을 잠시 중단했어. 내부 정리 후 다시 연결할게.';
           imageEl.classList.remove('show');
           imageEl.removeAttribute('src');
           return;
