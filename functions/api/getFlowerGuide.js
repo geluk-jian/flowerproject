@@ -41,6 +41,38 @@ const paletteMap = {
   }
 };
 
+const flowerImgByKey = {
+  rose: "/image/rose.png",
+};
+
+async function generateBouquetImageBase64({ apiKey, prompt }) {
+  const res = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "gpt-image-1-mini",
+      prompt,
+      size: "1024x1024",
+      quality: "low",
+      n: 1,
+      output_format: "png"
+    })
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`image_generation_failed: ${res.status} ${t}`);
+  }
+
+  const json = await res.json();
+  const b64 = json?.data?.[0]?.b64_json;
+  if (!b64) throw new Error("image_generation_no_b64");
+  return `data:image/png;base64,${b64}`;
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -67,6 +99,7 @@ async function buildGuide(body, env) {
   const occasion = String(body.occasion || "선물").trim();
   const rawStyle = String(body.style || "세련된").trim();
   const mainFlower = String(body.mainFlower || "").trim();
+  const mainFlowerKey = String(body.mainFlowerKey || "").trim();
   const paletteKey = String(body.palette || "").trim();
   const rawPhotoHabit = String(body.photoHabit || "사진을 자주 남김").trim();
   const rawCautions = Array.isArray(body.cautions) ? body.cautions : [];
@@ -95,6 +128,7 @@ async function buildGuide(body, env) {
   };
 
   const style = styleLabelMap[rawStyle] || rawStyle || "세련된";
+  const styleLabel = style;
   const photoHabit = photoHabitLabelMap[rawPhotoHabit] || rawPhotoHabit || "사진을 자주 남김";
   const cautions = rawCautions
     .map(v => cautionLabelMap[v] || String(v))
@@ -108,6 +142,31 @@ async function buildGuide(body, env) {
       { hex: "#A9B8A0", name: "Moss" }
     ]
   };
+
+  const paletteLine = (paletteMeta.colors || [])
+    .map(c => `${c.name} (${c.hex})`)
+    .join(", ");
+
+  const imagePrompt = [
+    "Premium realistic product photo of a single Korean florist bouquet.",
+    "Bouquet centered, clean cream studio background, soft natural light.",
+    "NO people, NO hands, NO text, NO watermark, NO logo.",
+    `Main flower must be clearly visible and dominant: ${mainFlower}.`,
+    `Color palette: ${paletteMeta.label}. Use these colors: ${paletteLine}.`,
+    `Style/mood: ${styleLabel}.`,
+    "Wrapping: matte kraft paper with a thin ribbon. Not flashy.",
+    "High detail, natural petals and greenery, premium florist look."
+  ].join("\n");
+
+  let imageUrl = "";
+  try {
+    const apiKey = env?.OPENAI_API_KEY;
+    if (apiKey) {
+      imageUrl = await generateBouquetImageBase64({ apiKey, prompt: imagePrompt });
+    }
+  } catch (e) {
+    imageUrl = flowerImgByKey[mainFlowerKey] || "/image/rose.png";
+  }
 
   const orderText = [
     `${relation}에게 ${occasion} 선물이에요.`,
@@ -127,7 +186,7 @@ async function buildGuide(body, env) {
   const response = {
     __build: "TEST-IMAGE-CHECK-1",
     mainFlower,
-    imageUrl: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80",
+    imageUrl,
     targetName: relation,
     moodLabel: paletteMeta.label,
     orderText,
@@ -145,78 +204,7 @@ async function buildGuide(body, env) {
     meaning: "다정함과 설렘의 무드"
   };
 
-  // ✅ 이미지 생성(실패해도 텍스트 결과는 반환)
-  try {
-    const prompt = makeBouquetPrompt({
-      moodLabel: response.moodLabel,
-      wrapGuide: response.wrapGuide,
-      flowerMix: response.flowerMix,
-      palettes: response.palettes
-    });
-
-    const b64 = await generateBouquetImageB64({
-      apiKey: env.OPENAI_API_KEY,
-      prompt
-    });
-
-    response.imageUrl = `data:image/webp;base64,${b64}`;
-    console.log("[usage] image_generated", { model: "gpt-image-1", size: "512x512" });
-  } catch (e) {
-    console.error("[getFlowerGuide] image generation failed:", e?.message || e);
-  }
-
   return response;
-}
-
-/** 텍스트 결과를 기반으로 "제품컷 스타일 꽃다발 이미지" 프롬프트 생성 */
-function makeBouquetPrompt({ moodLabel, wrapGuide, flowerMix, palettes }) {
-  const paletteHint = (palettes || [])
-    .slice(0, 3)
-    .map(p => `${p.name}(${p.hex})`)
-    .join(", ");
-
-  return [
-    "Realistic florist bouquet product photo, centered.",
-    "Clean white background, soft natural shadow, studio lighting.",
-    "No text, no watermark, no people, no hands.",
-    `Color tone: ${moodLabel}.`,
-    `Flower mix: ${String(flowerMix).replace(/\n/g, ", ")}.`,
-    `Wrapping: ${wrapGuide}.`,
-    paletteHint ? `Palette hints: ${paletteHint}.` : "",
-    "Bouquet occupies about 60% of the frame height, straight-on camera."
-  ].filter(Boolean).join(" ");
-}
-
-/** OpenAI Images API 호출 → base64(webp) 반환 */
-async function generateBouquetImageB64({ apiKey, prompt }) {
-  if (!apiKey) throw new Error("OPENAI_API_KEY missing");
-  const imagePrompt = prompt;
-
-  const res = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-image-1",
-      prompt: imagePrompt,
-      size: "512x512",
-      output_format: "webp",
-      output_compression: 80,
-      // quality: "low",
-    }),
-  });
-
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`OpenAI image API error ${res.status}: ${t}`);
-  }
-
-  const data = await res.json();
-  const b64 = data?.data?.[0]?.b64_json;
-  if (!b64) throw new Error("No b64_json returned");
-  return b64;
 }
 
 function json(obj, status = 200) {
