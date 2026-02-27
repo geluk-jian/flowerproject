@@ -233,40 +233,6 @@
       border:1px solid #e5e7eb;
     }
 
-    .guideBanner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 16px;
-      border-radius:14px;
-      background: var(--green-light);
-      color: var(--text-dark);
-      text-decoration:none;
-      border:1px solid #d9eee2;
-      box-shadow: var(--shadow);
-    }
-    .guideBannerText{
-      flex:1;
-      text-align:center;
-    }
-    .guideBannerTitle{
-      font-size:16px;
-      font-weight:900;
-      letter-spacing:-.2px;
-    }
-    .guideBannerSub{
-      margin-top:2px;
-      font-size:12px;
-      color:#2f5c3b;
-      font-weight:700;
-    }
-    .guideBannerArrow{
-      font-size:18px;
-      font-weight:900;
-      color:#2f5c3b;
-    }
-
     .bar > div{
       height:100%;
       width:0%;
@@ -542,323 +508,6 @@
     #app .toast.show{opacity:1;}
 
     .divider{height:1px; background: #eef2f7; margin:12px 0;}
-
-    .section{
-      margin-top:16px;
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      background: var(--card);
-      box-shadow: var(--shadow);
-      padding: var(--pad);
-    }
-    .section h2{margin:0 0 10px; font-size:18px; letter-spacing:-.2px;}
-    .section p{margin:0 0 10px; font-size:14px;}
-    .section .small{font-size:12px; color: var(--muted);}
-
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
-    @media (min-width: 640px){
-      .twoCol{grid-template-columns: 1fr 1fr;}
-    }
-
-    .ctaPro{
-      border: 1px dashed rgba(34,197,94,.55);
-      background: rgba(34,197,94,.06);
-    }
-
-    /* ====== Start Poster (Landing) ====== */
-    :root{
-      --startBg: url('./assets/bg-wreath.png');
-    }
-
-    #screenStart .card{
-      /* 첫 화면은 카드 느낌 약하게 + 포스터 느낌 */
-      border: none;
-      box-shadow: none;
-      background: transparent;
-    }
-
-    .startPoster{
-      position: relative;
-      min-height: calc(100vh - 48px);
-      border-radius: 22px;
-      overflow: hidden;
-      border: 1px solid rgba(229,231,235,.6);
-      box-shadow: 0 18px 50px rgba(15, 23, 42, .10);
-      background: #f8fafc;
-    }
-
-    /* 배경 이미지 + 오버레이 */
-    .startPoster::before{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(60% 40% at 50% 8%, rgba(255,255,255,.9), rgba(255,255,255,0) 70%),
-        linear-gradient(180deg, #ffffff 0%, #f3f4f6 60%, #eef2f7 100%);
-    }
-
-    .startPoster::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(35% 28% at 50% 40%, rgba(255,255,255,0), rgba(255,255,255,.95) 70%);
-    }
-
-    .startInner{
-      position: relative;
-      z-index: 1;
-      padding: 22px 18px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .startTopRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .startBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.85);
-      border: 1px solid rgba(255,255,255,.65);
-      font-size: 12px;
-      font-weight: 800;
-      color: #111827;
-    }
-
-    .startTitle{
-      text-align:center;
-      padding-top: 6px;
-    }
-
-    .startTitle h1{
-      margin: 8px 0 6px;
-      font-size: 24px;
-      line-height: 1.08;
-      letter-spacing: -0.8px;
-      font-weight: 950;
-      color: #0b0f14;
-      text-shadow: 0 1px 0 rgba(255,255,255,.35);
-      font-family: "Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    }
-
-    .startTitle p{
-      margin: 0;
-      font-size: 14px;
-      font-weight: 750;
-      color: rgba(17,24,39,.85);
-      font-family: "Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    }
-
-    .startSlider{
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-    }
-    .startSliderWrap{
-      position: relative;
-      width: min(100%, 580px);
-      display:flex;
-      flex-direction: column;
-      align-items:center;
-      justify-content:center;
-      padding: 0 116px;
-      gap: 12px;
-    }
-    .slideFrame{
-      position: relative;
-      width: min(100%, 340px);
-      aspect-ratio: 4 / 3;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(226,232,240,.95);
-      background: #fff;
-      box-shadow: 0 16px 28px rgba(15, 23, 42, .14);
-    }
-    .slideItem{
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-      opacity: 0;
-      transition: opacity .35s ease;
-      background: #fff;
-    }
-    .slideItem.active{
-      opacity: 1;
-    }
-    .speechBubble{
-      position:absolute;
-      width: 168px;
-      height: 96px;
-      border-radius:999px;
-      border:2px solid rgba(17,24,39,.2);
-      background:#ffffff;
-      color:#111827;
-      font-size:14px;
-      font-weight:900;
-      line-height:1.2;
-      letter-spacing:-.2px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:10px;
-      box-shadow: 0 10px 20px rgba(15,23,42,.16);
-    }
-    .speechBubble::after{
-      content:"";
-      position:absolute;
-      width: 14px;
-      height: 14px;
-      background:#fff;
-      border-right:2px solid rgba(17,24,39,.2);
-      border-bottom:2px solid rgba(17,24,39,.2);
-      transform: rotate(45deg);
-    }
-    .speechOwner{
-      left: 0;
-      top: 14px;
-    }
-    .speechOwner::after{
-      right: 12px;
-      bottom: 10px;
-    }
-    .speechNo{
-      right: 0;
-      top: 0;
-    }
-    .speechNo::after{
-      left: 14px;
-      bottom: 8px;
-    }
-    .speechAny{
-      right: 6px;
-      bottom: 2px;
-    }
-    .speechAny::after{
-      left: 18px;
-      top: 12px;
-    }
-    .startBubbleRow{
-      display:flex;
-      width:100%;
-      justify-content:space-between;
-      gap:8px;
-    }
-    .startBubbleRow .speechBubble{
-      position:static;
-    }
-    .startBubbleRow .speechBubble::after{display:none;}
-    .speechOwner,
-    .speechNo,
-    .speechAny{
-      display:none;
-    }
-
-    .startCta{
-      margin-top: 8px;
-      display:flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .startCta button{
-      width: 100%;
-      padding: 14px 14px;
-      border-radius: 16px;
-      font-size: 16px;
-    }
-    .startGuide{
-      color:#111827;
-      background:rgba(255,255,255,.9);
-      border:1px solid rgba(255,255,255,.75);
-      border-radius:16px;
-      padding:10px 12px;
-    }
-    .startGuideTitle{
-      margin:0 0 6px;
-      font-size:13px;
-      font-weight:900;
-      text-align:left;
-    }
-    .startGuideItem{
-      margin:0 0 4px;
-      font-size:13px;
-      font-weight:760;
-      line-height:1.35;
-      text-align:left;
-    }
-    .startGuideItem:last-child{margin-bottom:0;}
-    .examplePreviewLink{
-      appearance:none;
-      border:none;
-      background:none;
-      color:#0f172a;
-      font-size:14px;
-      font-weight:850;
-      text-decoration:underline;
-      text-underline-offset: 3px;
-      padding:2px 0 0;
-      margin: 0 auto;
-      cursor:pointer;
-      width:auto;
-    }
-    .examplePreviewLink:hover{
-      transform:none;
-      background:none;
-      border:none;
-      color:#166534;
-    }
-
-    .startMeta{
-      text-align: center;
-      font-size: 12px;
-      font-weight: 750;
-      color: rgba(255,255,255,.85);
-    }
-    .startBrand{
-      margin-top: 10px;
-      text-align: center;
-      font-size: 13px;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-    }
-
-    @media (max-width: 420px){
-      .startTitle h1{ font-size: 26px; }
-      .startSliderWrap{
-        width:100%;
-        padding:0;
-        flex-direction:column;
-        gap:10px;
-      }
-      .speechBubble{
-        width: 118px;
-        height: 74px;
-        border-radius:999px;
-        font-size:12px;
-      }
-      .speechBubble::after{display:none;}
-    }
-
-    @media (max-width: 360px){
-      .slideFrame{
-        border-radius: 14px;
-      }
-    }
 
     /* ===== Landing Page v2 (Start Screen Only) ===== */
     #screenStart{
@@ -1435,6 +1084,7 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
+    let startSliderControl = null;
 
     function initStartSlider(){
       const frame = byId('flowerSlide');
@@ -1475,7 +1125,18 @@
         dots = Array.from(dotsW.querySelectorAll('.dot'));
       }
 
-      setInterval(()=> goTo(idx + 1), 1500);
+      let timer = null;
+      const startAuto = () => {
+        if(timer) return;
+        timer = setInterval(()=> goTo(idx + 1), 1500);
+      };
+      const stopAuto = () => {
+        if(!timer) return;
+        clearInterval(timer);
+        timer = null;
+      };
+      startSliderControl = { start: startAuto, stop: stopAuto };
+      startAuto();
     }
 
     function escapeHtml(value) {
@@ -1564,6 +1225,10 @@
       ['screenStart','screenQuiz','screenResult'].forEach(id=>{
         $(id).classList.toggle('active', id === which);
       });
+      if(startSliderControl){
+        if(which === 'screenStart') startSliderControl.start();
+        else startSliderControl.stop();
+      }
       window.scrollTo({top:0, behavior:'smooth'});
     }
 
@@ -1629,7 +1294,7 @@
       const closeBtn = $('btnCloseTopInfo');
       if(!panel || !titleEl || !bodyEl) return;
 
-      const links = Array.from(document.querySelectorAll('.topnav a[data-info], .guideBanner[data-info]'));
+      const links = Array.from(document.querySelectorAll('.topnav a[data-info]'));
       let openKey = '';
 
       const hidePanel = () => {
@@ -1749,8 +1414,6 @@
         occasion: null,
         palette: null,
         photoHabit: null,
-        finish: null,
-        brightness: null,
         style: null,
         cautions: []
       };
@@ -1809,37 +1472,6 @@
       ]
     };
 
-    const bouquetPhotoByPersonality = {
-      '러블리': './image/rose.png',
-      '세련됨': './image/calla.png',
-      '귀여움': './image/gerbera.png',
-      '미니멀': './image/lisianthus.png',
-      '우아함': './image/lisianthus.png',
-      '활기': './image/tulip.png'
-    };
-
-    const flowerNameByPhotoKey = {
-      rose: '장미',
-      calla: '카라',
-      gerbera: '거베라',
-      lisianthus: '리시안셔스',
-      tulip: '튤립',
-      ranunculus: '라넌큘러스',
-      carnation: '카네이션',
-      hydrangea: '수국'
-    };
-
-    const flowerPhotoByName = {
-      '장미': './image/rose.png',
-      '튤립': './image/tulip.png',
-      '라넌큘러스': './image/ranunculus.png',
-      '리시안셔스': './image/lisianthus.png',
-      '거베라': './image/gerbera.png',
-      '카라': './image/calla.png',
-      '카네이션': './image/carnation.png',
-      '수국': './image/hydrangea.png'
-    };
-
     function fallbackSampleImage(concept){
       const safe = escapeHtml(concept || '추천 컨셉');
       const svg = `
@@ -1857,32 +1489,11 @@
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
-    function pickFlowerPhoto(mainList){
-      for(const f of (mainList || [])){
-        const key = Object.keys(flowerPhotoByName).find(k => f.includes(k));
-        if(key) return flowerPhotoByName[key];
-      }
-      return null;
-    }
-
-    function pickConceptPreviewPhoto(personality){
-      return bouquetPhotoByPersonality[personality]
-        || './image/rose.png';
-    }
-
-    function pickConceptFlowerName(personality){
-      const photo = pickConceptPreviewPhoto(personality);
-      const file = (photo.split('/').pop() || '').split('.')[0];
-      return flowerNameByPhotoKey[file] || '장미';
-    }
-
     const state = {
       relation:null,
       occasion:null,
       palette:null,
       photoHabit:null,
-      finish:null,
-      brightness:null,
       style:null,
       cautions:[]
     };
@@ -1892,8 +1503,6 @@
       state.occasion = null;
       state.palette = null;
       state.photoHabit = null;
-      state.finish = null;
-      state.brightness = null;
       state.style = null;
       state.cautions = [];
     }
@@ -2092,30 +1701,13 @@
       }
     };
 
-    const occasionReason = {
-      '생일/기념일':'특별한 날엔 밝고 센스 있는 무드가 가장 안전해요.',
-      '생일':'생일은 ‘축하’가 중심. 밝고 기분 좋아지는 무드가 안전해요.',
-      '기념일':'기념일은 ‘관계의 확신’이 포인트. 과하지 않게 센스가 좋아요.',
-      '사과(미안해)':'사과는 ‘부담’보다 ‘진심’. 톤다운 + 담백이 제일 안정적이에요.',
-      '축하(합격/승진/새출발)':'축하는 ‘응원/자부심’. 깔끔한데 힘 있는 조합이 좋아요.',
-      '첫 선물':'첫 선물은 ‘안전하게 호감’. 취향 존중 톤이 답이에요.',
-      '그냥(고맙고 응원)':'그냥 주는 건 ‘일상에 정성’. 멘트 한 줄이면 센스 완성.'
-    };
-
-    function normalizeBrightness(brightness){
-      if(brightness === 'bright' || brightness === 'vivid') return 'bright';
-      if(brightness === 'calm' || brightness === 'soft') return 'calm';
-      return 'bright';
-    }
-
     function normalizeStyle(style){
       if(style === 'cute' || style === 'romantic' || style === 'soft_feminine') return 'cute';
       if(style === 'chic' || style === 'minimal' || style === 'elegant' || style === 'chic_elegant' || style === 'trendy') return 'chic';
       return 'chic';
     }
 
-    function mapPersonality(brightness, style, palette, occasion, photoHabit){
-      const b = normalizeBrightness(brightness);
+    function mapPersonality(style, palette, occasion, photoHabit){
       const s = normalizeStyle(style);
 
       if(style === 'trendy'){
@@ -2135,10 +1727,11 @@
         if(palette === 'yellow_orange') return '활기';
         if(palette === 'lilac' || palette === 'red_wine') return '우아함';
         if(palette === 'pink_peach' && occasion === '생일/기념일') return '러블리';
-        return b === 'calm' ? '미니멀' : '세련됨';
+        if(palette === 'white_green' || photoHabit === 'no_photo') return '미니멀';
+        return '세련됨';
       }
 
-      if(s === 'cute') return b === 'calm' ? '러블리' : '귀여움';
+      if(s === 'cute') return '귀여움';
       return '세련됨';
     }
 
@@ -2228,44 +1821,6 @@
         sense: rel.sense + (tail.sense || ''),
         sincere: rel.sincere + (tail.sincere || '')
       };
-    }
-
-    function buildStoryTip({ personality, relation, occasion, tone }){
-      const openerByPersonality = {
-        '러블리': '부드럽고 사랑스러운 분위기가 너랑 잘 어울릴 것 같아서 골랐어.',
-        '세련됨': '도시적이고 깔끔한 무드가 너랑 잘 맞을 것 같아서 이 컨셉으로 골랐어.',
-        '귀여움': '밝고 발랄한 느낌이 너한테 잘 어울릴 것 같아서 이렇게 골랐어.',
-        '미니멀': '과하지 않게 정돈된 느낌이 더 멋있을 것 같아서 이 스타일로 골랐어.',
-        '우아함': '차분하고 우아한 분위기가 너한테 잘 어울릴 것 같아서 이렇게 준비했어.',
-        '활기': '에너지 있고 환한 느낌이 딱 너답다고 생각해서 이걸로 골랐어.'
-      };
-
-      const relationTail = {
-        '썸/소개팅': '부담 없이 받았으면 좋겠고, 네 반응이 궁금해.',
-        '여자친구(연인)': '네가 좋아해주면 그걸로 완전 성공이야.',
-        '아내/배우자': '늘 고마운 마음을 이렇게라도 전하고 싶었어.',
-        '친구/동료': '너답게 잘 어울리면 진짜 뿌듯할 것 같아.',
-        '가족': '가족이라 더 따뜻하게 전하고 싶었어.'
-      };
-
-      const occasionTail = {
-        '생일/기념일': '오늘 같은 특별한 날이라 더 신경 써서 골랐어.',
-        '생일': '오늘 하루 기분 좋게 기억됐으면 좋겠어.',
-        '기념일': '우리한테 의미 있는 날이라 더 신경 써서 골랐어.',
-        '사과(미안해)': '말보다 진심이 먼저 전달됐으면 좋겠어.',
-        '축하(합격/승진/새출발)': '진심으로 축하하고, 시작이 더 빛났으면 좋겠어.',
-        '첫 선물': '첫 꽃 선물이라 더 조심스럽게 고른 거야.',
-        '그냥(고맙고 응원)': '특별한 이유 없어도 고마운 마음은 전하고 싶었어.'
-      };
-
-      const opener = openerByPersonality[personality] || openerByPersonality['세련됨'];
-      const rel = relationTail[relation] || '잘 어울리면 좋겠다는 마음으로 골랐어.';
-      const occ = occasionTail[occasion] || '';
-
-      const short = `${opener} ${rel}`.replace(/\s+/g, ' ').trim();
-      const long = `${opener} ${tone} 톤으로 맞추면 ‘존중’과 ‘센스’가 자연스럽게 전달된다고 하더라. ${occ} ${rel}`.replace(/\s+/g, ' ').trim();
-
-      return { short, long };
     }
 
     function hexToRgb(hex){
@@ -2419,120 +1974,12 @@
       return flowerAssetByKey[bestKey] || flowerAssetByKey.tulip;
     }
 
-    /* ===== 다운로드: TXT ===== */
-    function downloadTextFile(filename, text){
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(()=> URL.revokeObjectURL(url), 1000);
-    }
-
-    /* ===== 다운로드: PNG(주문서 이미지) ===== */
-    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight){
-      const words = text.split(' ');
-      let line = '';
-      for(let n=0; n<words.length; n++){
-        const testLine = line + words[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        if(metrics.width > maxWidth && n > 0){
-          ctx.fillText(line.trim(), x, y);
-          line = words[n] + ' ';
-          y += lineHeight;
-        }else{
-          line = testLine;
-        }
-      }
-      ctx.fillText(line.trim(), x, y);
-      return y + lineHeight;
-    }
-
-    async function downloadOrderSheetPng({ title, subtitle, lines }){
-      const W = 1080, H = 1350;
-      const canvas = document.createElement('canvas');
-      canvas.width = W; canvas.height = H;
-      const ctx = canvas.getContext('2d');
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0,0,W,H);
-
-      ctx.fillStyle = '#22c55e';
-      ctx.fillRect(0,0,W,160);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 54px ui-sans-serif, system-ui, -apple-system';
-      ctx.fillText(title || '꽃 주문서', 60, 95);
-
-      ctx.font = '700 28px ui-sans-serif, system-ui, -apple-system';
-      ctx.fillText(subtitle || '', 60, 135);
-
-      let y = 220;
-      ctx.fillStyle = '#0f172a';
-      ctx.font = '800 30px ui-sans-serif, system-ui, -apple-system';
-      ctx.fillText('복붙해서 꽃집에 보내세요', 60, y);
-
-      y += 48;
-      ctx.strokeStyle = '#e5e7eb';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(60, y);
-      ctx.lineTo(W-60, y);
-      ctx.stroke();
-
-      y += 36;
-      ctx.font = '650 30px ui-sans-serif, system-ui, -apple-system';
-
-      const maxWidth = W - 120;
-      const lineHeight = 44;
-
-      for(const line of lines){
-        y = wrapCanvasText(ctx, line, 60, y, maxWidth, lineHeight);
-        if(y > H - 120) break;
-      }
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = '700 24px ui-sans-serif, system-ui, -apple-system';
-      ctx.fillText('© TONE ART / flowerproject', 60, H - 60);
-
-      const dataUrl = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = 'order_sheet.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
     function showResult(){
-      const personality = mapPersonality(state.brightness, state.style, state.palette, state.occasion, state.photoHabit);
+      const personality = mapPersonality(state.style, state.palette, state.occasion, state.photoHabit);
       const profile = profiles[personality];
 
       const { main, sub, tex } = pickFlowers(profile, state);
       const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
-
-      let tone = profile.tone;
-      let wrap = profile.wrap;
-      const finishHintByValue = {
-        '깔끔 마감':'종이 1~2겹, 리본 최소',
-        '포인트 마감':'포인트 컬러 강조',
-        '고급 마감':'톤다운, 무광 재질',
-        '러블리 마감':'부드러운 색감 + 리본 강조'
-      };
-      const finishHint = finishHintByValue[state.finish];
-      if(finishHint) wrap += ` / ${finishHint}`;
-
-      const photoFinishHintByValue = {
-        sns_often:'포인트 컬러 + 사진빨 마감',
-        sns_sometimes:'포인트 or 고급 마감',
-        private_photo:'고급/깔끔 마감',
-        no_photo:'깔끔 마감'
-      };
-      const photoFinishHint = (!state.finish && state.photoHabit) ? photoFinishHintByValue[state.photoHabit] : '';
-      if(photoFinishHint) wrap += ` / ${photoFinishHint}`;
 
       const styleLabel = {
         cute:'귀여움',
@@ -2552,38 +1999,6 @@
         yellow_orange:'옐로·오렌지'
       }[state.palette] || '미선택';
 
-      const photoHabitLabel = {
-        sns_often:'SNS 자주',
-        sns_sometimes:'가끔 업로드',
-        private_photo:'찍고 보관',
-        no_photo:'사진 관심 없음'
-      }[state.photoHabit] || '미선택';
-
-      const cautionLabel = {
-        scent_light:'향은 약한 쪽이 좋아요',
-        allergy_sensitive:'알레르기/민감(꽃가루/향 최소)',
-        no_rose:'장미는 다른 꽃이면 더 좋아요',
-        clean_over_flashy:'화려함보단 깔끔한 게 좋아요',
-        none:'없음'
-      };
-      const cautionValues = (state.cautions || []).filter(v => v !== 'none');
-      const cautionText = cautionValues.map(v => cautionLabel[v] || v).join(', ');
-
-      const reasonParts = [
-        `관계: ${state.relation || '미선택'}`,
-        `상황: ${state.occasion || '미선택'}`,
-        state.palette ? `색감: ${paletteLabel}` : '',
-        state.finish ? `마무리: ${state.finish}` : '',
-        state.photoHabit ? `사진 습관: ${photoHabitLabel}` : '',
-        cautionText ? `참고사항: ${cautionText}` : '',
-        occasionReason[state.occasion] || '',
-        `선택한 무드는 “${styleLabel}${state.palette ? ` / ${paletteLabel}` : ''}${state.photoHabit ? ` / ${photoHabitLabel}` : ''}” 쪽!`
-      ].filter(Boolean);
-
-      const meaning = `${profile.meaning} (상황: ${state.occasion || '미선택'})`;
-      const substitution = '메인 꽃 품절 시 비슷한 톤/결로 대체 가능(무드 유지).';
-      const palette = paletteByPersonality[personality] || paletteByPersonality['세련됨'];
-
       // ====== Hero 요약 데이터 만들기 ======
       const mainAsset = getMainFlowerAsset({
         personality,
@@ -2596,34 +2011,11 @@
       const basicOrderSentence = `${mainAsset.name} 중심으로 ${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
       const floristOrder = `주문문장: ${basicOrderSentence}`;
 
-      const orderToneLabel = state.palette ? paletteLabel : tone;
-      const premiumOrderSentence = `대표 꽃 ${mainAsset.name} 포함해서 ${orderToneLabel}의 ${styleLabel} 무드 부케로 부탁드려요.`;
-      const baseNoteSentence = `${wrap}. 메인 꽃 품절이면 비슷한 톤으로 대체 가능.`;
-      const premiumNoteSentence = cautionText
-        ? `${baseNoteSentence} 추가 참고: ${cautionText}.`
-        : baseNoteSentence;
-      const storyTip = buildStoryTip({
-        personality,
-        relation: state.relation,
-        occasion: state.occasion,
-        tone
-      });
-      const storyTipShort = storyTip.short;
-      const storyTipLong = storyTip.long;
-
       const shareState = {...state};
       const code = base64UrlEncode(shareState);
       const url = new URL(location.href);
       url.searchParams.set('r', code);
       history.replaceState(null, '', url.toString());
-
-      const finishShort = (() => {
-        // 사진 타입 기준: 포인트/깔끔만 간단히
-        if (state.photoHabit === 'sns_often' || state.photoHabit === 'sns_sometimes') return '포인트';
-        if (state.photoHabit === 'private_photo') return '깔끔';
-        if (state.photoHabit === 'no_photo') return '깔끔';
-        return '무난';
-      })();
 
       // 주의(참고사항) 요약: taboos/cautions가 없거나 none이면 "없음"
       const rawTaboos = Array.isArray(state.taboos)
@@ -2676,105 +2068,9 @@
         `;
       })();
 
-      // 가격 정보: volume 없으면 기본(M)
-      const priceInfoList = [
-        { label: '한송이', range: '약 1만~2만원' },
-        { label: '미니(S)', range: '약 3만~5만원' },
-        { label: '기본(M)', range: '약 5만~8만원' },
-        { label: '대형(L)', range: '약 8만~13만원' }
-      ];
-
       // ====== 주문문장(미리보기 구성) ======
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}`;
       const basicMsgList = [basicMessage];
-      const premiumMsgList = [msgs.simple, msgs.sense, msgs.sincere];
-      const paidResultHtml = `
-        <div class="box" style="margin-top:12px;">
-          <h3>꽃집 DM 고급 버전</h3>
-          <p class="orderPreview">📢 주문문장: ${escapeHtml(premiumOrderSentence)}<br/>📢 참고사항: ${escapeHtml(premiumNoteSentence)}</p>
-        </div>
-
-        <div class="box">
-          <h3>꽃과 함께 그녀에게 보낼 멘트 추천(3개)</h3>
-          <ol class="list msgList" style="margin-top:10px;">
-            ${premiumMsgList.map((m, i)=>`
-              <li>
-                <span class="msgText">${escapeHtml(m)}</span>
-                <button class="msgCopy paidMsgCopy" type="button" data-idx="${i}">복사</button>
-              </li>
-            `).join('')}
-          </ol>
-        </div>
-
-        <div class="box">
-          <h3>컨셉 디테일</h3>
-          <div class="muted" style="font-size:13px;">
-            톤/색감: <b>${escapeHtml(tone)}</b><br/>
-            포장: <b>${escapeHtml(wrap)}</b>
-          </div>
-          <div class="palette" style="margin-top:10px;">
-            ${(palette || []).map(p => `
-              <div class="swatch">
-                <div class="swatchColor" style="background:${escapeHtml(p.hex)};"></div>
-                <div class="swatchMeta">${escapeHtml(p.name)}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="box">
-          <h3>추천 꽃 조합 <span class="muted" style="font-size:12px;">(계절/재고에 따라 변경 가능)</span></h3>
-          <ul class="list">
-            <li><b>메인</b>: ${main.map(escapeHtml).join(' / ')}</li>
-            <li><b>서브</b>: ${sub.map(escapeHtml).join(' / ')}</li>
-            <li><b>질감/그린</b>: ${tex.map(escapeHtml).join(' / ')}</li>
-          </ul>
-          <div class="divider"></div>
-          <div class="muted" style="font-size:13px;"><b>대체 규칙</b>: ${escapeHtml(substitution)}</div>
-        </div>
-
-        <div class="box">
-          <h3>예상 가격대</h3>
-          <ul class="list">
-            ${priceInfoList.map(p => `<li><b>${escapeHtml(p.label)}</b>: ${escapeHtml(p.range)}</li>`).join('')}
-          </ul>
-          <div class="muted" style="margin-top:8px; font-size:12px;">(지역/시즌/꽃값에 따라 달라질 수 있어요)</div>
-        </div>
-
-        <div class="box">
-          <h3>꽃 의미 한 줄</h3>
-          <p style="margin:0; font-size:14px;"><b>${escapeHtml(meaning)}</b></p>
-          <div class="footnote">※ 꽃말은 해석이 여러 가지일 수 있어요.</div>
-        </div>
-
-        <div class="box">
-          <h3>왜 이게 맞냐면</h3>
-          <details class="explain" open>
-            <summary>접기/펼치기</summary>
-            <p>${reasonParts.map(escapeHtml).join(' ')}</p>
-          </details>
-        </div>
-
-        <div class="box">
-          <h3>선물 스토리/전달 메시지 팁</h3>
-          <div class="storyTipBlock">
-            <div class="storyTipRow">
-              <div class="storyTipLabel">짧은 버전</div>
-              <div class="storyTipText" id="storyTipShort">${escapeHtml(storyTipShort)}</div>
-              <button class="secondary storyTipBtn" id="btnCopyStoryTipShort">짧게 복사</button>
-            </div>
-            <div class="storyTipRow">
-              <div class="storyTipLabel">긴 버전</div>
-              <div class="storyTipText" id="storyTipLong">${escapeHtml(storyTipLong)}</div>
-              <button class="secondary storyTipBtn" id="btnCopyStoryTipLong">길게 복사</button>
-            </div>
-          </div>
-          <div class="btnrow">
-            <button class="secondary" id="btnCopyLink">여친에게 결과 공유하기(링크 복사)</button>
-          </div>
-          <div class="muted" style="margin-top:6px; font-size:12px;">링크를 보내면 결과 화면을 그대로 공유할 수 있어요.</div>
-        </div>
-      `;
 
       const resultHtml = `
         <!-- [A] HERO 카드 -->
@@ -2805,7 +2101,6 @@
 
             <div class="heroChips">
               <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
-              <span class="chip">마무리: <b>${escapeHtml(finishShort)}</b></span>
               ${cautionChipHtml}
             </div>
 
@@ -3403,39 +2698,6 @@
       color:var(--text);
       font-weight:650;
       white-space: pre-wrap;
-    }
-
-    .storyTipBlock{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top:6px;
-    }
-    .storyTipRow{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-    }
-    .storyTipLabel{
-      flex-shrink:0;
-      font-size:11px;
-      font-weight:800;
-      color: var(--muted);
-      background:#f1f5f9;
-      padding:4px 8px;
-      border-radius: 999px;
-    }
-    .storyTipText{
-      flex:1;
-      font-size:13px;
-      font-weight:700;
-      color: var(--text);
-      line-height:1.5;
-    }
-    .storyTipBtn{
-      flex-shrink:0;
-      padding:6px 10px;
-      font-size:12px;
     }
 
     /* chip처럼 클릭 가능한 주의사항 */
