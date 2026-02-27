@@ -2431,14 +2431,7 @@
           openPaidGuide(e);
         };
       }
-      if (paidUpsellBoxEl) {
-        paidUpsellBoxEl.onclick = (e) => {
-          if (e.target && e.target.closest && e.target.closest('#btnOpenPaid')) return;
-          openPaidGuide(e);
-        };
-      }
-
-
+      // paidUpsellBoxEl click disabled: only button should open paid guide
       const btnAgainEl = $('btnAgain');
       if(btnAgainEl){
         btnAgainEl.onclick = ()=>{
