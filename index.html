@@ -1203,6 +1203,26 @@
       }
     }
 
+    async function downloadImage(url, filename){
+      if(!url) return;
+      try{
+        const res = await fetch(url, { mode: 'cors' });
+        if(!res.ok) throw new Error('image fetch failed');
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename || 'flower_image.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=> URL.revokeObjectURL(blobUrl), 1000);
+      }catch(e){
+        window.open(url, '_blank');
+        toast('이미지를 길게 눌러 저장해줘!');
+      }
+    }
+
     function base64UrlEncode(obj){
       const json = JSON.stringify(obj);
       const bytes = new TextEncoder().encode(json);
@@ -2216,6 +2236,7 @@
       .vip-box h3 { margin: 0 0 12px; font-size: 16px; font-weight: 900; color: #111827; letter-spacing: -0.3px; }
       .vip-hero { text-align: center; border: none; box-shadow: none; padding: 0; }
       .vip-hero-img { width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin-bottom: 12px; }
+      .vip-btn-outline { width: 100%; max-width: 300px; padding: 10px; background: #ffffff; color: #111827; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; margin: 0 auto 10px; }
       .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
       .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
       .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
@@ -2232,6 +2253,7 @@
     <div class="vip-container">
       <div class="vip-box vip-hero">
         <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
+        <button class="vip-btn-outline" id="btnSaveVipImage" type="button">이미지 저장</button>
         <div class="vip-hero-text">
           ${escapeHtml(data.targetName || '그분')}에게 어울리는 세련되고 우아한<br>
           <span style="color:#22c55e;">${escapeHtml(data.moodLabel || '추천')} 무드</span>입니다.
@@ -2337,6 +2359,13 @@
             const text = document.getElementById('vipOrderContent')?.innerText || '';
             const ok = await copyText(text);
             toast(ok ? '주문서를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+          });
+        }
+
+        const btnSaveVipImage = document.getElementById('btnSaveVipImage');
+        if(btnSaveVipImage){
+          btnSaveVipImage.addEventListener('click', async ()=>{
+            await downloadImage(heroImg, 'flower_guide.png');
           });
         }
 
