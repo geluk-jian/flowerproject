@@ -2244,6 +2244,17 @@
         };
         const photoWrapGuide = wrapGuideByPhoto[state.photoHabit] || '';
         const wrapGuideText = photoWrapGuide || (data.wrapGuide || '');
+        const meaningByFlower = {
+          '장미': '사랑과 마음을 전하는 꽃',
+          '튤립': '설렘과 진심을 담는 꽃',
+          '라넌큘러스': '우아함과 매력을 담는 꽃',
+          '리시안셔스': '감사와 정성을 전하는 꽃',
+          '거베라': '밝은 응원과 기분 업',
+          '카라': '품격과 세련됨을 전하는 꽃',
+          '카네이션': '고마움과 존중을 담는 꽃',
+          '수국': '풍성한 마음과 배려'
+        };
+        const meaningText = meaningByFlower[mainAsset.name] || data.meaning || '';
 
         const paidResultHtml = `
     <style>
@@ -2251,8 +2262,8 @@
       .vip-box { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
       .vip-box h3 { margin: 0 0 12px; font-size: 16px; font-weight: 900; color: #111827; letter-spacing: -0.3px; }
       .vip-hero { text-align: center; border: none; box-shadow: none; padding: 0; }
-      .vip-hero-img { width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin-bottom: 6px; }
-      .vip-btn-outline { width: 50%; max-width: 150px; padding: 6px 8px; background: #ffffff; color: #111827; border: 1px solid #e5e7eb; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; margin: 0 auto 10px; }
+      .vip-hero-img { display:block; width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin: 0 auto 6px; }
+      .vip-btn-outline { display:block; width: 50%; max-width: 150px; padding: 6px 8px; background: #ffffff; color: #111827; border: 1px solid #e5e7eb; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; margin: 0 auto 10px; }
       .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
       .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
       .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
@@ -2275,9 +2286,9 @@
           <span style="color:#22c55e;">${escapeHtml(data.moodLabel || '추천')} 무드</span>입니다.
         </div>
 
-        ${data.meaning ? `
+        ${meaningText ? `
           <div style="margin:10px auto 0; max-width:320px; font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
-            <span style="font-weight:900; color:#111827;">꽃 의미</span> · ${escapeHtml(data.meaning)}
+            <span style="font-weight:900; color:#111827;">꽃 의미</span> · ${escapeHtml(meaningText)}
           </div>
         ` : ''}
 
@@ -2404,7 +2415,7 @@
       <div style="position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center;">
         <div style="font-size:40px; animation: spin 1.5s linear infinite;">🌸</div>
         <div style="margin-top:20px; font-weight:800; font-size:16px; color:#111827;">플로리스트 누나가 큐레이션 중...</div>
-        <div style="margin-top:8px; font-weight:700; font-size:13px; color:#6b7280;">딱 5초만 기다려줘!</div>
+        <div style="margin-top:8px; font-weight:700; font-size:13px; color:#6b7280;">딱 10초만 기다려줘!</div>
         <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
       </div>
     `;
