@@ -129,7 +129,7 @@
 
     .wrap{max-width:var(--max); margin:0 auto; padding:24px 16px 60px;}
 
-    .card{
+    #app .card{
       border:1px solid var(--line);
       border-radius:var(--radius);
       background: var(--card);
@@ -185,7 +185,7 @@
 
     .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
 
-    button{
+    #app button{
       appearance:none;
       border:1px solid var(--accent);
       background: var(--accent);
@@ -394,7 +394,7 @@
       font-weight:800;
     }
 
-    .box{
+    #app .box{
       border:1px solid var(--line);
       background: #fff;
       border-radius: 16px;
@@ -1268,7 +1268,7 @@
   </script>
 </head>
 <body>
-  <div class="wrap">
+  <div id="app" class="wrap">
     <section class="screen active" id="screenStart">
       <div class="lpWrap">
 
@@ -3561,5 +3561,6 @@
       </div>
     </div>
   </footer>
+  </div>
   </body>
 </html>
