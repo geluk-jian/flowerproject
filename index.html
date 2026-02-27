@@ -1079,7 +1079,7 @@
     </section>
 
     <div id="toast" class="toast">복사했어!</div>
-  </div>
+  </div><!-- /#app -->
 
   <script>
     const $ = (id) => document.getElementById(id);
@@ -1333,7 +1333,7 @@
             return;
           }
           titleEl.textContent = data.title;
-          bodyEl.innerHTML = data.lines.map((line)=>`<p>${escapeHtml(line)}</p>`).join('');
+          bodyEl.innerHTML = data.lines.map((line)=> `<p>${escapeHtml(line)}</p>`).join('');
           panel.classList.add('active');
           openKey = key;
         });
@@ -2829,6 +2829,7 @@
 
   </style>
 
+  <!-- ✅ 아래는 app 바깥(전역 하단 고정 안내/사업자) -->
   <section class="service-period" aria-label="서비스 제공기간 및 환불 안내" style="max-width: 760px; margin: 0 auto; padding: 0 16px;">
     <div class="service-period__box" style="font-size: 13px;">
       <strong>[서비스 제공 및 환불 안내]</strong><br>
@@ -2861,6 +2862,5 @@
       </div>
     </div>
   </footer>
-  </div>
   </body>
 </html>
