@@ -1560,7 +1560,7 @@
     function canGoNext(){
       const s = currentStep();
       const ans = getAnswer(s.id);
-      if(s.type === 'multi') return Array.isArray(ans) && ans.length > 0;
+      if(s.type === 'multi') return Array.isArray(ans) ? ans.length > 0 : !!ans;
       return !!ans;
     }
 
