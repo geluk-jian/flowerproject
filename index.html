@@ -1587,8 +1587,9 @@
       $('btnBack').style.visibility = (stepIdx === 0) ? 'hidden' : 'visible';
       $('btnNext').style.display = (s.type === 'multi') ? 'inline-flex' : 'none';
       if(s.type === 'multi'){
-        $('btnNext').disabled = !canGoNext();
-        $('btnNext').setAttribute('aria-disabled', String(!canGoNext()));
+        // 다음 버튼은 항상 클릭 가능하게 두고, 유효성은 goNext에서 체크
+        $('btnNext').disabled = false;
+        $('btnNext').removeAttribute('aria-disabled');
       }else{
         $('btnNext').disabled = false;
         $('btnNext').removeAttribute('aria-disabled');
