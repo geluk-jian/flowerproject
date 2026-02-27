@@ -2228,6 +2228,14 @@
         // 이미지 URL 안전 처리 (비정상 스킴 차단)
         const safeImg = sanitizeUrl(data.imageUrl);
         const heroImg = safeImg || fallbackSampleImage(data.moodLabel || '꽃다발 시안');
+        const wrapGuideByPhoto = {
+          sns_often: '포인트 컬러 포장 + 리본 강조 (사진빨 우선)',
+          sns_sometimes: '톤다운 포장 + 리본 1~2개 (무난하고 예쁘게)',
+          private_photo: '무광/차분 포장 + 리본 최소 (깔끔하게)',
+          no_photo: '크래프트/심플 포장 + 리본 최소 (담백하게)'
+        };
+        const photoWrapGuide = wrapGuideByPhoto[state.photoHabit] || '';
+        const wrapGuideText = photoWrapGuide || (data.wrapGuide || '');
 
         const paidResultHtml = `
     <style>
@@ -2278,10 +2286,10 @@
 
       <div class="vip-box">
         <h3>🎨 시크릿 디테일 가이드</h3>
-        <div class="vip-detail-row">
-          <div class="vip-detail-label">포장</div>
-          <div class="vip-detail-value">${escapeHtml(data.wrapGuide || '')}</div>
-        </div>
+          <div class="vip-detail-row">
+            <div class="vip-detail-label">포장</div>
+            <div class="vip-detail-value">${escapeHtml(wrapGuideText)}</div>
+          </div>
         <div class="vip-detail-row">
           <div class="vip-detail-label">꽃조합</div>
           <div class="vip-detail-value">${nl2brSafe(data.flowerMix)}</div>
