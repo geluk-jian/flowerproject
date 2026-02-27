@@ -1437,7 +1437,7 @@
     const $ = (id) => document.getElementById(id);
 
     function initStartSlider(){
-      const frame = $('flowerSlide');
+      const frame = byId('flowerSlide');
       if(!frame) return;
 
       const slides = Array.from(frame.querySelectorAll('img'));
@@ -1450,7 +1450,7 @@
         slides[0].classList.add('active');
       }
 
-      const dotsW = $('dots');
+      const dotsW = byId('dots');
       let dots = [];
 
       function goTo(n){
