@@ -2032,14 +2032,6 @@
       const basicMoodLine = `${paletteLabel} 컬러 컨셉이 가장 잘 어울려요.`;
       const basicMessage = msgs.simple;
       const basicOrderSentence = `${mainAsset.name} 중심으로 ${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
-      const cautionTextForOrder = tabooShortList.length ? ` / 주의: ${tabooShortList.join(' · ')}` : '';
-      const floristOrder = `주문문장: ${basicOrderSentence}${cautionTextForOrder}`;
-
-      const shareState = {...state};
-      const code = base64UrlEncode(shareState);
-      const url = new URL(location.href);
-      url.searchParams.set('r', code);
-      history.replaceState(null, '', url.toString());
 
       // 주의(참고사항) 요약: taboos/cautions가 없거나 none이면 "없음"
       const rawTaboos = Array.isArray(state.taboos)
@@ -2070,6 +2062,17 @@
       const tabooShortList = rawTaboos
         .map(v => tabooShortMap[v] || String(v))
         .filter(v => v && v !== '없음' && v !== 'none');
+
+      const cautionTextForOrder = tabooShortList.length
+        ? ` / 주의: ${tabooShortList.join(' · ')}`
+        : '';
+      const floristOrder = `주문문장: ${basicOrderSentence}${cautionTextForOrder}`;
+
+      const shareState = {...state};
+      const code = base64UrlEncode(shareState);
+      const url = new URL(location.href);
+      url.searchParams.set('r', code);
+      history.replaceState(null, '', url.toString());
 
       const cautionChipHtml = (() => {
         if (tabooShortList.length === 0) {
