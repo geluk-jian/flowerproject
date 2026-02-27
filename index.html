@@ -183,7 +183,7 @@
       opacity:.9;
     }
 
-    .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+    .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; position:relative; z-index:2;}
 
     #app button{
       appearance:none;
@@ -1590,6 +1590,8 @@
         // 다음 버튼은 항상 클릭 가능하게 두고, 유효성은 goNext에서 체크
         $('btnNext').disabled = false;
         $('btnNext').removeAttribute('aria-disabled');
+        $('btnNext').style.visibility = 'visible';
+        $('btnNext').style.pointerEvents = 'auto';
       }else{
         $('btnNext').disabled = false;
         $('btnNext').removeAttribute('aria-disabled');
