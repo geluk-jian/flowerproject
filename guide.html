@@ -1046,6 +1046,24 @@
       }
     }
 
+    (async function initFromRid(){
+      const params = new URLSearchParams(location.search);
+      const rid = params.get('rid');
+      if(!rid) return;
+
+      const res = await fetch(`/api/getPaidResult?rid=${encodeURIComponent(rid)}`);
+      const json = await res.json().catch(()=> ({}));
+      if(!res.ok || !json.ok){
+        alert('저장된 결과를 찾을 수 없어요.');
+        return;
+      }
+
+      // 저장된 유료 결과 그대로 렌더
+      if (typeof renderVipResult === 'function') {
+        renderVipResult(json.result);
+      }
+    })();
+
     document.getElementById('btnRunPaid')?.addEventListener('click', runPaidGuide);
     renderMovedPaidDetail();
 
