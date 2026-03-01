@@ -2269,6 +2269,9 @@
         const recSize = rec.size || 'M';
         const recBudget = rec.budget || (data.priceInfo || '약 5만~8만 원');
         const recReason = rec.reason || '무난한 구간';
+        const lastSavedAt = (() => {
+          try { return localStorage.getItem("last_paid_saved_at") || ""; } catch(e){ return ""; }
+        })();
 
         const priceGuideHtml = `
           <div class="vip-box" style="background:#ffffff; border:1px solid #e5e7eb;">
@@ -2307,6 +2310,22 @@
             </div>
           </div>
         `;
+        const localReopenHtml = `
+          <div class="vip-box" style="border:1px solid #e5e7eb;">
+            <h3>🗂 최근 결과 다시보기</h3>
+            <div style="font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
+              같은 브라우저/기기라면 방금 본 유료 결과를 다시 열 수 있어요.
+              ${lastSavedAt ? `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">저장: ${lastSavedAt}</div>` : ``}
+            </div>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="vip-btn-full" id="btnReopenLastPaid" type="button">최근 유료 결과 다시 열기</button>
+              <button class="vip-msg-btn" id="btnCopyCurrentLink" type="button" style="padding:12px 10px;">현재 링크 복사</button>
+            </div>
+            <div style="margin-top:8px; font-size:11px; color:#94a3b8; line-height:1.4;">
+              ※ 다른 기기/브라우저로 바꾸면 로컬 저장은 사라질 수 있어요. (KV 연동 시 링크로 재열람 가능)
+            </div>
+          </div>
+        `;
 
         const paidResultHtml = `
     <style>
@@ -2331,6 +2350,7 @@
     </style>
 
     <div class="vip-container">
+      ${localReopenHtml}
       <div class="vip-box vip-hero">
         <div class="vip-hero-media">
           <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
@@ -2415,6 +2435,11 @@
   `;
 
         $('resultArea').innerHTML = paidResultHtml;
+        // ✅ 최근 유료 결과 로컬 저장(브라우저에서만 유지)
+        try {
+          localStorage.setItem("last_paid_result", JSON.stringify(data));
+          localStorage.setItem("last_paid_saved_at", new Date().toISOString());
+        } catch (e) {}
 
         // ✅ 유료 결과 서버 저장(토큰 추가 0) + 다시보기 링크 노출
         (async ()=>{
@@ -2480,13 +2505,33 @@
         }
 
         // ✅ 멘트 복사 버튼들(문장에 따옴표/특수문자 있어도 안 깨짐)
-        document.querySelectorAll('.vip-msg-btn').forEach(btn=>{
+        document.querySelectorAll('.vip-msg-btn[data-idx]').forEach(btn=>{
           btn.addEventListener('click', async ()=>{
             const i = Number(btn.dataset.idx);
             const text = messages[i] || '';
             const ok = await copyText(text);
             toast(ok ? '복사했어!' : '복사 실패(브라우저 권한 확인)');
           });
+        });
+
+        // ✅ 최근 유료 결과 다시보기
+        document.getElementById("btnReopenLastPaid")?.addEventListener("click", () => {
+          try {
+            const raw = localStorage.getItem("last_paid_result");
+            if (!raw) return alert("저장된 최근 유료 결과가 없어요.");
+            const parsed = JSON.parse(raw);
+            renderVipResult(parsed);
+            toast("최근 유료 결과를 다시 열었어!");
+          } catch (e) {
+            alert("저장된 데이터를 불러오지 못했어.");
+          }
+        });
+
+        // ✅ 현재 링크 복사 (?r=... 포함)
+        document.getElementById("btnCopyCurrentLink")?.addEventListener("click", async () => {
+          const link = location.href;
+          const ok = await copyText(link);
+          toast(ok ? "현재 링크를 복사했어!" : "복사 실패");
         });
       }
 
