@@ -1203,39 +1203,6 @@
       }
     }
 
-    // ✅ IndexedDB 저장/불러오기(큰 base64도 OK)
-    function idbOpen() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open("toneart_paid_db", 1);
-        req.onupgradeneeded = () => {
-          const db = req.result;
-          if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
-    async function idbSet(key, value) {
-      const db = await idbOpen();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction("kv", "readwrite");
-        tx.objectStore("kv").put(value, key);
-        tx.oncomplete = () => resolve(true);
-        tx.onerror = () => reject(tx.error);
-      });
-    }
-
-    async function idbGet(key) {
-      const db = await idbOpen();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction("kv", "readonly");
-        const req = tx.objectStore("kv").get(key);
-        req.onsuccess = () => resolve(req.result || null);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
     async function downloadImage(url, filename){
       if(!url) return;
       try{
@@ -2293,28 +2260,6 @@
         const recBudget = rec.budget || (data.priceInfo || '약 5만~8만 원');
         const recReason = rec.reason || '무난한 구간';
 
-        const lastSavedAt = (() => {
-          try { return localStorage.getItem("last_paid_saved_at") || ""; } catch(e){ return ""; }
-        })();
-
-        // ✅ “유료 다시보기(로컬)” 박스
-        const paidReopenHtml = `
-          <div class="vip-box" style="border:1px solid #e5e7eb;">
-            <h3>🔒 유료 결과 다시보기</h3>
-            <div style="font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
-              같은 브라우저/기기라면 유료 결과를 다시 열 수 있어요.
-              ${lastSavedAt ? `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">저장: ${escapeHtml(lastSavedAt)}</div>` : ``}
-            </div>
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="vip-btn-full" id="btnCopyPaidLocalLink" type="button">유료 다시보기 링크 복사</button>
-              <button class="vip-msg-btn" id="btnOpenPaidLocal" type="button" style="padding:12px 10px;">지금 다시 열기</button>
-            </div>
-            <div style="margin-top:8px; font-size:11px; color:#94a3b8; line-height:1.4;">
-              ※ 같은 기기/브라우저에서만 가능해요.
-            </div>
-          </div>
-        `;
-
         const priceGuideHtml = `
           <div class="vip-box" style="background:#ffffff; border:1px solid #e5e7eb;">
             <h3>💰 오늘 추천 예산/사이즈</h3>
@@ -2376,8 +2321,6 @@
           </style>
 
           <div class="vip-container">
-            ${paidReopenHtml}
-
             <div class="vip-box vip-hero">
               <div class="vip-hero-media">
                 <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
@@ -2458,16 +2401,6 @@
         $('resultArea').innerHTML = paidResultHtml;
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // ✅ 유료 결과 저장: 큰 데이터는 IndexedDB에 저장
-        (async ()=>{
-          try{
-            await idbSet("last_paid_result", data);
-            localStorage.setItem("last_paid_saved_at", new Date().toISOString());
-          }catch(e){
-            console.error(e);
-          }
-        })();
-
         // ✅ 주문서 복사
         document.getElementById('btnCopyVipOrder')?.addEventListener('click', async () => {
           const text = document.getElementById('vipOrderContent')?.innerText || '';
@@ -2490,25 +2423,6 @@
           });
         });
 
-        // ✅ 유료 다시보기 링크 복사 (paid=1)
-        document.getElementById("btnCopyPaidLocalLink")?.addEventListener("click", async () => {
-          const u = new URL(location.href);
-          u.searchParams.set("paid", "1");
-          const ok = await copyText(u.toString());
-          toast(ok ? "유료 다시보기 링크를 복사했어!(이 기기만)" : "복사 실패");
-        });
-
-        // ✅ 지금 다시 열기
-        document.getElementById("btnOpenPaidLocal")?.addEventListener("click", async () => {
-          try {
-            const saved = await idbGet("last_paid_result");
-            if (!saved) return alert("저장된 유료 결과가 없어요.");
-            renderVipResult(saved);
-            toast("유료 결과 다시 열었어!");
-          } catch (e) {
-            alert("유료 결과를 불러오지 못했어요.");
-          }
-        });
       }
 
       function showLoadingUI() {
@@ -2626,24 +2540,9 @@
     $('btnNext').addEventListener('click', goNext);
     $('btnRestart').addEventListener('click', resetAll);
 
-    (async function initFromUrl(){
+    (function initFromUrl(){
       const params = new URLSearchParams(location.search);
-      const paid = params.get("paid");
-      const r = params.get("r");
-
-      // ✅ paid=1이면: IndexedDB에서 유료 결과 먼저 로드
-      if (paid === "1") {
-        try{
-          const saved = await idbGet("last_paid_result");
-          if(saved){
-            renderVipResult(saved);
-            return;
-          }
-          alert("이 기기에서 저장된 유료 결과가 없어서 무료 결과로 보여줄게요.");
-        }catch(e){
-          // 실패하면 아래 무료 로직으로
-        }
-      }
+      const r = params.get('r');
 
       // ✅ 기존 무료 복원
       if(!r) return;
