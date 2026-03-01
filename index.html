@@ -1203,22 +1203,6 @@
       }
     }
 
-    async function savePaidResultToServer(result, meta){
-      try{
-        const res = await fetch('/api/savePaidResult', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ result, meta })
-        });
-        const json = await res.json().catch(()=> ({}));
-        if(!res.ok || !json.ok) throw new Error(json.error || 'save_failed');
-        return json; // {ok:true, rid, viewUrl}
-      }catch(e){
-        console.error(e);
-        return null;
-      }
-    }
-
     async function downloadImage(url, filename){
       if(!url) return;
       try{
@@ -2252,7 +2236,9 @@
         // 이미지 URL 안전 처리 (비정상 스킴 차단)
         const safeImg = sanitizeUrl(data.imageUrl);
         const heroImg = safeImg || fallbackSampleImage(data.moodLabel || '꽃다발 시안');
+
         const wrapGuideText = data.wrapGuide || '';
+
         const meaningByFlower = {
           '장미': '사랑과 마음을 전하는 꽃',
           '튤립': '설렘과 진심을 담는 꽃',
@@ -2263,15 +2249,38 @@
           '카네이션': '고마움과 존중을 담는 꽃',
           '수국': '풍성한 마음과 배려'
         };
-        const meaningText = meaningByFlower[mainAsset.name] || data.meaning || '';
+
+        // ✅ mainAsset이 없을 수 있으니 안전하게
+        const mainName = (typeof mainAsset !== 'undefined' && mainAsset && mainAsset.name) ? mainAsset.name : '';
+        const meaningText = meaningByFlower[mainName] || data.meaning || '';
+
         const rec = data.recommend || {};
         const priceTable = data.priceTable || {};
         const recSize = rec.size || 'M';
         const recBudget = rec.budget || (data.priceInfo || '약 5만~8만 원');
         const recReason = rec.reason || '무난한 구간';
+
         const lastSavedAt = (() => {
           try { return localStorage.getItem("last_paid_saved_at") || ""; } catch(e){ return ""; }
         })();
+
+        // ✅ “유료 다시보기(로컬)” 박스
+        const paidReopenHtml = `
+          <div class="vip-box" style="border:1px solid #e5e7eb;">
+            <h3>🔒 유료 결과 다시보기</h3>
+            <div style="font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
+              같은 브라우저/기기라면 유료 결과를 다시 열 수 있어요.
+              ${lastSavedAt ? `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">저장: ${escapeHtml(lastSavedAt)}</div>` : ``}
+            </div>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="vip-btn-full" id="btnCopyPaidLocalLink" type="button">유료 다시보기 링크 복사</button>
+              <button class="vip-msg-btn" id="btnOpenPaidLocal" type="button" style="padding:12px 10px;">지금 다시 열기</button>
+            </div>
+            <div style="margin-top:8px; font-size:11px; color:#94a3b8; line-height:1.4;">
+              ※ 같은 기기/브라우저에서만 가능해요.
+            </div>
+          </div>
+        `;
 
         const priceGuideHtml = `
           <div class="vip-box" style="background:#ffffff; border:1px solid #e5e7eb;">
@@ -2310,203 +2319,133 @@
             </div>
           </div>
         `;
-        const localReopenHtml = `
-          <div class="vip-box" style="border:1px solid #e5e7eb;">
-            <h3>🗂 최근 결과 다시보기</h3>
-            <div style="font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
-              같은 브라우저/기기라면 방금 본 유료 결과를 다시 열 수 있어요.
-              ${lastSavedAt ? `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">저장: ${lastSavedAt}</div>` : ``}
+
+        const paidResultHtml = `
+          <style>
+            .vip-container { display: flex; flex-direction: column; gap: 20px; padding: 10px 0; }
+            .vip-box { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+            .vip-box h3 { margin: 0 0 12px; font-size: 16px; font-weight: 900; color: #111827; letter-spacing: -0.3px; }
+            .vip-hero { text-align: center; border: none; box-shadow: none; padding: 0; }
+            .vip-hero-media { display:flex; flex-direction:column; align-items:center; gap:10px; }
+            .vip-hero-img { display:block; width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin: 0 auto; }
+            .vip-btn-outline { display:block; width: 50%; max-width: 150px; padding: 6px 8px; background: #ffffff; color: #111827; border: 1px solid #e5e7eb; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; margin: 0 auto; }
+            .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
+            .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
+            .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
+            .vip-detail-row { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 13px; line-height:1.5; }
+            .vip-detail-label { width: 60px; font-weight: 800; color: #6b7280; flex-shrink: 0; }
+            .vip-detail-value { font-weight: 700; color: #111827; }
+            .vip-msg-list { list-style: none; padding: 0; margin: 0; }
+            .vip-msg-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 10px; }
+            .vip-msg-item:last-child { border-bottom: none; padding-bottom: 0; }
+            .vip-msg-text { font-size: 14px; font-weight: 700; color: #374151; line-height: 1.5; }
+            .vip-msg-btn { flex-shrink: 0; padding: 6px 10px; font-size: 12px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 700; }
+          </style>
+
+          <div class="vip-container">
+            ${paidReopenHtml}
+
+            <div class="vip-box vip-hero">
+              <div class="vip-hero-media">
+                <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
+                <button class="vip-btn-outline" id="btnSaveVipImage" type="button">이미지 저장</button>
+              </div>
+
+              <div class="vip-hero-text">
+                ${escapeHtml(data.targetName || '그분')}에게 어울리는<br>
+                <span style="color:#22c55e;">${escapeHtml(data.moodLabel || '추천')} 무드</span>입니다.
+              </div>
+
+              ${meaningText ? `
+                <div style="margin:10px auto 0; max-width:320px; font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
+                  <span style="font-weight:900; color:#111827;">꽃 의미</span> · ${escapeHtml(meaningText)}
+                </div>
+              ` : ''}
+
+              <div style="margin:8px auto 0; max-width:320px; font-size:11px; color:#94a3b8; line-height:1.4;">
+                ※ 참고용 시안입니다. 계절/재고에 따라 유사 무드로 대체될 수 있어요.
+              </div>
             </div>
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="vip-btn-full" id="btnReopenLastPaid" type="button">최근 유료 결과 다시 열기</button>
-              <button class="vip-msg-btn" id="btnCopyCurrentLink" type="button" style="padding:12px 10px;">현재 링크 복사</button>
+
+            ${priceGuideHtml}
+
+            <div class="vip-box">
+              <h3>📋 1초 복붙! 플로리스트 주문서</h3>
+              <div class="vip-order-text" id="vipOrderContent">${nl2brSafe(data.orderText)}</div>
+              <button class="vip-btn-full" id="btnCopyVipOrder" type="button">주문서 전체 복사하기</button>
             </div>
-            <div style="margin-top:8px; font-size:11px; color:#94a3b8; line-height:1.4;">
-              ※ 다른 기기/브라우저로 바꾸면 로컬 저장은 사라질 수 있어요. (KV 연동 시 링크로 재열람 가능)
+
+            <div class="vip-box">
+              <h3>�� 시크릿 디테일 가이드</h3>
+              <div class="vip-detail-row">
+                <div class="vip-detail-label">포장</div>
+                <div class="vip-detail-value">${escapeHtml(wrapGuideText)}</div>
+              </div>
+              <div class="vip-detail-row">
+                <div class="vip-detail-label">꽃조합</div>
+                <div class="vip-detail-value">${nl2brSafe(data.flowerMix)}</div>
+              </div>
+
+              <div class="palette" style="margin-top:14px;">
+                ${palettes.map(p => `
+                  <div class="swatch">
+                    <div class="swatchColor" style="background:${sanitizeHex(p.hex)};"></div>
+                    <div class="swatchMeta">${escapeHtml(p.name || '')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="vip-box">
+              <h3>💬 분위기 살려주는 멘트 추천</h3>
+              <ul class="vip-msg-list">
+                ${messages.map((msg, i) => `
+                  <li class="vip-msg-item">
+                    <div class="vip-msg-text">${escapeHtml(msg)}</div>
+                    <button class="vip-msg-btn" type="button" data-idx="${i}">복사</button>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <div class="vip-box" style="background:#f8fafc; border:none;">
+              <h3>💡 실전 참고</h3>
+              <div style="margin-top:14px; padding:12px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
+                <div style="font-size:13px; font-weight:900; color:#111827; margin-bottom:8px;">🌿 꽃집 고르는 빠른 기준</div>
+                <ul style="margin:0; padding-left:18px; font-size:12px; font-weight:750; color:#374151; line-height:1.6;">
+                  <li><b>후기 사진</b>이 많고, 포장/톤이 “정돈된” 샵</li>
+                  <li><b>예약/상담</b>이 빠른 곳(카톡/DM 응답 속도)</li>
+                  <li><b>리뷰에 “요청 반영 잘함”</b>이 자주 나오는 곳</li>
+                </ul>
+              </div>
             </div>
           </div>
         `;
 
-        const paidResultHtml = `
-    <style>
-      .vip-container { display: flex; flex-direction: column; gap: 20px; padding: 10px 0; }
-      .vip-box { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-      .vip-box h3 { margin: 0 0 12px; font-size: 16px; font-weight: 900; color: #111827; letter-spacing: -0.3px; }
-      .vip-hero { text-align: center; border: none; box-shadow: none; padding: 0; }
-      .vip-hero-media { display:flex; flex-direction:column; align-items:center; gap:10px; }
-      .vip-hero-img { display:block; width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin: 0 auto; }
-      .vip-btn-outline { display:block; width: 50%; max-width: 150px; padding: 6px 8px; background: #ffffff; color: #111827; border: 1px solid #e5e7eb; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; margin: 0 auto; }
-      .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
-      .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
-      .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
-      .vip-detail-row { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 13px; line-height:1.5; }
-      .vip-detail-label { width: 60px; font-weight: 800; color: #6b7280; flex-shrink: 0; }
-      .vip-detail-value { font-weight: 700; color: #111827; }
-      .vip-msg-list { list-style: none; padding: 0; margin: 0; }
-      .vip-msg-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 10px; }
-      .vip-msg-item:last-child { border-bottom: none; padding-bottom: 0; }
-      .vip-msg-text { font-size: 14px; font-weight: 700; color: #374151; line-height: 1.5; }
-      .vip-msg-btn { flex-shrink: 0; padding: 6px 10px; font-size: 12px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 700; }
-    </style>
-
-    <div class="vip-container">
-      ${localReopenHtml}
-      <div class="vip-box vip-hero">
-        <div class="vip-hero-media">
-          <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
-          <button class="vip-btn-outline" id="btnSaveVipImage" type="button">이미지 저장</button>
-        </div>
-        <div class="vip-hero-text">
-          ${escapeHtml(data.targetName || '그분')}에게 어울리는 세련되고 우아한<br>
-          <span style="color:#22c55e;">${escapeHtml(data.moodLabel || '추천')} 무드</span>입니다.
-        </div>
-
-        ${meaningText ? `
-          <div style="margin:10px auto 0; max-width:320px; font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
-            <span style="font-weight:900; color:#111827;">꽃 의미</span> · ${escapeHtml(meaningText)}
-          </div>
-        ` : ''}
-
-        <div style="margin:8px auto 0; max-width:320px; font-size:11px; color:#94a3b8; line-height:1.4;">
-          ※ 참고용 시안 이미지입니다. 계절/재고에 따라 유사 무드로 대체될 수 있어요.
-        </div>
-      </div>
-
-      <div class="vip-box">
-        <h3>📋 1초 복붙! 플로리스트 주문서</h3>
-        <div class="vip-order-text" id="vipOrderContent">${nl2brSafe(data.orderText)}</div>
-        <button class="vip-btn-full" id="btnCopyVipOrder" type="button">주문서 전체 복사하기</button>
-      </div>
-
-      <div class="vip-box">
-        <h3>🎨 시크릿 디테일 가이드</h3>
-          <div class="vip-detail-row">
-            <div class="vip-detail-label">포장</div>
-            <div class="vip-detail-value">${escapeHtml(wrapGuideText)}</div>
-          </div>
-        <div class="vip-detail-row">
-          <div class="vip-detail-label">꽃조합</div>
-          <div class="vip-detail-value">${nl2brSafe(data.flowerMix)}</div>
-        </div>
-
-        <div class="palette" style="margin-top:14px;">
-          ${palettes.map(p => `
-            <div class="swatch">
-              <div class="swatchColor" style="background:${sanitizeHex(p.hex)};"></div>
-              <div class="swatchMeta">${escapeHtml(p.name || '')}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <div class="vip-box">
-        <h3>💬 분위기 살려주는 멘트 추천</h3>
-        <ul class="vip-msg-list">
-          ${messages.map((msg, i) => `
-            <li class="vip-msg-item">
-              <div class="vip-msg-text">${escapeHtml(msg)}</div>
-              <button class="vip-msg-btn" type="button" data-idx="${i}">복사</button>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-
-      ${priceGuideHtml}
-
-      <div class="vip-box" style="background:#f8fafc; border:none;">
-        <h3>💡 실전 참고</h3>
-
-        <div style="margin-top:14px; padding:12px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
-          <div style="font-size:13px; font-weight:900; color:#111827; margin-bottom:8px;">🌿 꽃집 고르는 빠른 기준</div>
-          <ul style="margin:0; padding-left:18px; font-size:12px; font-weight:750; color:#374151; line-height:1.6;">
-            <li><b>후기 사진</b>이 많고, 포장/톤이 “정돈된” 샵</li>
-            <li><b>예약/상담</b>이 빠른 곳(카톡/DM 응답 속도)</li>
-            <li><b>리뷰에 “요청 반영 잘함”</b>이 자주 나오는 곳</li>
-          </ul>
-          <div style="margin-top:10px; font-size:12px; color:#64748b; font-weight:800;">
-            검색 키워드 예시:
-            <span style="display:inline-block; margin-left:6px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:999px; background:#f8fafc;">“지역명 + 꽃다발 + 맞춤”</span>
-            <span style="display:inline-block; margin-left:6px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:999px; background:#f8fafc;">“플로리스트 + 스튜디오”</span>
-            <span style="display:inline-block; margin-left:6px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:999px; background:#f8fafc;">“톤다운/내추럴 꽃다발”</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
         $('resultArea').innerHTML = paidResultHtml;
-        // ✅ 최근 유료 결과 로컬 저장(브라우저에서만 유지)
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // ✅ 유료 결과 로컬 저장(이 기기/브라우저에서만)
         try {
           localStorage.setItem("last_paid_result", JSON.stringify(data));
           localStorage.setItem("last_paid_saved_at", new Date().toISOString());
         } catch (e) {}
 
-        // ✅ 유료 결과 서버 저장(토큰 추가 0) + 다시보기 링크 노출
-        (async ()=>{
-          const meta = {
-            relation: state.relation,
-            occasion: state.occasion,
-            style: state.style,
-            palette: state.palette,
-            photoHabit: state.photoHabit,
-            cautions: state.cautions,
-            mainFlower: data.mainFlower || ''
-          };
+        // ✅ 주문서 복사
+        document.getElementById('btnCopyVipOrder')?.addEventListener('click', async () => {
+          const text = document.getElementById('vipOrderContent')?.innerText || '';
+          const ok = await copyText(text);
+          toast(ok ? '주문서를 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        });
 
-          const saved = await savePaidResultToServer(data, meta);
-          if(!saved) return;
+        // ✅ 이미지 저장
+        document.getElementById('btnSaveVipImage')?.addEventListener('click', async () => {
+          await downloadImage(heroImg, 'flower_guide.png');
+        });
 
-          try{ localStorage.setItem('last_paid_rid', saved.rid); }catch(e){}
-
-          const container = document.querySelector('.vip-container');
-          if(!container) return;
-
-          const box = document.createElement('div');
-          box.className = 'vip-box';
-          box.innerHTML = `
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-              <h3 style="margin:0;">🔗 내 결과 다시보기</h3>
-              <button class="vip-msg-btn" id="btnCopyResultLink" type="button">결과 링크 복사</button>
-            </div>
-            <div style="font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
-              링크를 복사해두면 나중에 다시 확인할 수 있어요.
-            </div>
-            <div style="margin-top:8px; font-size:11px; color:#94a3b8;">
-              보관기간: 30일 (이후 자동 삭제)
-            </div>
-          `;
-
-          container.insertBefore(box, container.firstChild);
-
-          const link = saved.viewUrl;
-
-          document.getElementById('btnCopyResultLink')?.addEventListener('click', async ()=>{
-            const ok = await copyText(link);
-            toast(ok ? '결과 링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-          });
-        })();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // ✅ 주문서 복사 버튼(기존 inline onclick 제거)
-        const btnCopyVipOrder = document.getElementById('btnCopyVipOrder');
-        if(btnCopyVipOrder){
-          btnCopyVipOrder.addEventListener('click', async ()=>{
-            const text = document.getElementById('vipOrderContent')?.innerText || '';
-            const ok = await copyText(text);
-            toast(ok ? '주문서를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-          });
-        }
-
-        const btnSaveVipImage = document.getElementById('btnSaveVipImage');
-        if(btnSaveVipImage){
-          btnSaveVipImage.addEventListener('click', async ()=>{
-            await downloadImage(heroImg, 'flower_guide.png');
-          });
-        }
-
-        // ✅ 멘트 복사 버튼들(문장에 따옴표/특수문자 있어도 안 깨짐)
-        document.querySelectorAll('.vip-msg-btn[data-idx]').forEach(btn=>{
-          btn.addEventListener('click', async ()=>{
+        // ✅ 멘트 복사
+        document.querySelectorAll('.vip-msg-btn[data-idx]').forEach(btn => {
+          btn.addEventListener('click', async () => {
             const i = Number(btn.dataset.idx);
             const text = messages[i] || '';
             const ok = await copyText(text);
@@ -2514,24 +2453,24 @@
           });
         });
 
-        // ✅ 최근 유료 결과 다시보기
-        document.getElementById("btnReopenLastPaid")?.addEventListener("click", () => {
-          try {
-            const raw = localStorage.getItem("last_paid_result");
-            if (!raw) return alert("저장된 최근 유료 결과가 없어요.");
-            const parsed = JSON.parse(raw);
-            renderVipResult(parsed);
-            toast("최근 유료 결과를 다시 열었어!");
-          } catch (e) {
-            alert("저장된 데이터를 불러오지 못했어.");
-          }
+        // ✅ 유료 다시보기 링크 복사 (paid=1)
+        document.getElementById("btnCopyPaidLocalLink")?.addEventListener("click", async () => {
+          const u = new URL(location.href);
+          u.searchParams.set("paid", "1");
+          const ok = await copyText(u.toString());
+          toast(ok ? "유료 다시보기 링크를 복사했어!(이 기기만)" : "복사 실패");
         });
 
-        // ✅ 현재 링크 복사 (?r=... 포함)
-        document.getElementById("btnCopyCurrentLink")?.addEventListener("click", async () => {
-          const link = location.href;
-          const ok = await copyText(link);
-          toast(ok ? "현재 링크를 복사했어!" : "복사 실패");
+        // ✅ 지금 다시 열기
+        document.getElementById("btnOpenPaidLocal")?.addEventListener("click", () => {
+          try {
+            const raw = localStorage.getItem("last_paid_result");
+            if (!raw) return alert("저장된 유료 결과가 없어요.");
+            renderVipResult(JSON.parse(raw));
+            toast("유료 결과 다시 열었어!");
+          } catch (e) {
+            alert("유료 결과를 불러오지 못했어요.");
+          }
         });
       }
 
@@ -2667,6 +2606,20 @@
 
     initTopInfoPanel();
     initStartSlider();
+
+    (function autoOpenPaidFromLocal(){
+      try {
+        const params = new URLSearchParams(location.search);
+        if (params.get("paid") !== "1") return;
+
+        const raw = localStorage.getItem("last_paid_result");
+        if (!raw) {
+          alert("이 기기에서 저장된 유료 결과가 없어요.");
+          return;
+        }
+        renderVipResult(JSON.parse(raw));
+      } catch (e) {}
+    })();
   </script>
   <style>
     /* ===== Result Top (Hero + Actions) ===== */
