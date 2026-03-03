@@ -31,6 +31,34 @@ function isSameOrigin(candidate, origin) {
   }
 }
 
+function normalizeStr(s) {
+  return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+async function sha256Hex(str) {
+  const data = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hash)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function buildCacheKey(body) {
+  // 같은 입력이면 같은 키가 되게 (필요한 값만 포함)
+  const payload = {
+    prompt: normalizeStr(body?.prompt),
+    freeText: normalizeStr(body?.free_text || body?.freeText),
+    mainFlower: normalizeStr(body?.mainFlower),
+    input: body?.input ?? null,
+    images: (Array.isArray(body?.images) ? body.images : [])
+      .filter((v) => typeof v === "string" && v.trim())
+      .map((v) => v.trim()),
+  };
+  const raw = JSON.stringify(payload);
+  const hash = await sha256Hex(raw);
+  return `pro:v1:${hash}`;
+}
+
 function extractText(responseData) {
   if (!responseData || typeof responseData !== "object") return "";
   if (typeof responseData.output_text === "string" && responseData.output_text.trim()) {
@@ -60,9 +88,18 @@ async function generateBouquetImage({ apiKey, text, prompt, mainFlower }) {
     "Korean florist bouquet photo, premium realistic style.",
     "Single bouquet centered, clean cream background, soft natural light.",
     "No text, no watermark, no logo, no people, no hands.",
-    mainFlower ? `Main flower MUST be clearly visible: ${mainFlower}.` : "",
+    mainFlower
+      ? `Include ${mainFlower} as ONE of the focal blooms (medium size), not oversized, mixed with another focal flower.`
+      : "",
     "Use this concept and mood:",
     source,
+    "",
+    "Photorealistic studio product photography of a florist-designed hand-tied bouquet.",
+    "Balanced multi-flower composition (NOT a single oversized centerpiece):",
+    "3 medium focal blooms + 6-10 secondary blooms + 1 filler flower type + 1-2 airy greenery types.",
+    "Varied bloom sizes, layered depth, natural overlap, visible stems, slight asymmetry.",
+    "Real paper wrap with subtle wrinkles and micro texture, satin ribbon, natural soft shadow, subtle film grain.",
+    "Negative: no CGI, no 3D render, no illustration, avoid one giant central bloom dominating the bouquet, avoid perfect symmetry, avoid plastic/waxy petals.",
   ].filter(Boolean).join("\n");
 
   let imageRes;
@@ -77,6 +114,7 @@ async function generateBouquetImage({ apiKey, text, prompt, mainFlower }) {
         model: "gpt-image-1",
         prompt: imagePrompt,
         size: "1024x1024",
+        quality: "medium",
       }),
     });
   } catch (e) {
@@ -168,19 +206,67 @@ export async function onRequestPost(context) {
     });
   }
 
+  // ===== KV cache lookup (before OpenAI calls) =====
+  const kv = context.env.FLOWER_CACHE; // 바인딩 이름 그대로
+  let cacheKey = null;
+
+  if (kv) {
+    cacheKey = await buildCacheKey(body);
+    const cached = await kv.get(cacheKey, { type: "json" });
+    if (cached?.text && cached?.image_url) {
+      return new Response(
+        JSON.stringify({
+          text: cached.text,
+          image_url: cached.image_url,
+          cached: true,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+  }
+
   const buildInput = () => {
     if (input) return input;
     const freeText = String(body?.free_text || body?.freeText || "").trim();
     const images = Array.isArray(body?.images) ? body.images : [];
-    const systemText =
-      "당신은 최고의 전문 플로리스트입니다. 무료 설문 결과를 참고해 유료용 디테일 확장 추천서를 작성하세요. " +
-      "반드시 다음 구성으로 출력하세요:\n" +
-      "1) 꽃다발 이미지 설명(텍스트)\n" +
-      "2) 대표꽃/컨셉/이유\n" +
-      "3) 상황별 추천 멘트 5개\n" +
-      "4) 제작 가이드(톤/포장/조합/대체 규칙)\n" +
-      "5) 꽃집 전달용 상세 문장(복붙 1개)\n" +
-      "6) 주의/피해야 할 포인트(3개 이내)\n";
+    const systemText = [
+      "당신은 10년차 플로리스트입니다. 아래 \"무료 설문 결과/사용자 입력\"을 바탕으로,",
+      "화이트데이(또는 선물 상황)에서 실패하지 않는 '구매 실행형' 추천서를 작성하세요.",
+      "과장 금지, 현실적으로 꽃집에서 바로 통하는 문장만 씁니다.",
+      "출력은 반드시 아래 형식/순서를 지키고, 각 항목은 2~5줄로 간결하게.",
+      "",
+      "[출력 형식]",
+      "1) 한줄 결론(그냥 이대로 사면 됨)",
+      "- 예: \"핑크-피치 톤의 우아한 믹스 부케 / 과하지 않게 고급 포장\"",
+      "",
+      "2) 꽃다발 구성(조화로운 구성 규칙)",
+      "- 포컬(중간 크기) 3송이: (꽃 2종 혼합, '한 송이만 크게' 금지)",
+      "- 서브 6~10송이: (작은 꽃/스프레이류)",
+      "- 필러 1종: (작은 군락)",
+      "- 그린 1~2종: (공기감)",
+      "※ 팔레트/무드/관계에 맞춰 꽃을 구체적으로 제안.",
+      "",
+      "3) 예산별 추천(3만/5만/7만 중 해당만 강조)",
+      "- 같은 톤 유지하면서 \"볼륨/포인트/포장\"만 단계적으로 업그레이드.",
+      "",
+      "4) 꽃집 주문서(복붙 1개: 가장 중요)",
+      "- 꽃집 사장님에게 그대로 보내도 되는 완성 문장 1개.",
+      "- 포함해야 할 요소: 예산 / 팔레트 / 무드 / 포컬·서브·그린 구성 / 포장지·리본 톤 / 금지사항 1개.",
+      "",
+      "5) 카드 한줄(남자가 쓰기 쉬운 문장 2개)",
+      "- 길고 감성적인 문구 금지. 짧고 안전한 문장 2개.",
+      "",
+      "6) 피해야 할 실수 3가지(짧게)",
+      "- 예: \"너무 쨍한 색 섞기 / 장례 느낌 톤 / 포장 과하게 번쩍이는 것\"",
+      "",
+      "[작성 규칙]",
+      "- '계절/재고에 따라 유사 소재로 대체 가능' 한 줄 추가.",
+      "- 너무 완벽하게 꾸며진 말투 금지. 실제 주문/실행 중심.",
+      "- 꽃 이름은 한국 꽃집에서 통하는 표현으로(예: 장미, 스프레이장미, 리시안셔스, 튤립, 유칼립 등).",
+    ].join("\n");
 
     const content = [
       { type: "input_text", text: freeText || prompt },
@@ -252,6 +338,13 @@ export async function onRequestPost(context) {
 
   const text = extractText(data);
   const image_url = await generateBouquetImage({ apiKey, text, prompt, mainFlower });
+
+  // ===== KV cache save (only on success) =====
+  if (kv && cacheKey && text && image_url) {
+    await kv.put(cacheKey, JSON.stringify({ text, image_url }), {
+      expirationTtl: 60 * 60 * 24 * 14, // 14일
+    });
+  }
 
   return new Response(JSON.stringify({ text, image_url }), {
     status: 200,
