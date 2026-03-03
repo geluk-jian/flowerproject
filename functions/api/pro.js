@@ -153,14 +153,16 @@ async function generateBouquetImage({ apiKey, text, prompt, mainFlower, paletteK
 
   const mf = String(mainFlower || "").trim();
   const mainRule = mf
-    ? `Include "${mf}" as ONE of the focal blooms (medium size), not oversized, mixed with another focal flower.`
-    : "No single oversized centerpiece; keep focal blooms medium and balanced.";
+    ? `Include "${mf}" as ONE of the 3 focal blooms (medium size), NOT oversized. Show THREE focal blooms clearly visible from the front (similar size) in a triangular composition—no single hero bloom.`
+    : "Show THREE focal blooms clearly visible from the front (similar size) in a triangular composition—no single hero bloom.";
 
   // 이미지용 스펙(짧고 명확하게) — text 전체를 넣지 않음(혼란 방지)
   const shortConcept = [
     "Korean florist bouquet, premium realistic studio product photo.",
     `Color palette: ${set.label}. Mood: ${set.mood}.`,
-    "Balanced multi-flower bouquet: 3 medium focal blooms + 6-10 secondary blooms + 1 filler + 1-2 airy greenery types.",
+    "Balanced multi-flower bouquet:",
+    "3 medium focal blooms + 6-10 secondary blooms + 1 filler flower + 1-2 airy greenery.",
+    "Avoid: single flower bouquet, single daisy/gerbera dominating, one giant central bloom.",
     `Focal: ${set.focal.join(" + ")} (mixed, similar size).`,
     `Secondary: ${set.secondary.join(" + ")}.`,
     `Filler: ${set.filler}.`,
@@ -175,6 +177,7 @@ async function generateBouquetImage({ apiKey, text, prompt, mainFlower, paletteK
     `Softbox lighting, natural soft shadow on ${set.bg}.`,
     "85mm lens look, shallow depth of field, subtle film grain, high detail.",
     "Negative: no CGI, no 3D render, no illustration, avoid perfect symmetry, avoid plastic/waxy petals, avoid one giant central bloom dominating the bouquet.",
+    "Avoid: single flower bouquet, single daisy/gerbera dominating, one giant central bloom.",
   ].join("\n");
 
   const imagePrompt = `${shortConcept}\n\n${photoRules}`;
