@@ -2310,6 +2310,10 @@
             .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
             .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
             .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
+            .vip-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+            .vip-head h3 { margin:0; }
+            .vip-head-actions { display:flex; gap:8px; }
+            .mini-btn { padding:8px 10px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); background:#fff; font-weight:700; cursor:pointer; }
             .vip-detail-row { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 13px; line-height:1.5; }
             .vip-detail-label { width: 60px; font-weight: 800; color: #6b7280; flex-shrink: 0; }
             .vip-detail-value { font-weight: 700; color: #111827; }
@@ -2346,29 +2350,41 @@
             ${priceGuideHtml}
 
             <div class="vip-box">
-              <h3>📋 1초 복붙! 플로리스트 주문서</h3>
+              <div class="vip-head">
+                <h3>📋 1초 복붙! 플로리스트 주문서</h3>
+                <button class="mini-btn" type="button" id="btnCopyVipOrderMini">복사</button>
+              </div>
               <div class="vip-order-text" id="vipOrderContent">${nl2brSafe(data.orderText)}</div>
               <button class="vip-btn-full" id="btnCopyVipOrder" type="button">주문서 전체 복사하기</button>
             </div>
 
-            <div class="vip-box">
-              <h3>�� 시크릿 디테일 가이드</h3>
-              <div class="vip-detail-row">
-                <div class="vip-detail-label">포장</div>
-                <div class="vip-detail-value">${escapeHtml(wrapGuideText)}</div>
-              </div>
-              <div class="vip-detail-row">
-                <div class="vip-detail-label">꽃조합</div>
-                <div class="vip-detail-value">${nl2brSafe(data.flowerMix)}</div>
+            <div class="vip-box" id="vipSecretBox">
+              <div class="vip-head">
+                <h3>🔒 시크릿 디테일 가이드</h3>
+                <div class="vip-head-actions">
+                  <button class="mini-btn" type="button" id="btnCopySecret">복사</button>
+                  <button class="mini-btn" type="button" id="btnToggleSecret">펼치기</button>
+                </div>
               </div>
 
-              <div class="palette" style="margin-top:14px;">
-                ${palettes.map(p => `
-                  <div class="swatch">
-                    <div class="swatchColor" style="background:${sanitizeHex(p.hex)};"></div>
-                    <div class="swatchMeta">${escapeHtml(p.name || '')}</div>
-                  </div>
-                `).join('')}
+              <div class="vip-body" id="vipSecretBody" style="display:none;">
+                <div class="vip-detail-row">
+                  <div class="vip-detail-label">포장</div>
+                  <div class="vip-detail-value">${escapeHtml(wrapGuideText)}</div>
+                </div>
+                <div class="vip-detail-row">
+                  <div class="vip-detail-label">꽃조합</div>
+                  <div class="vip-detail-value">${nl2brSafe(data.flowerMix)}</div>
+                </div>
+
+                <div class="palette" style="margin-top:14px;">
+                  ${palettes.map(p => `
+                    <div class="swatch">
+                      <div class="swatchColor" style="background:${sanitizeHex(p.hex)};"></div>
+                      <div class="swatchMeta">${escapeHtml(p.name || '')}</div>
+                    </div>
+                  `).join('')}
+                </div>
               </div>
             </div>
 
@@ -2401,17 +2417,64 @@
         $('resultArea').innerHTML = paidResultHtml;
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // ✅ 주문서 복사
-        document.getElementById('btnCopyVipOrder')?.addEventListener('click', async () => {
-          const text = document.getElementById('vipOrderContent')?.innerText || '';
-          const ok = await copyText(text);
-          toast(ok ? '주문서를 복사했어!' : '복사 실패(브라우저 권한 확인)');
-        });
+        // ✅ 주문서 복사(기존 버튼 + 상단 미니 버튼)
+        const btnCopyVipOrder = document.getElementById('btnCopyVipOrder');
+        const btnCopyVipOrderMini = document.getElementById('btnCopyVipOrderMini');
+        const vipOrderContent = document.getElementById('vipOrderContent');
+        const orderTextPlain = String(data.orderText || '').trim();
+
+        async function copyOrder() {
+          try {
+            await navigator.clipboard.writeText(orderTextPlain);
+            if (btnCopyVipOrder) btnCopyVipOrder.textContent = '복사됨 ✅';
+            if (btnCopyVipOrderMini) btnCopyVipOrderMini.textContent = '복사됨';
+            setTimeout(() => {
+              if (btnCopyVipOrder) btnCopyVipOrder.textContent = '주문서 전체 복사하기';
+              if (btnCopyVipOrderMini) btnCopyVipOrderMini.textContent = '복사';
+            }, 900);
+          } catch (e) {
+            alert('복사가 막혔어요. 브라우저 권한을 확인해 주세요.');
+          }
+        }
+
+        if (btnCopyVipOrder) btnCopyVipOrder.onclick = copyOrder;
+        if (btnCopyVipOrderMini) btnCopyVipOrderMini.onclick = copyOrder;
 
         // ✅ 이미지 저장
         document.getElementById('btnSaveVipImage')?.addEventListener('click', async () => {
           await downloadImage(heroImg, 'flower_guide.png');
         });
+
+        // ✅ 시크릿 디테일: 복사/펼치기
+        const btnCopySecret = document.getElementById('btnCopySecret');
+        const btnToggleSecret = document.getElementById('btnToggleSecret');
+        const vipSecretBody = document.getElementById('vipSecretBody');
+
+        const secretPlain =
+          `【시크릿 디테일 가이드】\n` +
+          `- 포장: ${String(wrapGuideText || '').trim()}\n` +
+          `- 꽃조합:\n${String(data.flowerMix || '').trim()}\n` +
+          `- 팔레트: ${(Array.isArray(palettes) ? palettes : []).map(p => p?.name).filter(Boolean).join(', ')}`;
+
+        if (btnCopySecret) {
+          btnCopySecret.onclick = async () => {
+            try {
+              await navigator.clipboard.writeText(secretPlain);
+              btnCopySecret.textContent = '복사됨';
+              setTimeout(() => (btnCopySecret.textContent = '복사'), 900);
+            } catch (e) {
+              alert('복사가 막혔어요. 브라우저 권한을 확인해 주세요.');
+            }
+          };
+        }
+
+        if (btnToggleSecret && vipSecretBody) {
+          btnToggleSecret.onclick = () => {
+            const open = vipSecretBody.style.display !== 'none';
+            vipSecretBody.style.display = open ? 'none' : 'block';
+            btnToggleSecret.textContent = open ? '펼치기' : '접기';
+          };
+        }
 
         // ✅ 멘트 복사
         document.querySelectorAll('.vip-msg-btn[data-idx]').forEach(btn => {

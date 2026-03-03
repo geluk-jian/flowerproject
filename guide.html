@@ -280,6 +280,75 @@
       font-size: 14px;
     }
 
+    .fixed-cta.hidden {
+      display: none;
+    }
+
+    .sticky-bar{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.94);
+      border-top: 1px solid rgba(0,0,0,0.08);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .sticky-bar.hidden { display:none; }
+
+    .btn{
+      flex: 1;
+      padding: 12px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn.primary{
+      background: #22c55e;
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .section-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .mini-btn{
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background:#fff;
+      font-weight:700;
+      cursor: pointer;
+    }
+
+    .badge{
+      display:inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fff;
+    }
+
+    .badge.reco{
+      background:#22c55e;
+      color:#fff;
+      border-color:transparent;
+    }
+
     .result-card {
       display: none;
       background: var(--white);
@@ -374,6 +443,31 @@
       font-size: 12px;
       color: var(--text-mid);
       font-weight: 700;
+    }
+
+    .pro-block {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .pro-block h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .pro-text {
+      margin-top: 8px;
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+
+    .avoid-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
     }
 
     .moved-paid-detail {
@@ -579,7 +673,7 @@
         <div class="result-title">누나의 유료 꽃추천 결과</div>
         <div class="result-status" id="paidResultStatus">준비됨</div>
       </div>
-      <img id="paidResultImage" class="result-image" alt="추천 꽃다발 이미지" loading="lazy" />
+      <img id="bouquetImg" class="result-image" alt="추천 꽃다발 이미지" loading="lazy" />
       <div class="result-body" id="paidResultBody"></div>
     </section>
 
@@ -594,6 +688,12 @@
       누나의 전체 가이드 받기
       <span class="price-tag">3,900원</span>
     </button>
+  </div>
+
+  <div id="stickyBar" class="sticky-bar hidden">
+    <button id="ctaCopyOrder" class="btn primary">주문서 복사</button>
+    <button id="ctaSaveImage" class="btn">이미지 저장</button>
+    <button id="ctaShare" class="btn">링크 공유</button>
   </div>
 
   <section class="legalWrap" id="legal">
@@ -923,6 +1023,188 @@
       }
     }
 
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value || '';
+    }
+
+    function setHTML(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html || '';
+    }
+
+    function renderDetailSecret(detailText) {
+      const container = document.getElementById('detailSecretWrap');
+      if (!container) return;
+
+      const safe = String(detailText || '').trim();
+      container.innerHTML = `
+        <div class="section-header">
+          <h3>시크릿 디테일 가이드</h3>
+          <div style="display:flex; gap:8px;">
+            <button id="btnCopyDetail" class="mini-btn">복사</button>
+            <button id="btnToggleDetail" class="mini-btn">펼치기</button>
+          </div>
+        </div>
+        <div id="detailSecretBody" style="display:none; margin-top:10px; white-space:pre-wrap;">${escapeHtml(safe)}</div>
+      `;
+
+      const copyBtn = document.getElementById('btnCopyDetail');
+      const toggleBtn = document.getElementById('btnToggleDetail');
+      if (copyBtn) copyBtn.onclick = () => copyText(safe);
+      if (toggleBtn) {
+        toggleBtn.onclick = () => {
+          const body = document.getElementById('detailSecretBody');
+          if (!body) return;
+          const isOpen = body.style.display !== 'none';
+          body.style.display = isOpen ? 'none' : 'block';
+          toggleBtn.textContent = isOpen ? '펼치기' : '접기';
+        };
+      }
+    }
+
+    function renderCardLines(lines) {
+      const container = document.getElementById('mentWrap');
+      if (!container) return;
+
+      const arr = Array.isArray(lines) ? lines.filter(Boolean) : [];
+      const top = arr[0] || '';
+      const alt = arr[1] || '';
+
+      container.innerHTML = `
+        <div class="section-header">
+          <h3>분위기 살려주는 멘트</h3>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px;">
+          <div>
+            <span class="badge reco">가장 무난</span>
+            <div style="margin-top:6px; font-weight:700;">${escapeHtml(top)}</div>
+          </div>
+          <button class="mini-btn" id="btnCopyTop">복사</button>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px;">
+          <div>
+            <span class="badge">대안</span>
+            <div style="margin-top:6px;">${escapeHtml(alt)}</div>
+          </div>
+          <button class="mini-btn" id="btnCopyAlt">복사</button>
+        </div>
+      `;
+
+      const topBtn = document.getElementById('btnCopyTop');
+      const altBtn = document.getElementById('btnCopyAlt');
+      if (topBtn) topBtn.onclick = () => copyText(top);
+      if (altBtn) altBtn.onclick = () => copyText(alt);
+    }
+
+    function highlightBudgetRow(sizeKey) {
+      const s = String(sizeKey || '').toUpperCase();
+      document.querySelectorAll('[data-size]').forEach((row) => {
+        const hit = (row.dataset.size || '').toUpperCase() === s;
+        row.style.fontWeight = hit ? '800' : '400';
+        row.style.background = hit ? 'rgba(34,197,94,0.10)' : 'transparent';
+      });
+    }
+
+    function showStickyBar({ onCopyOrder, onSaveImage }) {
+      const bar = document.getElementById('stickyBar');
+      if (!bar) return;
+      bar.classList.remove('hidden');
+
+      const fixedCta = document.querySelector('.fixed-cta');
+      if (fixedCta) fixedCta.classList.add('hidden');
+
+      const copyOrder = document.getElementById('ctaCopyOrder');
+      const saveImage = document.getElementById('ctaSaveImage');
+      const share = document.getElementById('ctaShare');
+      if (copyOrder) copyOrder.onclick = onCopyOrder;
+      if (saveImage) saveImage.onclick = onSaveImage;
+      if (share) {
+        share.onclick = async () => {
+          const url = location.href;
+          try {
+            await navigator.clipboard.writeText(url);
+          } catch (e) {}
+        };
+      }
+    }
+
+    function renderProResult(data) {
+      const body = document.getElementById('paidResultBody');
+      if (!body) return;
+
+      body.className = 'result-body';
+      body.innerHTML = `
+        <div class="pro-block">
+          <h3>한 줄 결론</h3>
+          <div id="oneLine" class="pro-text"></div>
+        </div>
+        <div class="pro-block">
+          <h3>꽃다발 구성</h3>
+          <div id="bouquetSpec" class="pro-text"></div>
+        </div>
+        <div class="pro-block">
+          <h3>예산 추천</h3>
+          <div id="budgetText" class="pro-text"></div>
+        </div>
+        <div class="pro-block">
+          <div class="section-header">
+            <h3>꽃집 복붙 주문서</h3>
+            <button id="btnCopyOrderInline" class="mini-btn">복사</button>
+          </div>
+          <div id="orderCopyText" class="pro-text"></div>
+        </div>
+        <div class="pro-block" id="detailSecretWrap"></div>
+        <div class="pro-block" id="mentWrap"></div>
+        <div class="pro-block">
+          <h3>피해야 할 실수</h3>
+          <ul id="avoidList" class="avoid-list"></ul>
+        </div>
+      `;
+
+      setText('oneLine', data.one_line);
+      setText('bouquetSpec', data.bouquet_spec);
+      setText('budgetText', data.budget);
+      setText('orderCopyText', data.order_copy);
+
+      const orderBtn = document.getElementById('btnCopyOrderInline');
+      if (orderBtn) orderBtn.onclick = () => copyText(data.order_copy);
+
+      renderDetailSecret(data.detail_secret);
+      renderCardLines(data.card_lines);
+
+      const avoidEl = document.getElementById('avoidList');
+      const avoidItems = Array.isArray(data.avoid) ? data.avoid : [];
+      if (avoidEl) {
+        avoidEl.innerHTML = avoidItems.map((v) => `<li>${escapeHtml(v)}</li>`).join('');
+      }
+
+      const img = document.getElementById('bouquetImg');
+      if (img && data.image_url) {
+        img.src = data.image_url;
+        img.classList.add('show');
+      } else if (img) {
+        img.classList.remove('show');
+        img.removeAttribute('src');
+      }
+
+      showStickyBar({
+        onCopyOrder: () => copyText(data.order_copy),
+        onSaveImage: () => {
+          if (!data.image_url) return;
+          const a = document.createElement('a');
+          a.href = data.image_url;
+          a.download = 'bouquet.png';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+      });
+
+      const m = String(data.budget || '').match(/\b([SML])\b/);
+      if (m && m[1]) highlightBudgetRow(m[1]);
+    }
+
     function bindMovedPaidActions(root){
       if(!root) return;
 
@@ -976,14 +1258,13 @@
       const card = document.getElementById('paidResultCard');
       const body = document.getElementById('paidResultBody');
       const status = document.getElementById('paidResultStatus');
-      const imageEl = document.getElementById('paidResultImage');
+      const imageEl = document.getElementById('bouquetImg');
       if (!btn || !card || !body || !status || !imageEl) return;
 
       const state = getStateFromQuery();
       const prompt = buildPromptFromState(state);
       const params = new URLSearchParams(location.search);
       const isAuto = params.get('auto') === '1';
-      const disablePaidApi = true;
 
       btn.disabled = true;
       btn.style.opacity = '0.7';
@@ -1006,15 +1287,6 @@
           return;
         }
 
-        if (disablePaidApi) {
-          status.textContent = '완료';
-          body.className = 'result-body';
-          body.textContent = '유료 추천 API 연동을 잠시 중단했어. 내부 정리 후 다시 연결할게.';
-          imageEl.classList.remove('show');
-          imageEl.removeAttribute('src');
-          return;
-        }
-
         const payload = {
           prompt,
           paletteKey: state && state.palette, // white_green/pink_peach/lilac/red_wine/yellow_orange
@@ -1028,16 +1300,27 @@
         if (!res.ok) throw new Error(`status_${res.status}`);
 
         const data = await res.json();
-        const text = (data && data.text) ? data.text.trim() : '';
-        if (!text) throw new Error('empty_text');
-        const imageUrl = (data && data.image_url) ? String(data.image_url).trim() : '';
+        const hasStructured =
+          data &&
+          (
+            typeof data.one_line === 'string' ||
+            typeof data.bouquet_spec === 'string' ||
+            typeof data.order_copy === 'string'
+          );
 
         status.textContent = '완료';
-        body.className = 'result-body';
-        body.innerHTML = formatPaidText(text, state);
-        if (imageUrl) {
-          imageEl.src = imageUrl;
-          imageEl.classList.add('show');
+        if (hasStructured) {
+          renderProResult(data);
+        } else {
+          const text = (data && (data.raw_text || data.text)) ? String(data.raw_text || data.text).trim() : '';
+          if (!text) throw new Error('empty_text');
+          const imageUrl = (data && data.image_url) ? String(data.image_url).trim() : '';
+          body.className = 'result-body';
+          body.innerHTML = formatPaidText(text, state);
+          if (imageUrl) {
+            imageEl.src = imageUrl;
+            imageEl.classList.add('show');
+          }
         }
       } catch (e) {
         status.textContent = '실패';

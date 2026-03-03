@@ -81,6 +81,23 @@ function extractText(responseData) {
   return parts.join("\n\n").trim();
 }
 
+function pickTagBlock(text, tag) {
+  const s = String(text || "");
+  const start = `[${tag}]`;
+  const end = `[/${tag}]`;
+  const i = s.indexOf(start);
+  const j = s.indexOf(end);
+  if (i === -1 || j === -1 || j <= i) return "";
+  return s.slice(i + start.length, j).trim();
+}
+
+function splitLines(block) {
+  return String(block || "")
+    .split("\n")
+    .map((v) => v.replace(/^\s*[-•]\s*/, "").trim())
+    .filter(Boolean);
+}
+
 async function generateBouquetImage({ apiKey, text, prompt, mainFlower, paletteKey }) {
   const key = String(paletteKey || "").trim().toLowerCase() || "pink_peach";
 
@@ -275,10 +292,24 @@ export async function onRequestPost(context) {
     cacheKey = await buildCacheKey(body);
     const cached = await kv.get(cacheKey, { type: "json" });
     if (cached?.text && cached?.image_url) {
+      const one_line = pickTagBlock(cached.text, "ONE_LINE");
+      const bouquet_spec = pickTagBlock(cached.text, "BOUQUET_SPEC");
+      const budget = pickTagBlock(cached.text, "BUDGET");
+      const order_copy = pickTagBlock(cached.text, "ORDER_COPY");
+      const detail_secret = pickTagBlock(cached.text, "DETAIL_SECRET");
+      const card_lines = splitLines(pickTagBlock(cached.text, "CARD_LINES"));
+      const avoid = splitLines(pickTagBlock(cached.text, "AVOID"));
       return new Response(
         JSON.stringify({
-          text: cached.text,
           image_url: cached.image_url,
+          raw_text: cached.text,
+          one_line,
+          bouquet_spec,
+          budget,
+          order_copy,
+          detail_secret,
+          card_lines,
+          avoid,
           cached: true,
         }),
         {
@@ -293,41 +324,42 @@ export async function onRequestPost(context) {
     if (input) return input;
     const freeText = String(body?.free_text || body?.freeText || "").trim();
     const images = Array.isArray(body?.images) ? body.images : [];
-    const systemText = [
-      "당신은 10년차 플로리스트입니다. 아래 \"무료 설문 결과/사용자 입력\"을 바탕으로,",
-      "화이트데이(또는 선물 상황)에서 실패하지 않는 '구매 실행형' 추천서를 작성하세요.",
-      "과장 금지, 현실적으로 꽃집에서 바로 통하는 문장만 씁니다.",
-      "출력은 반드시 아래 형식/순서를 지키고, 각 항목은 2~5줄로 간결하게.",
-      "",
-      "[출력 형식]",
-      "1) 한줄 결론(그냥 이대로 사면 됨)",
-      "- 예: \"핑크-피치 톤의 우아한 믹스 부케 / 과하지 않게 고급 포장\"",
-      "",
-      "2) 꽃다발 구성(조화로운 구성 규칙)",
-      "- 포컬(중간 크기) 3송이: (꽃 2종 혼합, '한 송이만 크게' 금지)",
-      "- 서브 6~10송이: (작은 꽃/스프레이류)",
-      "- 필러 1종: (작은 군락)",
-      "- 그린 1~2종: (공기감)",
-      "※ 팔레트/무드/관계에 맞춰 꽃을 구체적으로 제안.",
-      "",
-      "3) 예산별 추천(3만/5만/7만 중 해당만 강조)",
-      "- 같은 톤 유지하면서 \"볼륨/포인트/포장\"만 단계적으로 업그레이드.",
-      "",
-      "4) 꽃집 주문서(복붙 1개: 가장 중요)",
-      "- 꽃집 사장님에게 그대로 보내도 되는 완성 문장 1개.",
-      "- 포함해야 할 요소: 예산 / 팔레트 / 무드 / 포컬·서브·그린 구성 / 포장지·리본 톤 / 금지사항 1개.",
-      "",
-      "5) 카드 한줄(남자가 쓰기 쉬운 문장 2개)",
-      "- 길고 감성적인 문구 금지. 짧고 안전한 문장 2개.",
-      "",
-      "6) 피해야 할 실수 3가지(짧게)",
-      "- 예: \"너무 쨍한 색 섞기 / 장례 느낌 톤 / 포장 과하게 번쩍이는 것\"",
-      "",
-      "[작성 규칙]",
-      "- '계절/재고에 따라 유사 소재로 대체 가능' 한 줄 추가.",
-      "- 너무 완벽하게 꾸며진 말투 금지. 실제 주문/실행 중심.",
-      "- 꽃 이름은 한국 꽃집에서 통하는 표현으로(예: 장미, 스프레이장미, 리시안셔스, 튤립, 유칼립 등).",
-    ].join("\n");
+    const systemText =
+      "당신은 10년차 플로리스트입니다. 아래 입력을 바탕으로 ‘구매 실행형’ 추천서를 작성하세요.\n" +
+      "중요: 선택지/슬래시(/)로 여러 옵션을 나열하지 말고, 각 항목은 ‘하나의 확정안’만 제시하세요.\n" +
+      "과장 금지. 꽃집에서 바로 통하는 문장만.\n\n" +
+      "출력은 반드시 아래 태그 형식을 정확히 지키세요(태그 누락 금지). 각 태그 안 내용은 2~5줄로 간결하게.\n\n" +
+      "[ONE_LINE]\n" +
+      "- 한 줄 결론(그냥 이대로 사면 됨)\n" +
+      "[/ONE_LINE]\n\n" +
+      "[BOUQUET_SPEC]\n" +
+      "- 구성 규칙을 반드시 포함:\n" +
+      "  포컬(중간 크기) 3송이(2종 믹스, ‘한 송이만 크게’ 금지)\n" +
+      "  서브 6~10송이\n" +
+      "  필러 1종\n" +
+      "  그린 1~2종\n" +
+      "- 팔레트/무드/관계에 맞는 꽃 이름을 한국 꽃집에서 통하는 표현으로 구체적으로\n" +
+      "- 마지막 줄에: ‘계절/재고에 따라 유사 톤 소재로 대체 가능’ 1줄 추가\n" +
+      "[/BOUQUET_SPEC]\n\n" +
+      "[BUDGET]\n" +
+      "- 예산/사이즈 추천(예: M 5~8만원)\n" +
+      "- 왜 이 사이즈가 무난한지 1줄\n" +
+      "[/BUDGET]\n\n" +
+      "[ORDER_COPY]\n" +
+      "- 꽃집 사장님에게 그대로 보내는 ‘복붙 주문서’ 1개(가장 중요)\n" +
+      "- 반드시 포함: 예산, 팔레트, 무드, 포컬/서브/필러/그린 구성, 포장(포장지 톤/리본), 금지사항 1개\n" +
+      "- 금지: 슬래시(/)로 옵션 나열, 괄호 안에 선택지 나열\n" +
+      "[/ORDER_COPY]\n\n" +
+      "[DETAIL_SECRET]\n" +
+      "- 디테일 가이드(포장/꽃조합/그린/대체 규칙) 4~6줄\n" +
+      "- 금지: 슬래시(/)로 여러 옵션 나열\n" +
+      "[/DETAIL_SECRET]\n\n" +
+      "[CARD_LINES]\n" +
+      "- 남자가 쓰기 쉬운 카드 한줄 2개(짧고 안전하게)\n" +
+      "[/CARD_LINES]\n\n" +
+      "[AVOID]\n" +
+      "- 피해야 할 실수 3개(짧게)\n" +
+      "[/AVOID]\n";
 
     const content = [
       { type: "input_text", text: freeText || prompt },
@@ -398,7 +430,20 @@ export async function onRequestPost(context) {
   }
 
   const text = extractText(data);
-  const image_url = await generateBouquetImage({ apiKey, text, prompt, mainFlower, paletteKey });
+  const image_url = await generateBouquetImage({
+    apiKey,
+    text,
+    prompt,
+    mainFlower,
+    paletteKey: String(body?.paletteKey || ""),
+  });
+  const one_line = pickTagBlock(text, "ONE_LINE");
+  const bouquet_spec = pickTagBlock(text, "BOUQUET_SPEC");
+  const budget = pickTagBlock(text, "BUDGET");
+  const order_copy = pickTagBlock(text, "ORDER_COPY");
+  const detail_secret = pickTagBlock(text, "DETAIL_SECRET");
+  const card_lines = splitLines(pickTagBlock(text, "CARD_LINES"));
+  const avoid = splitLines(pickTagBlock(text, "AVOID"));
 
   // ===== KV cache save (only on success) =====
   if (kv && cacheKey && text && image_url) {
@@ -407,8 +452,21 @@ export async function onRequestPost(context) {
     });
   }
 
-  return new Response(JSON.stringify({ text, image_url }), {
-    status: 200,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify({
+      image_url,
+      raw_text: text,
+      one_line,
+      bouquet_spec,
+      budget,
+      order_copy,
+      detail_secret,
+      card_lines,
+      avoid,
+    }),
+    {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    }
+  );
 }
