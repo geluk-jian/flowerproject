@@ -197,15 +197,15 @@
       letter-spacing:-.1px;
       transition: transform .08s ease, background .15s ease, border-color .15s ease;
     }
-    button:hover{transform: translateY(-1px); background: var(--accentDark); border-color: var(--accentDark);}
+    #app button:hover{transform: translateY(-1px); background: var(--accentDark); border-color: var(--accentDark);}
 
-    button.secondary{
+    #app button.secondary{
       border:1px solid var(--line);
       background: #fff;
       color: var(--text);
       font-weight:800;
     }
-    button.secondary:hover{background:#f8fafc; border-color:#d1d5db;}
+    #app button.secondary:hover{background:#f8fafc; border-color:#d1d5db;}
 
     .screen{display:none;}
     .screen.active{display:block;}
@@ -1085,6 +1085,7 @@
     const $ = (id) => document.getElementById(id);
     const byId = (id) => document.getElementById(id);
     let startSliderControl = null;
+    const PG_READY = false; // ✅ 나중에 PG 붙으면 true로
 
     function initStartSlider(){
       const frame = byId('flowerSlide');
@@ -1459,39 +1460,6 @@
       return normalized;
     }
 
-    const paletteByPersonality = {
-      '러블리': [
-        { name:'Rose Quartz', hex:'#F7CAC9' },
-        { name:'Peach Echo', hex:'#F7B39B' },
-        { name:'Cream Tan', hex:'#F3E0BE' }
-      ],
-      '세련됨': [
-        { name:'Cloud Dancer', hex:'#F0EEE9' },
-        { name:'Harbor Mist', hex:'#BFC9C2' },
-        { name:'Urban Chic', hex:'#464646' }
-      ],
-      '귀여움': [
-        { name:'Lemon Zest', hex:'#F9E547' },
-        { name:'Bubblegum', hex:'#FF77A9' },
-        { name:'Apricot', hex:'#FFB482' }
-      ],
-      '미니멀': [
-        { name:'Snow White', hex:'#F8F7F2' },
-        { name:'Silk Gray', hex:'#D9D9D6' },
-        { name:'Sage Hint', hex:'#C9D4C5' }
-      ],
-      '우아함': [
-        { name:'Muted Blush', hex:'#D9A5A0' },
-        { name:'Champagne', hex:'#F3E5C8' },
-        { name:'Vintage Green', hex:'#708D81' }
-      ],
-      '활기': [
-        { name:'Sunflower', hex:'#FFD23F' },
-        { name:'Orange Pop', hex:'#FF8C42' },
-        { name:'Fresh Leaf', hex:'#7DBA3A' }
-      ]
-    };
-
     function fallbackSampleImage(concept){
       const safe = escapeHtml(concept || '추천 컨셉');
       const svg = `
@@ -1525,6 +1493,10 @@
       state.photoHabit = null;
       state.style = null;
       state.cautions = [];
+    }
+
+    function clearStickyPadding(){
+      document.body.style.paddingBottom = '';
     }
 
     let stepIdx = 0;
@@ -1667,6 +1639,7 @@
 
     function resetAll(){
       clearState();
+      clearStickyPadding();
       stepIdx = 0;
       history.replaceState(null, '', location.pathname);
       showScreen('screenStart');
@@ -2098,6 +2071,15 @@
       // ====== 주문문장(미리보기 구성) ======
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}${cautionTextForOrder ? `<br/>주의: ${escapeHtml(tabooShortList.join(' · '))}` : ''}`;
       const basicMsgList = [basicMessage];
+      const paidBadge = PG_READY ? '결제 필요' : '베타 무료';
+      const paidBtnText = PG_READY ? '👉 3,900원으로 시크릿 가이드 열기' : '👉 무료로 시크릿 가이드 열기';
+      const paidPriceGuideHtml = PG_READY ? `
+          <div style="text-align: center; margin: 10px 0 10px;">
+            <div style="font-weight: 700; color: #111827; margin-bottom: 6px;">🔒 잠깐! 꽃집에 가기 전, 완벽한 주문서를 확인하세요</div>
+            <del style="color: #94a3b8; font-size: 13px;">정가 9,900원</del>
+            <div style="color: #111827; font-size: 18px; font-weight: 800; margin-top: 4px;">커피 한 잔 값, 3,900원</div>
+          </div>
+      ` : '';
 
       const resultHtml = `
         <!-- [A] HERO 카드 -->
@@ -2160,15 +2142,11 @@
         <div class="box paidCard" id="paidUpsellBox">
           <div class="paidHead">
             <div class="paidTitle">실패 확률 0%, 센스 있는 남친으로 만들어 줄 시크릿 가이드</div>
-            <div class="paidPrice">결제 필요</div>
+            <div class="paidPrice">${paidBadge}</div>
           </div>
           <p class="paidDesc">📸 1. 꽃다발 시안 이미지<br/>길게 설명하지 않아도, 꽃집에서 “딱 이 느낌”으로 보여주세요.<br/><br/>📋 2. 복붙용 플로리스트 고급 주문서<br/>메인 꽃, 서브 꽃, 대체 규칙까지 세팅 완료. “알아서 예쁘게” 대신 복붙 한 번으로 퀄리티를 보장받으세요.<br/><br/>🎨 3. 컬러 팔레트 &amp; 포장 가이드<br/>촌스러워지는 색 조합 원천 차단. 사진빨 100% 성공하는 취향 저격 디테일이에요.<br/><br/>💬 4. 상황별 맞춤 멘트 5개<br/>막상 건넬 때 멘트 고민 끝. 어색함 없이 분위기를 살려줄 한마디를 골라 쓰세요.</p>
-          <div style="text-align: center; margin: 10px 0 10px;">
-            <div style="font-weight: 700; color: #111827; margin-bottom: 6px;">🔒 잠깐! 꽃집에 가기 전, 완벽한 주문서를 확인하세요</div>
-            <del style="color: #94a3b8; font-size: 13px;">정가 9,900원</del>
-            <div style="color: #111827; font-size: 18px; font-weight: 800; margin-top: 4px;">커피 한 잔 값, 3,900원</div>
-          </div>
-          <button id="btnOpenPaid" class="paidCta" type="button" style="background-color: #5cb85c; color: white; padding: 10px; border: none; border-radius: 5px; width: 100%;">👉 3,900원으로 시크릿 가이드 열기</button>
+          ${paidPriceGuideHtml}
+          <button id="btnOpenPaid" class="paidCta" type="button" style="background-color: #5cb85c; color: white; padding: 10px; border: none; border-radius: 5px; width: 100%;">${paidBtnText}</button>
         </div>
 
         <div class="btnrow" style="margin-top:16px;">
@@ -2178,6 +2156,11 @@
       `;
 
       $('resultArea').innerHTML = resultHtml;
+      if(!PG_READY){
+        document.querySelector('.service-period')?.style.setProperty('display','none');
+      } else {
+        document.querySelector('.service-period')?.style.removeProperty('display');
+      }
 
       // ====== 버튼 바인딩: 없는 버튼은 안전하게 스킵 ======
       const btnCopyOrderEl = $('btnCopyOrder');
@@ -2220,7 +2203,8 @@
             cautions: userState.cautions,
             mainFlower: mainAsset.name,
             mainFlowerKey: flowerKeyFromText(mainAsset.name) || '',
-            instruction: `유저가 퀴즈에서 선택한 6가지 데이터를 기반으로 나온 무료버전의 꽃(${mainAsset.name})을 메인으로 해서 서치 후 내용을 작성해줘. 한글로 써줘.`
+            instruction: `유저 선택 6가지 데이터를 반영해서, 플로리스트 관점의 ‘실전 주문/가이드’로 작성해줘.
+옵션 나열(/) 금지, 한 항목당 확정안 1개만 제시. 한글로.`
           })
         });
         if (!response.ok) {
@@ -2259,6 +2243,15 @@
         const recSize = rec.size || 'M';
         const recBudget = rec.budget || (data.priceInfo || '약 5만~8만 원');
         const recReason = rec.reason || '무난한 구간';
+        const topMsg = messages[0] || '';
+        const altMsgs = messages.slice(1);
+        const dmTemplate =
+`안녕하세요! ${data.occasion ? `${data.occasion} ` : ''}선물로 꽃다발 주문하려고 해요.
+예산은 ${recBudget} (${recSize}) 정도이고, ${data.moodLabel || '추천'} 무드로 부탁드려요.
+(가능하면) ${mainName || (mainAsset && mainAsset.name) || ''} 느낌이 들어가면 좋고,
+포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배송 가능 일정과 대략 구성 안내 가능할까요?`.trim();
+        const recKey = String(recSize || 'M').toUpperCase();
+        const rowBg = (k) => (recKey === k ? 'background: rgba(34,197,94,0.10);' : '');
 
         const priceGuideHtml = `
           <div class="vip-box" style="background:#ffffff; border:1px solid #e5e7eb;">
@@ -2278,15 +2271,15 @@
             </div>
 
             <div style="margin-top:12px; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
-              <div style="display:grid; grid-template-columns:70px 1fr; border-bottom:1px solid #f3f4f6;">
+              <div style="display:grid; grid-template-columns:70px 1fr; border-bottom:1px solid #f3f4f6; ${rowBg('S')}">
                 <div style="padding:10px 12px; font-weight:900; color:#64748b; background:#f8fafc;">S</div>
                 <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.S || "3만~5만 (가벼운 감사/첫 선물/사과)")}</div>
               </div>
-              <div style="display:grid; grid-template-columns:70px 1fr; border-bottom:1px solid #f3f4f6;">
+              <div style="display:grid; grid-template-columns:70px 1fr; border-bottom:1px solid #f3f4f6; ${rowBg('M')}">
                 <div style="padding:10px 12px; font-weight:900; color:#64748b; background:#f8fafc;">M</div>
                 <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.M || "5만~8만 (친한 친구/축하/무난)")}</div>
               </div>
-              <div style="display:grid; grid-template-columns:70px 1fr;">
+              <div style="display:grid; grid-template-columns:70px 1fr; ${rowBg('L')}">
                 <div style="padding:10px 12px; font-weight:900; color:#64748b; background:#f8fafc;">L</div>
                 <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.L || "8만~13만 (각별한 사이/기념일)")}</div>
               </div>
@@ -2389,19 +2382,40 @@
             </div>
 
             <div class="vip-box">
-              <h3>💬 분위기 살려주는 멘트 추천</h3>
-              <ul class="vip-msg-list">
-                ${messages.map((msg, i) => `
-                  <li class="vip-msg-item">
-                    <div class="vip-msg-text">${escapeHtml(msg)}</div>
-                    <button class="vip-msg-btn" type="button" data-idx="${i}">복사</button>
-                  </li>
-                `).join('')}
-              </ul>
+              <div class="vip-head">
+                <h3>💬 분위기 살려주는 멘트</h3>
+              </div>
+
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:12px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
+                <div>
+                  <div style="display:inline-block; padding:2px 8px; border-radius:999px; background:#22c55e; color:#fff; font-size:12px; font-weight:900;">가장 무난</div>
+                  <div style="margin-top:8px; font-size:14px; font-weight:800; color:#111827; line-height:1.5;">${escapeHtml(topMsg)}</div>
+                </div>
+                <button class="vip-msg-btn" type="button" id="btnCopyTopVipMsg">복사</button>
+              </div>
+
+              ${altMsgs.length ? `
+                <div style="margin-top:12px; font-size:12px; font-weight:900; color:#6b7280;">대안 멘트</div>
+                <ul class="vip-msg-list" style="margin-top:6px;">
+                  ${altMsgs.map((msg, i) => `
+                    <li class="vip-msg-item">
+                      <div class="vip-msg-text">${escapeHtml(msg)}</div>
+                      <button class="vip-msg-btn" type="button" data-alt-idx="${i}">복사</button>
+                    </li>
+                  `).join('')}
+                </ul>
+              ` : ''}
             </div>
 
             <div class="vip-box" style="background:#f8fafc; border:none;">
               <h3>💡 실전 참고</h3>
+              <div style="margin-top:14px; padding:12px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <div style="font-size:13px; font-weight:900; color:#111827;">📩 꽃집 첫 DM 템플릿</div>
+                  <button class="vip-msg-btn" type="button" id="btnCopyDmTemplate">복사</button>
+                </div>
+                <div style="margin-top:8px; font-size:12px; font-weight:750; color:#374151; line-height:1.6; white-space:pre-wrap;">${escapeHtml(dmTemplate)}</div>
+              </div>
               <div style="margin-top:14px; padding:12px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
                 <div style="font-size:13px; font-weight:900; color:#111827; margin-bottom:8px;">🌿 꽃집 고르는 빠른 기준</div>
                 <ul style="margin:0; padding-left:18px; font-size:12px; font-weight:750; color:#374151; line-height:1.6;">
@@ -2411,30 +2425,41 @@
                 </ul>
               </div>
             </div>
+
+            <div class="btnrow" style="margin-top:16px;">
+              <button id="btnAgainVip" type="button">다시 하기</button>
+              <button class="secondary" id="btnHomeVip" type="button">처음으로</button>
+            </div>
+
+            <div id="vipStickyBar" aria-label="빠른 실행">
+              <button class="btn primary" type="button" id="vipStickyCopyOrder">주문서 복사</button>
+              <button class="btn" type="button" id="vipStickySaveImage">이미지 저장</button>
+              <button class="btn" type="button" id="vipStickyShare">링크 공유</button>
+            </div>
           </div>
         `;
 
         $('resultArea').innerHTML = paidResultHtml;
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.style.paddingBottom = '72px';
 
         // ✅ 주문서 복사(기존 버튼 + 상단 미니 버튼)
         const btnCopyVipOrder = document.getElementById('btnCopyVipOrder');
         const btnCopyVipOrderMini = document.getElementById('btnCopyVipOrderMini');
-        const vipOrderContent = document.getElementById('vipOrderContent');
         const orderTextPlain = String(data.orderText || '').trim();
 
         async function copyOrder() {
-          try {
-            await navigator.clipboard.writeText(orderTextPlain);
-            if (btnCopyVipOrder) btnCopyVipOrder.textContent = '복사됨 ✅';
-            if (btnCopyVipOrderMini) btnCopyVipOrderMini.textContent = '복사됨';
-            setTimeout(() => {
-              if (btnCopyVipOrder) btnCopyVipOrder.textContent = '주문서 전체 복사하기';
-              if (btnCopyVipOrderMini) btnCopyVipOrderMini.textContent = '복사';
-            }, 900);
-          } catch (e) {
+          const ok = await copyText(orderTextPlain);
+          if(!ok){
             alert('복사가 막혔어요. 브라우저 권한을 확인해 주세요.');
+            return;
           }
+          if (btnCopyVipOrder) btnCopyVipOrder.textContent = '복사됨 ✅';
+          if (btnCopyVipOrderMini) btnCopyVipOrderMini.textContent = '복사됨';
+          setTimeout(() => {
+            if (btnCopyVipOrder) btnCopyVipOrder.textContent = '주문서 전체 복사하기';
+            if (btnCopyVipOrderMini) btnCopyVipOrderMini.textContent = '복사';
+          }, 900);
         }
 
         if (btnCopyVipOrder) btnCopyVipOrder.onclick = copyOrder;
@@ -2443,6 +2468,22 @@
         // ✅ 이미지 저장
         document.getElementById('btnSaveVipImage')?.addEventListener('click', async () => {
           await downloadImage(heroImg, 'flower_guide.png');
+        });
+
+        // ✅ VIP 하단 고정 CTA 바
+        const sticky = document.getElementById('vipStickyBar');
+        if (sticky) sticky.style.display = 'flex';
+
+        document.getElementById('vipStickyCopyOrder')?.addEventListener('click', copyOrder);
+
+        document.getElementById('vipStickySaveImage')?.addEventListener('click', async () => {
+          await downloadImage(heroImg, 'flower_guide.png');
+        });
+
+        document.getElementById('vipStickyShare')?.addEventListener('click', async () => {
+          const shareUrl = location.href;
+          const ok = await copyText(shareUrl);
+          toast(ok ? '링크를 복사했어!' : '복사 실패(브라우저 권한 확인)');
         });
 
         // ✅ 시크릿 디테일: 복사/펼치기
@@ -2458,13 +2499,13 @@
 
         if (btnCopySecret) {
           btnCopySecret.onclick = async () => {
-            try {
-              await navigator.clipboard.writeText(secretPlain);
-              btnCopySecret.textContent = '복사됨';
-              setTimeout(() => (btnCopySecret.textContent = '복사'), 900);
-            } catch (e) {
+            const ok = await copyText(secretPlain);
+            if(!ok){
               alert('복사가 막혔어요. 브라우저 권한을 확인해 주세요.');
+              return;
             }
+            btnCopySecret.textContent = '복사됨';
+            setTimeout(() => (btnCopySecret.textContent = '복사'), 900);
           };
         }
 
@@ -2476,15 +2517,37 @@
           };
         }
 
-        // ✅ 멘트 복사
-        document.querySelectorAll('.vip-msg-btn[data-idx]').forEach(btn => {
+        // ✅ VIP 멘트 복사(추천 1개)
+        document.getElementById('btnCopyTopVipMsg')?.addEventListener('click', async () => {
+          const text = (messages[0] || '').trim();
+          const ok = await copyText(text);
+          toast(ok ? '복사했어!' : '복사 실패(브라우저 권한 확인)');
+        });
+
+        // ✅ VIP 멘트 복사(대안)
+        document.querySelectorAll('.vip-msg-btn[data-alt-idx]').forEach(btn => {
           btn.addEventListener('click', async () => {
-            const i = Number(btn.dataset.idx);
-            const text = messages[i] || '';
+            const i = Number(btn.dataset.altIdx);
+            const text = (messages[i + 1] || '').trim();
             const ok = await copyText(text);
             toast(ok ? '복사했어!' : '복사 실패(브라우저 권한 확인)');
           });
         });
+
+        document.getElementById('btnCopyDmTemplate')?.addEventListener('click', async () => {
+          const ok = await copyText(dmTemplate);
+          toast(ok ? 'DM 템플릿을 복사했어!' : '복사 실패(브라우저 권한 확인)');
+        });
+
+        document.getElementById('btnAgainVip')?.addEventListener('click', ()=>{
+          clearState();
+          clearStickyPadding();
+          stepIdx = 0;
+          showScreen('screenQuiz');
+          renderStep();
+        });
+
+        document.getElementById('btnHomeVip')?.addEventListener('click', resetAll);
 
       }
 
@@ -2542,6 +2605,7 @@
       if(btnAgainEl){
         btnAgainEl.onclick = ()=>{
           clearState();
+          clearStickyPadding();
           stepIdx = 0;
           showScreen('screenQuiz');
           renderStep();
@@ -2815,6 +2879,25 @@
       transform:none;
     }
 
+    /* ✅ VIP/서브 액션 버튼은 흰색으로(메인 CTA만 초록 유지) */
+    #app .mini-btn,
+    #app .vip-btn-outline,
+    #app .vip-msg-btn,
+    #app .msgCopy{
+      border: 1px solid var(--line) !important;
+      background: #fff !important;
+      color: var(--text) !important;
+    }
+
+    #app .mini-btn:hover,
+    #app .vip-btn-outline:hover,
+    #app .vip-msg-btn:hover,
+    #app .msgCopy:hover{
+      transform:none !important;
+      background:#f8fafc !important;
+      border-color:#d1d5db !important;
+    }
+
     .noneDivider{
       height:1px;
       background:#e5e7eb;
@@ -2930,6 +3013,36 @@
       white-space: normal;
       line-height:1.5;
     }
+
+    /* ===== Sticky CTA Bar (VIP) ===== */
+    #vipStickyBar{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+      display: none;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.94);
+      border-top: 1px solid rgba(0,0,0,0.08);
+      backdrop-filter: blur(8px);
+    }
+    #vipStickyBar .btn{
+      flex: 1;
+      padding: 12px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fff;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    #vipStickyBar .btn.primary{
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+    }
+    #vipStickyBar .btn:active{ transform: scale(0.99); }
 
   </style>
 
