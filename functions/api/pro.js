@@ -49,6 +49,7 @@ async function buildCacheKey(body) {
     prompt: normalizeStr(body?.prompt),
     freeText: normalizeStr(body?.free_text || body?.freeText),
     mainFlower: normalizeStr(body?.mainFlower),
+    paletteKey: normalizeStr(body?.paletteKey),
     input: body?.input ?? null,
     images: (Array.isArray(body?.images) ? body.images : [])
       .filter((v) => typeof v === "string" && v.trim())
@@ -80,27 +81,86 @@ function extractText(responseData) {
   return parts.join("\n\n").trim();
 }
 
-async function generateBouquetImage({ apiKey, text, prompt, mainFlower }) {
-  const source = String(text || prompt || "").trim().slice(0, 1200);
-  if (!source) return null;
+async function generateBouquetImage({ apiKey, text, prompt, mainFlower, paletteKey }) {
+  const key = String(paletteKey || "").trim().toLowerCase() || "pink_peach";
 
-  const imagePrompt = [
-    "Korean florist bouquet photo, premium realistic style.",
-    "Single bouquet centered, clean cream background, soft natural light.",
-    "No text, no watermark, no logo, no people, no hands.",
-    mainFlower
-      ? `Include ${mainFlower} as ONE of the focal blooms (medium size), not oversized, mixed with another focal flower.`
-      : "",
-    "Use this concept and mood:",
-    source,
-    "",
+  const SETS = {
+    pink_peach: {
+      label: "pink-peach",
+      mood: "elegant, romantic, soft",
+      focal: ["rose", "lisianthus"],
+      secondary: ["spray roses", "small carnations"],
+      filler: "waxflower",
+      greenery: ["eucalyptus", "ruscus"],
+      bg: "light gray seamless backdrop with subtle gradient",
+    },
+    yellow_orange: {
+      label: "yellow-orange",
+      mood: "bright, cheerful, clean",
+      focal: ["tulips", "roses"],
+      secondary: ["spray roses", "lisianthus"],
+      filler: "solidago",
+      greenery: ["eucalyptus", "pittosporum"],
+      bg: "light gray seamless backdrop with subtle gradient",
+    },
+    red_wine: {
+      label: "deep red / burgundy",
+      mood: "moody, chic, luxurious",
+      focal: ["deep red roses", "ranunculus"],
+      secondary: ["deep red spray roses", "small carnations"],
+      filler: "hypericum berries",
+      greenery: ["ruscus", "eucalyptus"],
+      bg: "light gray seamless backdrop with subtle gradient",
+    },
+    white_green: {
+      label: "white-green",
+      mood: "minimal, clean, modern",
+      focal: ["white roses", "white lisianthus"],
+      secondary: ["spray roses"],
+      filler: "baby's breath",
+      greenery: ["eucalyptus", "ruscus"],
+      bg: "light gray seamless backdrop with subtle gradient",
+    },
+    lilac: {
+      label: "lilac / lavender",
+      mood: "elegant, dreamy, refined",
+      focal: ["purple lisianthus", "roses"],
+      secondary: ["spray roses"],
+      filler: "statice",
+      greenery: ["eucalyptus", "ruscus"],
+      bg: "light gray seamless backdrop with subtle gradient",
+    },
+  };
+
+  const set = SETS[key] || SETS.pink_peach;
+
+  const mf = String(mainFlower || "").trim();
+  const mainRule = mf
+    ? `Include "${mf}" as ONE of the focal blooms (medium size), not oversized, mixed with another focal flower.`
+    : "No single oversized centerpiece; keep focal blooms medium and balanced.";
+
+  // 이미지용 스펙(짧고 명확하게) — text 전체를 넣지 않음(혼란 방지)
+  const shortConcept = [
+    "Korean florist bouquet, premium realistic studio product photo.",
+    `Color palette: ${set.label}. Mood: ${set.mood}.`,
+    "Balanced multi-flower bouquet: 3 medium focal blooms + 6-10 secondary blooms + 1 filler + 1-2 airy greenery types.",
+    `Focal: ${set.focal.join(" + ")} (mixed, similar size).`,
+    `Secondary: ${set.secondary.join(" + ")}.`,
+    `Filler: ${set.filler}.`,
+    `Greenery: ${set.greenery.join(" + ")}.`,
+    mainRule,
+  ].join("\n");
+
+  const photoRules = [
     "Photorealistic studio product photography of a florist-designed hand-tied bouquet.",
-    "Balanced multi-flower composition (NOT a single oversized centerpiece):",
-    "3 medium focal blooms + 6-10 secondary blooms + 1 filler flower type + 1-2 airy greenery types.",
-    "Varied bloom sizes, layered depth, natural overlap, visible stems, slight asymmetry.",
-    "Real paper wrap with subtle wrinkles and micro texture, satin ribbon, natural soft shadow, subtle film grain.",
-    "Negative: no CGI, no 3D render, no illustration, avoid one giant central bloom dominating the bouquet, avoid perfect symmetry, avoid plastic/waxy petals.",
-  ].filter(Boolean).join("\n");
+    "Single bouquet centered, no text, no watermark, no logo, no people, no hands.",
+    "Real paper wrap with subtle wrinkles and micro texture, satin ribbon.",
+    `Softbox lighting, natural soft shadow on ${set.bg}.`,
+    "85mm lens look, shallow depth of field, subtle film grain, high detail.",
+    "Negative: no CGI, no 3D render, no illustration, avoid perfect symmetry, avoid plastic/waxy petals, avoid one giant central bloom dominating the bouquet.",
+  ].join("\n");
+
+  const imagePrompt = `${shortConcept}\n\n${photoRules}`;
 
   let imageRes;
   try {
@@ -190,6 +250,7 @@ export async function onRequestPost(context) {
 
   const prompt = String(body?.prompt || "").trim();
   const mainFlower = String(body?.mainFlower || "").trim();
+  const paletteKey = String(body?.paletteKey || "").trim();
   const input = Array.isArray(body?.input) ? body.input : null;
   if (!prompt && !input) {
     return new Response(JSON.stringify({ error: "prompt_required" }), {
@@ -337,7 +398,7 @@ export async function onRequestPost(context) {
   }
 
   const text = extractText(data);
-  const image_url = await generateBouquetImage({ apiKey, text, prompt, mainFlower });
+  const image_url = await generateBouquetImage({ apiKey, text, prompt, mainFlower, paletteKey });
 
   // ===== KV cache save (only on success) =====
   if (kv && cacheKey && text && image_url) {

@@ -1015,10 +1015,15 @@
           return;
         }
 
+        const payload = {
+          prompt,
+          paletteKey: state && state.palette, // white_green/pink_peach/lilac/red_wine/yellow_orange
+        };
+
         const res = await fetch('/api/pro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error(`status_${res.status}`);
 
