@@ -1576,6 +1576,14 @@
       const selected = getAnswer(s.id);
 
       s.options.forEach((opt, idx)=>{
+        // ✅ "없음" 옵션은 위에 구분선(옵션 박스 밖에 따로)
+        if(s.id === 'cautions' && opt.value === 'none'){
+          const hr = document.createElement('div');
+          hr.className = 'noneDivider';
+          hr.setAttribute('aria-hidden','true');
+          opts.appendChild(hr);
+        }
+
         const div = document.createElement('div');
         div.className = 'opt';
 
@@ -1595,11 +1603,7 @@
             ${opt.desc ? `<div class="abDesc">${escapeHtml(opt.desc)}</div>` : ''}
           `;
         } else {
-        const noneDivider = (s.id === 'cautions' && opt.value === 'none')
-          ? '<div class="noneDivider" aria-hidden="true"></div>'
-          : '';
-        div.innerHTML = `
-            ${noneDivider}
+          div.innerHTML = `
             <div>
               <div class="title">${escapeHtml(opt.title)}</div>
               ${opt.desc ? `<div class="desc">${escapeHtml(opt.desc)}</div>` : ''}
@@ -1642,6 +1646,8 @@
       clearStickyPadding();
       stepIdx = 0;
       history.replaceState(null, '', location.pathname);
+      const sp = document.querySelector('.service-period');
+      if(sp) sp.style.removeProperty('display');
       showScreen('screenStart');
     }
 
@@ -1770,53 +1776,92 @@
       return { main, sub, tex };
     }
 
-    function buildMessages({relation, occasion}){
+    function buildMessages({ relation, occasion, flowerName }) {
+      const relKey = relation || '여자친구(연인)';
+      const occKey = occasion || '그냥(고맙고 응원)';
+      const f = flowerName ? ` ${flowerName} 느낌으로` : '';
+
       const base = {
         '썸/소개팅': {
-          simple: '너한테 어울릴 것 같아서 들고 왔어.',
-          sense: '무드가 딱 너라서 골라봤어 🙂',
-          sincere: '부담 없이 받아줘. 기분 좋아졌으면!'
+          simple: `너 생각나서${f} 가져왔어.`,
+          sense: `너랑 잘 어울릴 것 같아서${f} 골라봤어.`,
+          sincere: `부담은 말고… 오늘 기분 조금이라도 좋아졌으면 해서.`
         },
         '여자친구(연인)': {
-          simple: '네 취향 쪽으로 챙겨왔어.',
-          sense: '이 느낌, 너한테 꽤 잘 어울릴 듯 🙂',
-          sincere: '요즘 고마운 게 많아서, 이렇게 전하고 싶었어.'
+          simple: `네가 좋아할 것 같아서${f} 챙겨왔어.`,
+          sense: `오늘은 고맙다는 말, 꽃으로 대신할게.`,
+          sincere: `요즘 네 덕분에 참 좋아. 그래서 더 예쁘게 전하고 싶었어.`
         },
         '아내/배우자': {
-          simple: '이걸로 고마움 전할게.',
-          sense: '당신 스타일로 정리해서 부탁해봤어 🙂',
-          sincere: '늘 든든하고 고마워. 꽃으로 마음 전할게.'
+          simple: `이걸로 고마움 전할게요.`,
+          sense: `당신이 좋아할 느낌으로 정리해서 골라봤어요.`,
+          sincere: `늘 고맙고 존중해요. 말로 다 못한 마음을 꽃으로 전할게요.`
         },
         '친구/동료': {
-          simple: '수고했어. 이거 받아!',
-          sense: '요즘 분위기랑 맞춰서 픽했어 🙂',
-          sincere: '응원하는 마음이야. 잘 풀리길!'
+          simple: `수고했어. 이거 받아!`,
+          sense: `요즘 고생한 거 알아서… 기분 전환하라고 챙겼어.`,
+          sincere: `항상 고마워. 네가 잘 되면 진짜 좋겠어.`
         },
         '가족': {
-          simple: '늘 고마운 마음이야.',
-          sense: '가족이라 더 담백하게 챙겼어 🙂',
-          sincere: '항상 든든해서 고마워. 꽃으로 마음 전할게.'
+          simple: `생각나서 챙겼어.`,
+          sense: `가족이니까 더 담백하게, 대신 정성은 확실히.`,
+          sincere: `늘 든든해서 고마워. 마음 전하고 싶었어.`
         }
       };
 
       const tails = {
-        '생일/기념일': { simple:' 오늘은 특별한 날.', sense:' 오늘은 확실히 챙기자 🙂', sincere:' 오늘 기억이 오래 남았으면 좋겠어.' },
-        '생일': { simple:' 오늘은 너 주인공.', sense:' 네 날이니까 챙겨야지 🙂', sincere:' 올 한 해도 좋은 일만 가득하길!' },
-        '기념일': { simple:' 그냥 넘어가면 섭하지.', sense:' 기념일이라 확실히 챙김 🙂', sincere:' 우리 앞으로도 계속 잘 지내자.' },
-        '사과(미안해)': { simple:' 내가 좀 더 신경 쓸게.', sense:' 말로만 말고 행동으로 보여줄게 🙂', sincere:' 미안해. 마음 풀렸으면 좋겠다.' },
-        '축하(합격/승진/새출발)': { simple:' 진짜 멋졌다.', sense:' 이런 날은 꽃이 국룰 🙂', sincere:' 앞으로 더 잘 될 거야. 진심으로 축하해.' },
-        '첫 선물': { simple:' 첫 꽃이라 무난하게 시작!', sense:' 처음이라 더 고민했어 🙂', sincere:' 부담은 말고, 그냥 내 마음이라고 생각해줘.' },
-        '그냥(고맙고 응원)': { simple:' 이유 없어도 되는 날이잖아.', sense:' 그냥 주고 싶어서 들고 왔지 🙂', sincere:' 요즘 고생 많아서, 기분 전환 했으면!' }
+        '생일/기념일': {
+          simple: ` 오늘은 네 날이니까.`,
+          sense: ` 오늘이 오래 기억에 남았으면 좋겠어.`,
+          sincere: ` 같이한 시간들이 더 소중하게 느껴지는 날이라서.`
+        },
+        '사과(미안해)': {
+          simple: ` 내가 미안해. 다음부턴 더 잘할게.`,
+          sense: ` 말보다 행동이 먼저일 것 같아서.`,
+          sincere: ` 내가 놓친 부분이 있었어. 진심으로 미안해.`
+        },
+        '축하(합격/승진/새출발)': {
+          simple: ` 진짜 고생했어. 축하해!`,
+          sense: ` 네 노력한 거 다 봤어. 정말 멋지다.`,
+          sincere: ` 너라면 해낼 줄 알았어. 앞으로 더 잘될 거야.`
+        },
+        '첫 선물': {
+          simple: ` 처음이라 더 고민했어.`,
+          sense: ` 부담은 줄이고, 대신 센스는 확실히 담고 싶었어.`,
+          sincere: ` 오늘을 좋은 기억으로 남기고 싶어서, 이렇게 전해.`
+        },
+        '그냥(고맙고 응원)': {
+          simple: ` 그냥 네 생각나서.`,
+          sense: ` 요즘 고생 많지? 응원하고 싶었어.`,
+          sincere: ` 늘 고맙고, 네가 잘 됐으면 하는 마음이야.`
+        }
       };
 
-      const rel = base[relation] || base['여자친구(연인)'];
-      const tail = tails[occasion] || {simple:'', sense:'', sincere:''};
+      const rel = base[relKey] || base['여자친구(연인)'];
+      const tail = tails[occKey] || { simple:'', sense:'', sincere:'' };
 
       return {
-        simple: rel.simple + (tail.simple || ''),
-        sense: rel.sense + (tail.sense || ''),
-        sincere: rel.sincere + (tail.sincere || '')
+        simple: (rel.simple + tail.simple).trim(),
+        sense: (rel.sense + tail.sense).trim(),
+        sincere: (rel.sincere + tail.sincere).trim()
       };
+    }
+
+    function chooseMessageTone(relation, occasion){
+      // 사과/배우자는 진지한 톤이 성공 확률 높음
+      if(occasion === '사과(미안해)') return 'sincere';
+      if(relation === '아내/배우자') return 'sincere';
+
+      // 썸은 너무 무겁지 않게 "센스" 추천
+      if(relation === '썸/소개팅') return 'sense';
+
+      // 축하는 에너지 있게
+      if(occasion === '축하(합격/승진/새출발)') return 'sense';
+
+      // 첫 선물은 부담 줄이는 문장
+      if(occasion === '첫 선물') return 'simple';
+
+      return 'simple';
     }
 
     function hexToRgb(hex){
@@ -1975,7 +2020,6 @@
       const profile = profiles[personality];
 
       const { main, sub, tex } = pickFlowers(profile, state);
-      const msgs = buildMessages({relation: state.relation, occasion: state.occasion});
 
       const styleLabel = {
         cute:'귀여움',
@@ -2002,8 +2046,24 @@
         mainList: main
       });
 
-      const basicMoodLine = `${paletteLabel} 컬러 컨셉이 가장 잘 어울려요.`;
-      const basicMessage = msgs.simple;
+      const msgs = buildMessages({
+        relation: state.relation,
+        occasion: state.occasion,
+        flowerName: mainAsset.name // ✅ 무료 1송이 이름을 멘트에 자연스럽게 반영
+      });
+      const toneKey = chooseMessageTone(state.relation, state.occasion);
+      const basicMessage = (msgs && msgs[toneKey]) ? msgs[toneKey] : (msgs.simple || '');
+
+      // 선물이유(occasion) 기반으로 무드 문장 더 납득되게
+      const occasionMeaning = {
+        '생일/기념일': '특별한 날',
+        '사과(미안해)': '미안한 마음을 전하는 날',
+        '축하(합격/승진/새출발)': '축하하는 날',
+        '첫 선물': '첫 인상을 만드는 날',
+        '그냥(고맙고 응원)': '고마움/응원을 전하는 날'
+      }[state.occasion] || '오늘';
+
+      const basicMoodLine = `${occasionMeaning}엔 ${paletteLabel} 톤이 가장 안전하고 예뻐요.`;
       const basicOrderSentence = `${mainAsset.name} 중심으로 ${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
 
       // 주의(참고사항) 요약: taboos/cautions가 없거나 none이면 "없음"
@@ -2110,6 +2170,7 @@
             </div>
 
             <div class="heroChips">
+              <span class="chip">이유: <b>${escapeHtml(state.occasion || '')}</b></span>
               <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
               ${cautionChipHtml}
             </div>
@@ -2245,11 +2306,11 @@
         const recReason = rec.reason || '무난한 구간';
         const topMsg = messages[0] || '';
         const altMsgs = messages.slice(1);
+        const mainLine = mainName ? `(가능하면) ${mainName} 느낌이 들어가면 좋고,\n` : '';
         const dmTemplate =
 `안녕하세요! ${data.occasion ? `${data.occasion} ` : ''}선물로 꽃다발 주문하려고 해요.
 예산은 ${recBudget} (${recSize}) 정도이고, ${data.moodLabel || '추천'} 무드로 부탁드려요.
-(가능하면) ${mainName || (mainAsset && mainAsset.name) || ''} 느낌이 들어가면 좋고,
-포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배송 가능 일정과 대략 구성 안내 가능할까요?`.trim();
+${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배송 가능 일정과 대략 구성 안내 가능할까요?`.trim();
         const recKey = String(recSize || 'M').toUpperCase();
         const rowBg = (k) => (recKey === k ? 'background: rgba(34,197,94,0.10);' : '');
 
