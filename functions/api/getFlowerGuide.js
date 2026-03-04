@@ -101,8 +101,8 @@ async function generateBouquetImageBase64({ apiKey, prompt }) {
     body: JSON.stringify({
       model: "gpt-image-1-mini",
       prompt,
-      size: "1024x1024",
-      quality: "low",
+      size: "1024x1024", // ✅ 일단 유지 (비용 방어)
+      quality: "medium", // ✅ low → medium (디테일 개선)
       n: 1,
       output_format: "png",
     }),
@@ -397,17 +397,35 @@ async function buildGuide(body, env) {
     .join(", ");
 
   const imagePrompt = [
-    "Premium realistic product photo of a single Korean florist bouquet.",
-    "Bouquet centered, clean cream studio background, soft natural light.",
+    "Photorealistic studio product photo of a Korean florist hand-tied bouquet (premium realistic).",
+    "Full bouquet visible from top to bottom, INCLUDING ribbon and bottom wrap. Do NOT crop.",
+    "Centered composition with generous negative space (leave 15–25% empty margin on all sides).",
+    "Seamless light gray / warm off-white backdrop with subtle gradient, softbox lighting, natural soft shadow.",
     "NO people, NO hands, NO text, NO watermark, NO logo.",
+
+    // ✅ 한 송이 'dominant' 금지: 포컬 3송이 규칙
+    "Balanced multi-flower bouquet (NOT a single oversized centerpiece):",
+    "Show THREE focal blooms clearly visible from the front, similar size, arranged in a triangular composition.",
+    "Add 6–10 secondary blooms + 1 filler flower + 1–2 airy greenery types for volume and depth.",
+    "Avoid: single flower bouquet, one giant hero bloom, tight crop, bouquet cut off at bottom.",
+
+    // ✅ 메인꽃은 'dominant'가 아니라 '포컬 중 하나'
     mainFlower
-      ? `Main flower must be clearly visible and dominant: ${mainFlower}.`
-      : "Main flower must be clearly visible and dominant.",
+      ? `Include "${mainFlower}" as ONE of the 3 focal blooms (medium size), clearly visible but NOT oversized.`
+      : "Ensure 3 focal blooms are clearly visible (none oversized).",
+
     `Color palette: ${paletteMeta.label}. Use these colors: ${paletteLine}.`,
     `Style/mood: ${styleLabel}.`,
-    `Wrapping: ${wrapGuide}.`,
-    "High detail, natural petals and greenery, premium florist look.",
-    cautionsShort.includes("알레르기/민감") ? "Avoid pollen-heavy look; keep clean petals." : "",
+
+    // 포장 지시는 간결하게 (wrapGuide가 길면 산만해져서)
+    "Wrapping: matte paper wrap, clean layered finish, one satin ribbon, not flashy.",
+
+    "Real paper wrap with subtle wrinkles and micro texture, premium florist finish.",
+    "Natural petals and realistic greenery, slight asymmetry, layered depth, high realism.",
+
+    cautionsShort.includes("알레르기/민감")
+      ? "Keep clean petals; avoid pollen-heavy look; minimize dusty filler."
+      : "",
   ]
     .filter(Boolean)
     .join("\n");
