@@ -43,6 +43,42 @@ const paletteMap = {
   },
 };
 
+function normalizeCode(v) {
+  return String(v || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "");
+}
+
+function isValidVipCode(env, rawCode) {
+  const input = normalizeCode(rawCode);
+  if (!input) return false;
+
+  const list = String(env?.VIP_CODES || "")
+    .split(",")
+    .map((s) => normalizeCode(s))
+    .filter(Boolean);
+
+  return list.includes(input);
+}
+
+function corsHeadersFor(req) {
+  const origin = req.headers.get("Origin") || "*";
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    Vary: "Origin",
+  };
+}
+
+function json(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...headers },
+  });
+}
+
 // ✅ fallback 로컬 이미지(최소한 이 정도는 있어야 안전)
 const flowerImgByKey = {
   rose: "/image/rose.png",
@@ -85,19 +121,24 @@ async function generateBouquetImageBase64({ apiKey, prompt }) {
 
 export async function onRequest(context) {
   const { request, env } = context;
+  const cors = corsHeadersFor(request);
 
-  if (request.method === "OPTIONS") return new Response("", { status: 204 });
-  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  if (request.method === "OPTIONS") return new Response("", { status: 204, headers: cors });
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405, cors);
 
   let body = {};
   try {
     body = await request.json();
   } catch {
-    return json({ error: "invalid_json_body" }, 400);
+    return json({ error: "invalid_json_body" }, 400, cors);
+  }
+
+  if (!isValidVipCode(env, body.vipCode)) {
+    return json({ error: "vip_code_required_or_invalid" }, 403, cors);
   }
 
   const guide = await buildGuide(body, env);
-  return json(guide);
+  return json(guide, 200, cors);
 }
 
 /**
@@ -417,11 +458,4 @@ async function buildGuide(body, env) {
     priceTable: priceRec.table,
     meaning,
   };
-}
-
-function json(obj, status = 200) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8" },
-  });
 }
