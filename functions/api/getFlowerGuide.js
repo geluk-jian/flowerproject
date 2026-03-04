@@ -290,44 +290,56 @@ async function buildGuide(body, env) {
   const priceRec = recommendBudgetAndSize();
   function sizeSpecByBudget(size) {
     const s = String(size || "M").toUpperCase();
+
     if (s === "S") {
       return {
         size: "S",
-        label: "small / compact",
-        stemsTotal: [8, 12],
-        focalCount: [2, 3],
-        secondaryCount: [3, 6],
+        label: "mini / compact",
+        // ✅ 실물 기준 (대략)
+        overallCm: "height 28–33cm, width 18–22cm",
+        wrapScale: "small wrap, narrow paper width, minimal layers",
+        ribbonScale: "small ribbon (thin, short tails)",
+        stemExpose: "short stem exposure (neat bottom)",
+        stemsTotal: [6, 10],
+        focalCount: [1, 2], // ✅ S는 포컬 1~2로 확 줄이기
+        secondaryCount: [2, 4],
         fillerCount: [0, 1],
-        greeneryCount: [1, 2],
-        // 비용 비율(대략): 비싼 꽃(포컬) : 중간(서브) : 저렴(필러/그린)
+        greeneryCount: [1, 1],
         costRatio: { focal: 0.45, secondary: 0.4, fillerGreen: 0.15 },
-        wrapDensity: "simple wrap, minimal layers, one ribbon",
       };
     }
+
     if (s === "L") {
       return {
         size: "L",
         label: "large / abundant",
+        overallCm: "height 45–55cm, width 32–40cm",
+        wrapScale: "wide layered wrap, fuller silhouette",
+        ribbonScale: "medium ribbon (longer tails)",
+        stemExpose: "longer stem exposure (premium finish)",
         stemsTotal: [22, 32],
-        focalCount: [3, 5],
+        focalCount: [4, 6],
         secondaryCount: [10, 16],
         fillerCount: [1, 2],
         greeneryCount: [2, 3],
         costRatio: { focal: 0.35, secondary: 0.45, fillerGreen: 0.2 },
-        wrapDensity: "premium layered wrap, more volume, one ribbon",
       };
     }
+
     // M default
     return {
       size: "M",
       label: "medium / balanced",
-      stemsTotal: [14, 20],
-      focalCount: [3, 3],
+      overallCm: "height 38–45cm, width 26–32cm",
+      wrapScale: "standard layered wrap, balanced silhouette",
+      ribbonScale: "small-to-medium ribbon",
+      stemExpose: "medium stem exposure",
+      stemsTotal: [12, 18],
+      focalCount: [3, 4],
       secondaryCount: [6, 10],
       fillerCount: [1, 1],
       greeneryCount: [1, 2],
       costRatio: { focal: 0.4, secondary: 0.42, fillerGreen: 0.18 },
-      wrapDensity: "clean layered wrap, one ribbon",
     };
   }
 
@@ -420,7 +432,7 @@ async function buildGuide(body, env) {
       avoid: set.avoid || [],
       ratioText,
       stemsText,
-      wrapDensity: sizeSpec.wrapDensity,
+      wrapDensity: sizeSpec.wrapScale,
     };
   }
   const sizeSpec = sizeSpecByBudget(priceRec.size);
@@ -518,6 +530,14 @@ async function buildGuide(body, env) {
   const paletteLine = (paletteMeta.colors || [])
     .map((c) => `${c.name} (${c.hex})`)
     .join(", ");
+  const focalRuleLine =
+    sizeSpec.size === "S"
+      ? "Show 1–2 focal blooms clearly visible from the front (small bouquet), no oversized hero bloom."
+      : "Show THREE focal blooms clearly visible from the front, similar size, arranged in a triangular composition.";
+  const qualityTone =
+    sizeSpec.size === "S"
+      ? "clean, realistic, simple florist look (not abundant)."
+      : "premium florist finish, high realism, abundant but balanced.";
 
   const imagePrompt = [
     "Photorealistic studio product photo of a Korean florist hand-tied bouquet (premium realistic).",
@@ -528,10 +548,13 @@ async function buildGuide(body, env) {
 
     // ✅ 한 송이 'dominant' 금지: 포컬 3송이 규칙
     "Balanced multi-flower bouquet (NOT a single oversized centerpiece):",
-    `Bouquet size: ${sizeSpec.label}. ${flowerPlan.stemsText}.`,
+    `Bouquet overall size (realistic): ${sizeSpec.overallCm}.`,
+    `Wrap scale: ${sizeSpec.wrapScale}. Ribbon scale: ${sizeSpec.ribbonScale}. ${sizeSpec.stemExpose}.`,
+    `Stem count guide: total ${sizeSpec.stemsTotal[0]}–${sizeSpec.stemsTotal[1]} stems.`,
+    `Focal count: ${sizeSpec.focalCount[0]}–${sizeSpec.focalCount[1]} focal blooms; secondary ${sizeSpec.secondaryCount[0]}–${sizeSpec.secondaryCount[1]}; filler ${sizeSpec.fillerCount[0]}–${sizeSpec.fillerCount[1]}; greenery ${sizeSpec.greeneryCount[0]}–${sizeSpec.greeneryCount[1]}.`,
     `Volume rule: ${flowerPlan.ratioText}.`,
     `Avoid: ${flowerPlan.avoid.slice(0, 3).join(", ")}.`,
-    "Show THREE focal blooms clearly visible from the front, similar size, arranged in a triangular composition.",
+    focalRuleLine,
     "Add 6–10 secondary blooms + 1 filler flower + 1–2 airy greenery types for volume and depth.",
     "Avoid: single flower bouquet, one giant hero bloom, tight crop, bouquet cut off at bottom.",
 
@@ -551,6 +574,7 @@ async function buildGuide(body, env) {
 
     "Real paper wrap with subtle wrinkles and micro texture, premium florist finish.",
     "Natural petals and realistic greenery, slight asymmetry, layered depth, high realism.",
+    qualityTone,
 
     cautionsShort.includes("알레르기/민감")
       ? "Keep clean petals; avoid pollen-heavy look; minimize dusty filler."
