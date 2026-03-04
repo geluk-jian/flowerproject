@@ -288,42 +288,162 @@ async function buildGuide(body, env) {
   }
 
   const priceRec = recommendBudgetAndSize();
-
-  // ✅ 꽃 조합(스타일/주의 반영)
-  function buildFlowerMix() {
-    const main = mainFlower || "시즌 메인 꽃(꽃집 추천)";
-    let sub = "알스트로메리아(톤 맞춤) 또는 스프레이 플라워";
-    let filler = "유칼립투스/그린(가볍게)";
-
-    if (styleKey === "minimal" || styleKey === "chic_elegant") {
-      sub = "리시안셔스/스카비오사 등 톤다운 서브(과한 색 금지)";
-      filler = "러스커스/유칼립투스 소량(정돈)";
+  function sizeSpecByBudget(size) {
+    const s = String(size || "M").toUpperCase();
+    if (s === "S") {
+      return {
+        size: "S",
+        label: "small / compact",
+        stemsTotal: [8, 12],
+        focalCount: [2, 3],
+        secondaryCount: [3, 6],
+        fillerCount: [0, 1],
+        greeneryCount: [1, 2],
+        // 비용 비율(대략): 비싼 꽃(포컬) : 중간(서브) : 저렴(필러/그린)
+        costRatio: { focal: 0.45, secondary: 0.4, fillerGreen: 0.15 },
+        wrapDensity: "simple wrap, minimal layers, one ribbon",
+      };
     }
-    if (styleKey === "romantic" || styleKey === "soft_feminine") {
-      sub = "스프레이 카네이션/왁스플라워 등 부드러운 필러";
-      filler = "유칼립투스/그린(부드럽게)";
+    if (s === "L") {
+      return {
+        size: "L",
+        label: "large / abundant",
+        stemsTotal: [22, 32],
+        focalCount: [3, 5],
+        secondaryCount: [10, 16],
+        fillerCount: [1, 2],
+        greeneryCount: [2, 3],
+        costRatio: { focal: 0.35, secondary: 0.45, fillerGreen: 0.2 },
+        wrapDensity: "premium layered wrap, more volume, one ribbon",
+      };
     }
-    if (styleKey === "trendy") {
-      sub = "포인트 1개만(톤 맞춰서) / 형태감 있는 꽃 1종";
-      filler = "그린은 선 정리용으로만(과다 금지)";
-    }
-
-    if (cautionsShort.includes("알레르기/민감") || cautionsShort.includes("향은 약한 쪽")) {
-      filler = "그린은 최소(또는 무향 그린)로 / 꽃가루 적은 쪽";
-    }
-    if (cautionsShort.includes("장미 제외")) {
-      sub = sub.replace(/스프레이/gi, "");
-    }
-
-    return [
-      `메인: ${main}`,
-      `서브: ${sub}`,
-      `그린/필러: ${filler}`,
-      "대체 규칙: 메인 꽃이 없으면 ‘같은 무드/같은 톤’의 시즌 꽃으로 대체(색만 유지)",
-    ].join("\n");
+    // M default
+    return {
+      size: "M",
+      label: "medium / balanced",
+      stemsTotal: [14, 20],
+      focalCount: [3, 3],
+      secondaryCount: [6, 10],
+      fillerCount: [1, 1],
+      greeneryCount: [1, 2],
+      costRatio: { focal: 0.4, secondary: 0.42, fillerGreen: 0.18 },
+      wrapDensity: "clean layered wrap, one ribbon",
+    };
   }
 
-  const flowerMix = buildFlowerMix();
+  // 팔레트별 '소재 세트' (꽃집에서 통하는 표현 위주)
+  // 포컬 = 가격대가 올라가는 핵심, 서브 = 볼륨 담당, 필러/그린 = 가성비/완성도
+  const PALETTE_FLOWER_SET = {
+    white_green: {
+      focal: ["화이트 장미", "화이트 리시안셔스", "화이트 튤립", "카라(화이트)", "화이트 수국(소량)"],
+      secondary: ["스프레이 장미(화이트/크림)", "리시안셔스(연크림)", "알스트로메리아(화이트)"],
+      filler: ["왁스플라워(화이트)", "안개(소량)"],
+      greenery: ["유칼립투스", "러스커스"],
+      avoid: ["거베라", "데이지 느낌 1송이 단독", "너무 노란 필러"],
+    },
+    pink_peach: {
+      focal: ["핑크 장미", "라넌큘러스(피치/핑크)", "리시안셔스(연핑크)", "튤립(연핑크)"],
+      secondary: ["스프레이 장미(핑크)", "소형 카네이션(연핑크)", "알스트로메리아(연핑크/크림)"],
+      filler: ["왁스플라워", "안개(소량)"],
+      greenery: ["유칼립투스", "러스커스"],
+      avoid: ["쨍한 푸시아 단독", "과한 프릴 포장"],
+    },
+    lilac: {
+      focal: ["리시안셔스(연보라)", "수국(연보라/화이트, 소량)", "장미(연보라/라벤더)", "튤립(연보라)"],
+      secondary: ["스프레이 장미(라벤더)", "알스트로메리아(연보라)", "리시안셔스(화이트 보강)"],
+      filler: ["스타티스(연보라)", "왁스플라워"],
+      greenery: ["유칼립투스", "러스커스"],
+      avoid: ["진보라 한 색만 과다", "검정 포장 과다"],
+    },
+    red_wine: {
+      focal: ["딥레드 장미", "라넌큘러스(버건디)", "카라(다크톤)", "카네이션(버건디/다크핑크)"],
+      secondary: ["스프레이 장미(딥레드)", "소형 카네이션(버건디)", "리시안셔스(크림 보강)"],
+      filler: ["히페리컴 베리(가능하면)", "왁스플라워(대체)"],
+      greenery: ["러스커스", "유칼립투스"],
+      avoid: ["빨강+검정 과다", "너무 번쩍이는 포장"],
+    },
+    yellow_orange: {
+      focal: ["튤립(옐로/오렌지)", "거베라(1~2송이만)", "장미(옐로)", "라넌큘러스(옐로/살구)"],
+      secondary: ["스프레이 장미(옐로)", "알스트로메리아(크림/옐로)", "리시안셔스(크림 보강)"],
+      filler: ["솔리다고(소량)", "왁스플라워(대체)"],
+      greenery: ["유칼립투스", "피토스포룸"],
+      avoid: ["솔리다고 과다(촌스러움)", "쨍한 다색 혼합"],
+    },
+  };
+
+  function pickBySize(list, countMinMax, seed = 0) {
+    const arr = Array.isArray(list) ? list.filter(Boolean) : [];
+    if (arr.length === 0) return [];
+    const [min, max] = countMinMax;
+    const n = max === min ? min : min + (seed % (max - min + 1));
+    // 간단 회전 선택(고정 랜덤처럼)
+    const start = seed % arr.length;
+    const rotated = arr.slice(start).concat(arr.slice(0, start));
+    return rotated.slice(0, Math.min(n, arr.length));
+  }
+
+  function buildFlowerPlan({ paletteKey, sizeSpec, mainFlower, seedStr }) {
+    const set = PALETTE_FLOWER_SET[paletteKey] || PALETTE_FLOWER_SET.white_green;
+    const seed =
+      typeof seedStr === "string" && seedStr.length
+        ? [...seedStr].reduce((a, c) => a + c.charCodeAt(0), 0)
+        : 7;
+
+    // 포컬/서브/필러/그린을 "줄기 수"에 맞춰 구성
+    const focalList = [...set.focal];
+    if (mainFlower) {
+      // 메인꽃은 포컬 리스트 맨 앞에 삽입(중복 방지)
+      const mf = String(mainFlower).trim();
+      if (mf) {
+        const filtered = focalList.filter((x) => x !== mf);
+        focalList.length = 0;
+        focalList.push(mf, ...filtered);
+      }
+    }
+
+    const focal = pickBySize(focalList, sizeSpec.focalCount, seed + 11);
+    const secondary = pickBySize(set.secondary, sizeSpec.secondaryCount, seed + 23);
+    const filler = pickBySize(set.filler, sizeSpec.fillerCount, seed + 37);
+    const greenery = pickBySize(set.greenery, sizeSpec.greeneryCount, seed + 41);
+
+    // "가성비" 문장(가격대별로 포컬 비율이 다름)
+    const ratio = sizeSpec.costRatio;
+    const ratioText = `구성 비율(대략): 포컬 ${Math.round(ratio.focal * 100)}% / 서브 ${Math.round(ratio.secondary * 100)}% / 필러·그린 ${Math.round(ratio.fillerGreen * 100)}%`;
+
+    const stemsText = `줄기 수 가이드: 총 ${sizeSpec.stemsTotal[0]}~${sizeSpec.stemsTotal[1]}대 (포컬 ${sizeSpec.focalCount[0]}~${sizeSpec.focalCount[1]} / 서브 ${sizeSpec.secondaryCount[0]}~${sizeSpec.secondaryCount[1]} / 필러 ${sizeSpec.fillerCount[0]}~${sizeSpec.fillerCount[1]} / 그린 ${sizeSpec.greeneryCount[0]}~${sizeSpec.greeneryCount[1]})`;
+
+    return {
+      focal,
+      secondary,
+      filler,
+      greenery,
+      avoid: set.avoid || [],
+      ratioText,
+      stemsText,
+      wrapDensity: sizeSpec.wrapDensity,
+    };
+  }
+  const sizeSpec = sizeSpecByBudget(priceRec.size);
+  const planSeed = [
+    relationRaw,
+    occasionRaw,
+    styleKey,
+    paletteKey,
+    photoHabitKey,
+    (rawCautions || []).join(","),
+  ].join("|");
+  const flowerPlan = buildFlowerPlan({ paletteKey, sizeSpec, mainFlower, seedStr: planSeed });
+
+  const flowerMix = [
+    `포컬(메인급): ${flowerPlan.focal.join(" · ") || "시즌 포컬 2종"}`,
+    `서브(볼륨): ${flowerPlan.secondary.join(" · ") || "스프레이/톤맞춤 꽃"}`,
+    `필러: ${flowerPlan.filler.join(" · ") || "소량"}`,
+    `그린: ${flowerPlan.greenery.join(" · ") || "유칼립/러스커스"}`,
+    flowerPlan.stemsText,
+    flowerPlan.ratioText,
+    `피하기: ${flowerPlan.avoid.slice(0, 3).join(" · ") || "과한 1송이 중심"}`,
+    "대체 규칙: 재고 없으면 ‘같은 톤/같은 무드’의 시즌 꽃으로 대체(색/결 유지)",
+  ].join("\n");
 
   // ✅ 멘트 5개(상황 반영)
   function buildMessages() {
@@ -386,7 +506,10 @@ async function buildGuide(body, env) {
     `[무드/색] ${moodLabel} / ${paletteMeta.label} 톤 중심`,
     `[포장] ${wrapGuide}`,
     `[사진] ${photoHabitLabel} → 사진에 디테일이 잘 보이게 정돈`,
-    `[구성] ${styleLabel} 무드로 ‘깔끔하게’, 포인트 꽃 1~2개만`,
+    `[볼륨/줄기수] ${flowerPlan.stemsText}`,
+    `[비율] ${flowerPlan.ratioText}`,
+    `[피하기] ${flowerPlan.avoid.slice(0, 3).join(" · ") || "한 송이만 크게/과한 크롭"}`,
+    `[구성] 포컬 ${sizeSpec.focalCount[0]}~${sizeSpec.focalCount[1]}송이(비슷한 크기) + 서브로 볼륨, 필러/그린은 과하지 않게`,
     `[대체] 재고 없으면 같은 톤/무드로 대체(톤 유지)`,
     cautionLine,
   ].join("\n");
@@ -405,6 +528,9 @@ async function buildGuide(body, env) {
 
     // ✅ 한 송이 'dominant' 금지: 포컬 3송이 규칙
     "Balanced multi-flower bouquet (NOT a single oversized centerpiece):",
+    `Bouquet size: ${sizeSpec.label}. ${flowerPlan.stemsText}.`,
+    `Volume rule: ${flowerPlan.ratioText}.`,
+    `Avoid: ${flowerPlan.avoid.slice(0, 3).join(", ")}.`,
     "Show THREE focal blooms clearly visible from the front, similar size, arranged in a triangular composition.",
     "Add 6–10 secondary blooms + 1 filler flower + 1–2 airy greenery types for volume and depth.",
     "Avoid: single flower bouquet, one giant hero bloom, tight crop, bouquet cut off at bottom.",
@@ -416,6 +542,9 @@ async function buildGuide(body, env) {
 
     `Color palette: ${paletteMeta.label}. Use these colors: ${paletteLine}.`,
     `Style/mood: ${styleLabel}.`,
+    `Focal flowers: ${flowerPlan.focal.join(" + ")}.`,
+    `Secondary flowers: ${flowerPlan.secondary.slice(0, 3).join(" + ")}.`,
+    `Greenery: ${flowerPlan.greenery.join(" + ")}.`,
 
     // 포장 지시는 간결하게 (wrapGuide가 길면 산만해져서)
     "Wrapping: matte paper wrap, clean layered finish, one satin ribbon, not flashy.",
