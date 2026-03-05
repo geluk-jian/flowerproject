@@ -2048,7 +2048,7 @@
         .filter(v => v && v !== '없음' && v !== 'none');
 
       const cautionTextForOrder = tabooShortList.length
-        ? ` / 주의: ${tabooShortList.join(' · ')}`
+        ? ` / 참고사항: ${tabooShortList.join(' · ')}`
         : '';
       const floristOrder = `주문문장: ${basicOrderSentence}${cautionTextForOrder}`;
 
@@ -2060,18 +2060,18 @@
 
       const cautionChipHtml = (() => {
         if (tabooShortList.length === 0) {
-          return `<span class="chip">주의: <b>없음</b></span>`;
+          return `<span class="chip">참고사항: <b>없음</b></span>`;
         }
         if (tabooShortList.length === 1) {
-          return `<span class="chip">주의: <b>${escapeHtml(tabooShortList[0])}</b></span>`;
+          return `<span class="chip">참고사항: <b>${escapeHtml(tabooShortList[0])}</b></span>`;
         }
         if (tabooShortList.length === 2) {
-          return `<span class="chip">주의: <b>${escapeHtml(tabooShortList.join(' · '))}</b></span>`;
+          return `<span class="chip">참고사항: <b>${escapeHtml(tabooShortList.join(' · '))}</b></span>`;
         }
         // 3개 이상이면 칩에 실제 개수 표시, 안에 전체 리스트
         return `
           <details class="chipDetails">
-            <summary class="chip">주의: <b>${tabooShortList.length}개(눌러보기)</b></summary>
+            <summary class="chip">참고사항: <b>${tabooShortList.length}개(눌러보기)</b></summary>
             <div class="chipPanel">
               ${tabooShortList.map(x => `<div class="chipLine">• ${escapeHtml(x)}</div>`).join('')}
             </div>
@@ -2080,7 +2080,7 @@
       })();
 
       // ====== 주문문장(미리보기 구성) ======
-      const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}${cautionTextForOrder ? `<br/>주의: ${escapeHtml(tabooShortList.join(' · '))}` : ''}`;
+      const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}${cautionTextForOrder ? `<br/>참고사항: ${escapeHtml(tabooShortList.join(' · '))}` : ''}`;
       const basicMsgList = [basicMessage];
       const paidBadge = PG_READY ? '결제 필요' : '베타 무료';
       const paidBtnText = PG_READY ? '👉 3,900원으로 시크릿 가이드 열기' : '🎁 화이트데이 한정기간 무료 오픈! (꽃다발 이미지)';
@@ -2112,7 +2112,7 @@
                 <div class="heroPhotoCard">
                   <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
                 </div>
-                <div class="heroPhotoHint">(꽃모양 참고)</div>
+                <div class="heroPhotoHint">※ 이미지는 꽃 ‘종류/모양’ 참고용이에요.</div>
               </div>
               <span class="heroChatMeta">지금</span>
             </div>
@@ -2141,7 +2141,7 @@
 
         <!-- [C] 무료: 멘트 1개 -->
         <div class="box">
-          <h3>건넬 때 멘트 추천(1개)</h3>
+          <h3>꽃과 함께하면 좋을 멘트</h3>
           <ol class="list msgList" style="margin-top:10px;">
             ${basicMsgList.map((m, i)=>`
               <li>
