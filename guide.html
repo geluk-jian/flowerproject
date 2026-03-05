@@ -1205,6 +1205,36 @@
       if (m && m[1]) highlightBudgetRow(m[1]);
     }
 
+    function normalizeSavedResultForPro(result){
+      const r = (result && typeof result === 'object') ? result : {};
+      if (
+        typeof r.one_line === 'string' ||
+        typeof r.bouquet_spec === 'string' ||
+        typeof r.order_copy === 'string'
+      ) {
+        return r;
+      }
+
+      const palettes = Array.isArray(r.palettes) ? r.palettes : [];
+      const paletteNames = palettes.map((p) => p && p.name).filter(Boolean).join(', ');
+      const detailLines = [
+        r.wrapGuide ? `포장: ${String(r.wrapGuide).trim()}` : '',
+        r.flowerMix ? `꽃조합:\n${String(r.flowerMix).trim()}` : '',
+        paletteNames ? `팔레트: ${paletteNames}` : '',
+      ].filter(Boolean).join('\n');
+
+      return {
+        one_line: r.meaning ? `전하고 싶은 느낌: ${String(r.meaning).trim()}` : '추천 결과를 불러왔어요.',
+        bouquet_spec: String(r.flowerMix || '').trim(),
+        budget: String(r.priceInfo || '').trim(),
+        order_copy: String(r.orderText || '').trim(),
+        detail_secret: detailLines,
+        card_lines: Array.isArray(r.messages) ? r.messages : [],
+        avoid: [],
+        image_url: String(r.imageUrl || '').trim(),
+      };
+    }
+
     function bindMovedPaidActions(root){
       if(!root) return;
 
@@ -1339,16 +1369,16 @@
       const rid = params.get('rid');
       if(!rid) return;
 
-      const res = await fetch(`/api/getPaidResult?rid=${encodeURIComponent(rid)}`);
-      const json = await res.json().catch(()=> ({}));
-      if(!res.ok || !json.ok){
-        alert('저장된 결과를 찾을 수 없어요.');
-        return;
-      }
-
-      // 저장된 유료 결과 그대로 렌더
-      if (typeof renderVipResult === 'function') {
-        renderVipResult(json.result);
+      try{
+        const res = await fetch(`/api/getPaidResult?rid=${encodeURIComponent(rid)}`);
+        const json = await res.json().catch(()=> ({}));
+        if(!res.ok || !json.ok){
+          alert('저장된 결과를 찾을 수 없어요.');
+          return;
+        }
+        renderProResult(normalizeSavedResultForPro(json.result));
+      }catch(e){
+        alert('저장된 결과를 불러오는 중 오류가 발생했어요.');
       }
     })();
 
