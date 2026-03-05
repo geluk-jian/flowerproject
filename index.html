@@ -2005,16 +2005,10 @@
       const toneKey = chooseMessageTone(state.relation, state.occasion);
       const basicMessage = (msgs && msgs[toneKey]) ? msgs[toneKey] : (msgs.simple || '');
 
-      // 선물이유(occasion) 기반으로 무드 문장 더 납득되게
-      const occasionMeaning = {
-        '생일/기념일': '특별한 날',
-        '사과(미안해)': '미안한 마음을 전하는 날',
-        '축하(합격/승진/새출발)': '축하하는 날',
-        '첫 선물': '첫 인상을 만드는 날',
-        '그냥(고맙고 응원)': '고마움/응원을 전하는 날'
-      }[state.occasion] || '오늘';
-
-      const basicMoodLine = `${occasionMeaning}에 어울리는 ${paletteLabel} 톤으로, 편안하고 예쁜 분위기를 담아봤어요.`;
+      const basicMoodLine = `'${state.occasion || '오늘'}' 상황엔 깔끔하고 단정한 인상의 ${mainAsset.name}가 잘 어울려요.`;
+      const basicToneLine = state.palette
+        ? `컬러는 ${paletteLabel} 톤으로 맞춰달라고 요청하면 됩니다.`
+        : '컬러는 받는 분 분위기에 맞춰 톤을 정리해달라고 요청하면 됩니다.';
       const basicOrderSentence = `${mainAsset.name} 중심으로 ${state.palette ? paletteLabel : '어울리는'} 톤으로 예쁘게 해주세요.`;
 
       // 주의(참고사항) 요약: taboos/cautions가 없거나 none이면 "없음"
@@ -2118,12 +2112,12 @@
             </div>
 
             <div class="heroChatItem">
-              <div class="heroMsg heroMsgLeft heroDescMsg">${escapeHtml(`꽃 추천: ${basicMoodLine}`)}</div>
+              <div class="heroMsg heroMsgLeft heroDescMsg">${escapeHtml(`꽃 추천: ${basicMoodLine} ${basicToneLine}`)}</div>
               <span class="heroChatMeta">지금</span>
             </div>
 
             <div class="heroChips">
-              <span class="chip">이유: <b>${escapeHtml(state.occasion || '')}</b></span>
+              <span class="chip">상황: <b>${escapeHtml(state.occasion || '')}</b></span>
               <span class="chip">색감: <b>${escapeHtml(paletteLabel)}</b></span>
               ${cautionChipHtml}
             </div>
@@ -2135,7 +2129,7 @@
                 <p class="orderPreview" id="orderPreview">${orderPreviewHtml}</p>
               </div>
             </div>
-            <button id="btnCopyOrder" class="primaryFull heroCopyBtn" type="button">복사하기</button>
+            <button id="btnCopyOrder" class="primaryFull heroCopyBtn" type="button">주문문장 복사</button>
           </div>
         </div>
 
