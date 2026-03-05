@@ -147,6 +147,24 @@
     }
 
     .hd h1, .hd h2{margin:0; font-size:16px; letter-spacing:-.2px; color: var(--text);}
+    .resultTitle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .proBadge{
+      display:inline-flex;
+      align-items:center;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid #bfdbfe;
+      background:#eff6ff;
+      color:#1d4ed8;
+      font-size:10px;
+      font-weight:900;
+      line-height:1;
+      white-space:nowrap;
+    }
 
     .bd{padding: var(--pad);}
 
@@ -993,7 +1011,7 @@
     <section class="screen" id="screenResult">
       <div class="card">
         <div class="hd">
-          <h2>꽃집 누나 PICK!</h2>
+          <h2 class="resultTitle">꽃집 누나 PICK! <span class="proBadge">PRO 결과</span></h2>
           <span class="pill">꽃다발+멘트 완성</span>
         </div>
         <div class="bd" id="resultArea"></div>
@@ -2269,11 +2287,36 @@
         const recSize = rec.size || 'M';
         const recBudget = rec.budget || (data.priceInfo || '약 5만~8만 원');
         const recReason = rec.reason || '무난한 구간';
+        const isLoverRelation = String(state.relation || '') === '여자친구(연인)';
+        const defaultSizeGuide = isLoverRelation
+          ? {
+              S: '가벼운 축하/첫 선물',
+              M: '기본값(가장 무난) / 축하·새출발',
+              L: '기념일급 / 확실한 존재감'
+            }
+          : {
+              S: '3만~5만 (가벼운 감사/첫 선물/사과)',
+              M: '5만~8만 (친한 친구/축하/무난)',
+              L: '8만~13만 (각별한 사이/기념일)'
+            };
+        const quickToneLabel = String(paletteLabel || (palettes[0]?.name) || '미선택').trim();
+        const quickMoodLabel = String(data.moodLabel || '차분·세련').trim();
+        const quickWrapLabel = String(wrapGuideText || '무광/톤다운').trim();
+        const quickMainFlower = String(mainName || '추천 꽃').trim();
+        const quickOrderPlain =
+`[예산] ${recSize} / ${recBudget}
+
+[톤] ${quickToneLabel} / ${quickMoodLabel}
+
+[요청] ${String(data.occasion || '선물').trim()} / 메인 꽃은 ${quickMainFlower} 포함 + 포장은 ${quickWrapLabel}으로 깔끔하게`;
         const topMsg = messages[0] || '';
         const altMsgs = messages.slice(1);
         const mainLine = mainName ? `(가능하면) ${mainName} 느낌이 들어가면 좋고,\n` : '';
         const dmTemplate =
-`안녕하세요! ${data.occasion ? `${data.occasion} ` : ''}선물로 꽃다발 주문하려고 해요.
+`수령일: [ ] / 시간: [ ]
+지역: [ ] / 픽업 or 배송: [ ]
+
+안녕하세요! ${data.occasion ? `${data.occasion} ` : ''}선물로 꽃다발 주문하려고 해요.
 예산은 ${recBudget} (${recSize}) 정도이고, ${data.moodLabel || '추천'} 무드로 부탁드려요.
 ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배송 가능 일정과 대략 구성 안내 가능할까요?`.trim();
         const recKey = String(recSize || 'M').toUpperCase();
@@ -2299,15 +2342,15 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
             <div style="margin-top:12px; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
               <div style="display:grid; grid-template-columns:70px 1fr; border-bottom:1px solid #f3f4f6; ${rowBg('S')}">
                 <div style="padding:10px 12px; font-weight:900; color:#64748b; background:#f8fafc;">S</div>
-                <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.S || "3만~5만 (가벼운 감사/첫 선물/사과)")}</div>
+                <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.S || defaultSizeGuide.S)}</div>
               </div>
               <div style="display:grid; grid-template-columns:70px 1fr; border-bottom:1px solid #f3f4f6; ${rowBg('M')}">
                 <div style="padding:10px 12px; font-weight:900; color:#64748b; background:#f8fafc;">M</div>
-                <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.M || "5만~8만 (친한 친구/축하/무난)")}</div>
+                <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.M || defaultSizeGuide.M)}</div>
               </div>
               <div style="display:grid; grid-template-columns:70px 1fr; ${rowBg('L')}">
                 <div style="padding:10px 12px; font-weight:900; color:#64748b; background:#f8fafc;">L</div>
-                <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.L || "8만~13만 (각별한 사이/기념일)")}</div>
+                <div style="padding:10px 12px; font-weight:800; color:#111827;">${escapeHtml(priceTable.L || defaultSizeGuide.L)}</div>
               </div>
             </div>
 
@@ -2327,11 +2370,19 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
             .vip-hero-img { display:block; width: 100%; max-width: 300px; aspect-ratio: 4/5; object-fit: cover; border-radius: 16px; margin: 0 auto; }
             .vip-btn-outline { display:block; width: 50%; max-width: 150px; padding: 6px 8px; background: #ffffff; color: #111827; border: 1px solid #e5e7eb; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; margin: 0 auto; }
             .vip-hero-text { font-size: 15px; font-weight: 800; color: #374151; word-break: keep-all; line-height: 1.5; }
+            .vip-howto { width:100%; max-width:300px; margin:10px auto 0; padding:12px; border:1px solid #fbcfe8; border-radius:12px; background:#fff7fb; text-align:left; }
+            .vip-howto-title { margin:0 0 8px; font-size:13px; font-weight:900; color:#be185d; }
+            .vip-howto-step { margin:0; font-size:12px; font-weight:800; color:#374151; line-height:1.5; }
+            .vip-howto-step + .vip-howto-step { margin-top:4px; }
             .vip-order-text { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.6; margin-bottom: 12px; }
+            .vip-order-tip { margin:0 0 10px; font-size:12px; font-weight:800; color:#475569; }
+            .vip-order-detail-toggle { margin-top:10px; display:flex; justify-content:flex-end; }
+            .vip-order-detail-body { margin-top:8px; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#ffffff; font-size:12px; font-weight:700; color:#374151; line-height:1.6; white-space:pre-wrap; display:none; }
             .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
             .vip-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
             .vip-head h3 { margin:0; }
             .vip-head-actions { display:flex; gap:8px; }
+            .vip-head-note { font-size:11px; font-weight:700; color:#64748b; white-space:nowrap; align-self:center; }
             .mini-btn { padding:8px 10px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); background:#fff; font-weight:700; cursor:pointer; }
             .vip-detail-row { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 13px; line-height:1.5; }
             .vip-detail-label { width: 60px; font-weight: 800; color: #6b7280; flex-shrink: 0; }
@@ -2341,6 +2392,9 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
             .vip-msg-item:last-child { border-bottom: none; padding-bottom: 0; }
             .vip-msg-text { font-size: 14px; font-weight: 700; color: #374151; line-height: 1.5; }
             .vip-msg-btn { flex-shrink: 0; padding: 6px 10px; font-size: 12px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 700; }
+            .vip-alt-wrap { margin-top:12px; }
+            .vip-alt-head { margin-top:0; display:flex; justify-content:flex-end; }
+            .vip-alt-body { display:none; }
           </style>
 
           <div class="vip-container">
@@ -2348,6 +2402,12 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
               <div class="vip-hero-media">
                 <img src="${escapeHtml(heroImg)}" alt="꽃다발 시안" class="vip-hero-img" />
                 <button class="vip-btn-outline" id="btnSaveVipImage" type="button">이미지 저장</button>
+              </div>
+              <div class="vip-howto">
+                <p class="vip-howto-title">✅ 이렇게 쓰면 끝(30초)</p>
+                <p class="vip-howto-step">1. 이미지 저장 → 꽃집에 보여주기</p>
+                <p class="vip-howto-step">2. 주문서 전체 복사 → DM으로 보내기</p>
+                <p class="vip-howto-step">3. 멘트 1개 복사 → 여자친구에게 보내기</p>
               </div>
 
               <div class="vip-hero-text">
@@ -2357,7 +2417,8 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
 
               ${meaningText ? `
                 <div style="margin:10px auto 0; max-width:320px; font-size:13px; font-weight:750; color:#475569; line-height:1.5;">
-                  <span style="font-weight:900; color:#111827;">꽃 의미</span> · ${escapeHtml(meaningText)}
+                  <span style="font-weight:900; color:#111827;">전하고 싶은 느낌</span> · ${escapeHtml(meaningText)}
+                  <div style="margin-top:4px; font-size:11px; font-weight:700; color:#94a3b8;">*꽃말/의미는 자료에 따라 다를 수 있어요</div>
                 </div>
               ` : ''}
 
@@ -2378,14 +2439,20 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
                 <h3>📋 1초 복붙! 플로리스트 주문서</h3>
                 <button class="mini-btn" type="button" id="btnCopyVipOrderMini">복사</button>
               </div>
-              <div class="vip-order-text" id="vipOrderContent">${nl2brSafe(data.orderText)}</div>
+              <div class="vip-order-text" id="vipOrderContent">${nl2brSafe(quickOrderPlain)}</div>
+              <div class="vip-order-tip">이 버튼만 복사해서 꽃집 DM에 붙여넣으면 됩니다</div>
               <button class="vip-btn-full" id="btnCopyVipOrder" type="button">주문서 전체 복사하기</button>
+              <div class="vip-order-detail-toggle">
+                <button class="mini-btn" type="button" id="btnToggleOrderDetail">상세 옵션(펼치기)</button>
+              </div>
+              <div class="vip-order-detail-body" id="vipOrderDetailBody">${escapeHtml(String(data.orderText || '').trim())}</div>
             </div>
 
             <div class="vip-box" id="vipSecretBox">
               <div class="vip-head">
                 <h3>🔒 시크릿 디테일 가이드</h3>
                 <div class="vip-head-actions">
+                  <span class="vip-head-note">원하면 더 디테일하게 요청할 때만 펼쳐요</span>
                   <button class="mini-btn" type="button" id="btnCopySecret">복사</button>
                   <button class="mini-btn" type="button" id="btnToggleSecret">펼치기</button>
                 </div>
@@ -2426,15 +2493,21 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
               </div>
 
               ${altMsgs.length ? `
-                <div style="margin-top:12px; font-size:12px; font-weight:900; color:#6b7280;">대안 멘트</div>
-                <ul class="vip-msg-list" style="margin-top:6px;">
-                  ${altMsgs.map((msg, i) => `
-                    <li class="vip-msg-item">
-                      <div class="vip-msg-text">${escapeHtml(msg)}</div>
-                      <button class="vip-msg-btn" type="button" data-alt-idx="${i}">복사</button>
-                    </li>
-                  `).join('')}
-                </ul>
+                <div class="vip-alt-wrap">
+                  <div class="vip-alt-head">
+                    <button class="mini-btn" type="button" id="btnToggleAltMsgs">다른 멘트 보기(${altMsgs.length}개)</button>
+                  </div>
+                  <div class="vip-alt-body" id="vipAltMsgsBody">
+                    <ul class="vip-msg-list" style="margin-top:6px;">
+                      ${altMsgs.map((msg, i) => `
+                        <li class="vip-msg-item">
+                          <div class="vip-msg-text">${escapeHtml(msg)}</div>
+                          <button class="vip-msg-btn" type="button" data-alt-idx="${i}">복사</button>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  </div>
+                </div>
               ` : ''}
             </div>
 
@@ -2472,7 +2545,7 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
         // ✅ 주문서 복사(기존 버튼 + 상단 미니 버튼)
         const btnCopyVipOrder = document.getElementById('btnCopyVipOrder');
         const btnCopyVipOrderMini = document.getElementById('btnCopyVipOrderMini');
-        const orderTextPlain = String(data.orderText || '').trim();
+        const orderTextPlain = String(quickOrderPlain || '').trim();
 
         async function copyOrder() {
           const ok = await copyText(orderTextPlain);
@@ -2490,6 +2563,16 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
 
         if (btnCopyVipOrder) btnCopyVipOrder.onclick = copyOrder;
         if (btnCopyVipOrderMini) btnCopyVipOrderMini.onclick = copyOrder;
+
+        const btnToggleOrderDetail = document.getElementById('btnToggleOrderDetail');
+        const vipOrderDetailBody = document.getElementById('vipOrderDetailBody');
+        if (btnToggleOrderDetail && vipOrderDetailBody) {
+          btnToggleOrderDetail.onclick = () => {
+            const open = vipOrderDetailBody.style.display !== 'none';
+            vipOrderDetailBody.style.display = open ? 'none' : 'block';
+            btnToggleOrderDetail.textContent = open ? '상세 옵션(펼치기)' : '상세 옵션(접기)';
+          };
+        }
 
         // ✅ 이미지 저장
         document.getElementById('btnSaveVipImage')?.addEventListener('click', async () => {
@@ -2533,6 +2616,19 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
           const ok = await copyText(text);
           toast(ok ? '복사했어!' : '복사 실패(브라우저 권한 확인)');
         });
+
+        // ✅ 대안 멘트 접기/펼치기
+        const btnToggleAltMsgs = document.getElementById('btnToggleAltMsgs');
+        const vipAltMsgsBody = document.getElementById('vipAltMsgsBody');
+        if (btnToggleAltMsgs && vipAltMsgsBody) {
+          btnToggleAltMsgs.addEventListener('click', () => {
+            const open = vipAltMsgsBody.style.display !== 'none';
+            vipAltMsgsBody.style.display = open ? 'none' : 'block';
+            btnToggleAltMsgs.textContent = open
+              ? `다른 멘트 보기(${altMsgs.length}개)`
+              : '다른 멘트 접기';
+          });
+        }
 
         // ✅ VIP 멘트 복사(대안)
         document.querySelectorAll('.vip-msg-btn[data-alt-idx]').forEach(btn => {
