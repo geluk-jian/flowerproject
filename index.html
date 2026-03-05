@@ -2261,7 +2261,8 @@
 
         // 이미지 URL 안전 처리 (비정상 스킴 차단)
         const safeImg = sanitizeUrl(data.imageUrl);
-        const heroImg = safeImg || fallbackSampleImage(data.moodLabel || '꽃다발 시안');
+        const fallbackLocalImg = sanitizeUrl(`./${(mainAsset && mainAsset.img) ? mainAsset.img : 'image/rose.png'}`);
+        const heroImg = safeImg || fallbackLocalImg || fallbackSampleImage(data.moodLabel || '꽃다발 시안');
 
         const wrapGuideText = data.wrapGuide || '';
 
