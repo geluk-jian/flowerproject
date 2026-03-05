@@ -2108,10 +2108,12 @@
             </div>
 
             <div class="heroChatItem">
-              <div class="heroPhotoCard">
-                <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+              <div class="heroPhotoWrap">
+                <div class="heroPhotoCard">
+                  <img src="./${escapeHtml(mainAsset.img)}" alt="대표 꽃 ${escapeHtml(mainAsset.name)}" loading="lazy" />
+                </div>
+                <div class="heroPhotoHint">(꽃모양 참고)</div>
               </div>
-              <div style="margin-top:6px; font-size:11px; color:#94a3b8; text-align:center;">(꽃모양 참고)</div>
               <span class="heroChatMeta">지금</span>
             </div>
 
@@ -2836,6 +2838,21 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
       display:flex;
       align-items:center;
       justify-content:center;
+    }
+    .heroPhotoWrap{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      width:184px;
+      flex:0 0 auto;
+    }
+    .heroPhotoHint{
+      width:100%;
+      font-size:11px;
+      color:#94a3b8;
+      text-align:center;
+      line-height:1.2;
     }
     .heroPhotoCard img{
       width:100%;
