@@ -1155,6 +1155,19 @@
       }
     }
 
+    function sanitizeApiImageUrl(url){
+      const raw = String(url || '').trim();
+      if(!raw) return '';
+
+      // API 생성 이미지는 data URL을 허용하되, SVG는 제외
+      if(raw.startsWith('data:')){
+        const okDataPrefix = /^data:image\/(png|jpeg|jpg|webp);base64,/i;
+        return okDataPrefix.test(raw) ? raw : '';
+      }
+
+      return sanitizeUrl(raw);
+    }
+
     function sanitizeHex(hex){
       const h = String(hex || '').trim();
       // #RGB 또는 #RRGGBB만 허용
@@ -2258,11 +2271,21 @@
       function renderVipResult(data) {
         const messages = Array.isArray(data.messages) ? data.messages : [];
         const palettes = Array.isArray(data.palettes) ? data.palettes : [];
+        const imageSource = String(data.imageSource || '').trim();
+        const imageError = String(data.imageError || '').trim();
 
         // 이미지 URL 안전 처리 (비정상 스킴 차단)
-        const safeImg = sanitizeUrl(data.imageUrl);
+        const safeImg = sanitizeApiImageUrl(data.imageUrl);
         const fallbackLocalImg = sanitizeUrl(`./${(mainAsset && mainAsset.img) ? mainAsset.img : 'image/rose.png'}`);
         const heroImg = safeImg || fallbackLocalImg || fallbackSampleImage(data.moodLabel || '꽃다발 시안');
+        const usedFallbackImage = imageSource && imageSource !== 'openai';
+        if (usedFallbackImage) {
+          console.warn('[VIP_IMAGE_FALLBACK]', {
+            imageSource,
+            imageError: imageError || 'unknown',
+            returnedImageUrl: data.imageUrl
+          });
+        }
 
         const wrapGuideText = data.wrapGuide || '';
 
@@ -2381,6 +2404,11 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
               <div style="margin:8px auto 0; max-width:320px; font-size:11px; color:#94a3b8; line-height:1.4;">
                 ※ 참고용 시안입니다. 계절/재고에 따라 유사 무드로 대체될 수 있어요.
               </div>
+              ${usedFallbackImage ? `
+                <div style="margin:6px auto 0; max-width:320px; font-size:11px; color:#dc2626; line-height:1.4;">
+                  ※ API 이미지 생성 실패로 기본 이미지가 표시되었어요 (${escapeHtml(imageError || 'unknown_error')}).
+                </div>
+              ` : ''}
             </div>
 
             ${priceGuideHtml}

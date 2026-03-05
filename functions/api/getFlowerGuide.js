@@ -585,13 +585,18 @@ async function buildGuide(body, env) {
 
   // ✅ 이미지 생성(실패해도 로컬 이미지로 무조건 fallback)
   let imageUrl = "";
+  let imageSource = "fallback";
+  let imageError = "";
   try {
     const apiKey = env?.OPENAI_API_KEY;
-    if (apiKey) {
+    if (!apiKey) {
+      imageError = "missing_openai_api_key";
+    } else {
       imageUrl = await generateBouquetImageBase64({ apiKey, prompt: imagePrompt });
+      if (imageUrl) imageSource = "openai";
     }
-  } catch {
-    // ignore
+  } catch (err) {
+    imageError = String(err?.message || "image_generation_unknown_error");
   }
   if (!imageUrl) {
     imageUrl = flowerImgByKey[mainFlowerKey] || "/image/rose.png";
@@ -611,6 +616,8 @@ async function buildGuide(body, env) {
 
   return {
     __build: "GUIDE-V2.1",
+    imageSource,
+    imageError,
     mainFlower,
     imageUrl,
     targetName: relationRaw,
