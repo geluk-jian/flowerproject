@@ -1028,11 +1028,6 @@
       if (el) el.textContent = value || '';
     }
 
-    function setHTML(id, html) {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = html || '';
-    }
-
     function renderDetailSecret(detailText) {
       const container = document.getElementById('detailSecretWrap');
       if (!container) return;
@@ -1235,54 +1230,6 @@
       };
     }
 
-    function bindMovedPaidActions(root){
-      if(!root) return;
-
-      root.querySelectorAll('.paidMsgCopy').forEach((btn)=>{
-        btn.onclick = async () => {
-          const text = btn.closest('li')?.querySelector('.msgText')?.textContent?.trim() || '';
-          if(text) await copyText(text);
-        };
-      });
-
-      const btnCopyLink = root.querySelector('#btnCopyLink');
-      if(btnCopyLink){
-        btnCopyLink.onclick = async () => {
-          await copyText(location.href);
-        };
-      }
-
-      const btnCopyStoryTipShort = root.querySelector('#btnCopyStoryTipShort');
-      if(btnCopyStoryTipShort){
-        btnCopyStoryTipShort.onclick = async () => {
-          const text = root.querySelector('#storyTipShort')?.textContent?.trim() || '';
-          if(text) await copyText(text);
-        };
-      }
-
-      const btnCopyStoryTipLong = root.querySelector('#btnCopyStoryTipLong');
-      if(btnCopyStoryTipLong){
-        btnCopyStoryTipLong.onclick = async () => {
-          const text = root.querySelector('#storyTipLong')?.textContent?.trim() || '';
-          if(text) await copyText(text);
-        };
-      }
-    }
-
-    function renderMovedPaidDetail(){
-      const wrap = document.getElementById('movedPaidDetail');
-      const body = document.getElementById('movedPaidDetailBody');
-      if(!wrap || !body) return;
-      let html = '';
-      try{
-        html = sessionStorage.getItem('paid_detail_html') || '';
-      }catch(e){}
-      if(!html) return;
-      body.innerHTML = html;
-      wrap.classList.add('show');
-      bindMovedPaidActions(body);
-    }
-
     async function runPaidGuide(){
       const btn = document.getElementById('btnRunPaid');
       const card = document.getElementById('paidResultCard');
@@ -1383,8 +1330,6 @@
     })();
 
     document.getElementById('btnRunPaid')?.addEventListener('click', runPaidGuide);
-    renderMovedPaidDetail();
-
     // Auto-run when arriving from the paid CTA
     try {
       const params = new URLSearchParams(location.search);

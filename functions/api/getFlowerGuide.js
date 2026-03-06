@@ -62,10 +62,22 @@ function isValidVipCode(env, rawCode) {
   return list.includes(input);
 }
 
+function isSameOrigin(candidate, origin) {
+  if (!candidate) return false;
+  try {
+    return new URL(candidate).origin === origin;
+  } catch {
+    return false;
+  }
+}
+
 function corsHeadersFor(req) {
-  const origin = req.headers.get("Origin") || "*";
+  const requestUrl = new URL(req.url);
+  const requestOrigin = requestUrl.origin;
+  const originHeader = req.headers.get("Origin");
+  const allowedOrigin = isSameOrigin(originHeader, requestOrigin) ? originHeader : requestOrigin;
   return {
-    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     Vary: "Origin",
@@ -122,9 +134,18 @@ async function generateBouquetImageBase64({ apiKey, prompt }) {
 export async function onRequest(context) {
   const { request, env } = context;
   const cors = corsHeadersFor(request);
+  const requestUrl = new URL(request.url);
+  const requestOrigin = requestUrl.origin;
+  const originHeader = request.headers.get("origin");
+  const refererHeader = request.headers.get("referer");
+  const originAllowed =
+    !originHeader ||
+    isSameOrigin(originHeader, requestOrigin) ||
+    isSameOrigin(refererHeader, requestOrigin);
 
   if (request.method === "OPTIONS") return new Response("", { status: 204, headers: cors });
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405, cors);
+  if (!originAllowed) return json({ error: "forbidden_origin" }, 403, cors);
 
   let body = {};
   try {
@@ -157,6 +178,10 @@ export async function onRequest(context) {
       const limit = 3;
       const windowSec = 60 * 60 * 24; // 24시간
       const key = `rl:ip:${ip}`;
+
+      if (!env?.RATE_LIMIT) {
+        return json({ error: "missing_rate_limit_binding", hint: "KV binding name must be RATE_LIMIT" }, 500, cors);
+      }
 
       const raw = await env.RATE_LIMIT.get(key);
       const current = raw ? Number(raw) : 0;
