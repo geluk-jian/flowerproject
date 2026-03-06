@@ -1033,7 +1033,7 @@
       </div>
 
       <input id="vipGateInput" type="text" placeholder="" autocomplete="off"
-        style="margin-top:12px; width:100%; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-weight:900; letter-spacing:.5px; text-transform:uppercase;" />
+        style="margin-top:12px; width:100%; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-weight:900; font-size:16px; letter-spacing:.5px; text-transform:uppercase;" />
 
       <button id="vipGateSubmit" type="button" style="margin-top:10px; width:100%;">코드 확인</button>
 
@@ -1125,9 +1125,9 @@
     }
 
     function sanitizeUrl(url){
-      // 서버/외부 입력 URL은 http/https만 허용(나머지는 차단)
       try{
-        const u = new URL(String(url || ''), location.origin);
+        const base = document.baseURI || location.href; // 서브디렉토리 배포 대응
+        const u = new URL(String(url || ''), base);
         const allowed = ['http:', 'https:'];
         if(!allowed.includes(u.protocol)) return '';
         return u.href;
@@ -2220,7 +2220,10 @@
         const apiUrl = "/api/getFlowerGuide";
         const response = await fetch(apiUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': localStorage.getItem('ADMIN_KEY') || ''
+          },
           body: JSON.stringify({
             relation: userState.relation,
             occasion: userState.occasion,
@@ -2379,9 +2382,9 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
             .vip-order-detail-toggle { margin-top:10px; display:flex; justify-content:flex-end; }
             .vip-order-detail-body { margin-top:8px; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#ffffff; font-size:12px; font-weight:700; color:#374151; line-height:1.6; white-space:pre-wrap; display:none; }
             .vip-btn-full { width: 100%; padding: 12px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; }
-            .vip-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
-            .vip-head h3 { margin:0; }
-            .vip-head-actions { display:flex; gap:8px; }
+            .vip-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+            .vip-head h3 { margin:0; flex:1 1 220px; min-width:0; line-height:1.4; word-break:keep-all; }
+            .vip-head-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
             .vip-head-note { font-size:11px; font-weight:700; color:#64748b; white-space:nowrap; align-self:center; }
             .mini-btn { padding:8px 10px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); background:#fff; font-weight:700; cursor:pointer; }
             .vip-detail-row { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 13px; line-height:1.5; }
@@ -2395,6 +2398,11 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
             .vip-alt-wrap { margin-top:12px; }
             .vip-alt-head { margin-top:0; display:flex; justify-content:flex-end; }
             .vip-alt-body { display:none; }
+            @media (max-width: 560px) {
+              .vip-head h3 { flex-basis:100%; }
+              .vip-head-actions { width:100%; justify-content:flex-start; }
+              .vip-head-note { white-space:normal; }
+            }
           </style>
 
           <div class="vip-container">
@@ -2557,11 +2565,15 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
         if (btnCopyVipOrder) btnCopyVipOrder.onclick = copyOrder;
         if (btnCopyVipOrderMini) btnCopyVipOrderMini.onclick = copyOrder;
 
+        function isVisible(el){
+          return !!el && window.getComputedStyle(el).display !== 'none';
+        }
+
         const btnToggleOrderDetail = document.getElementById('btnToggleOrderDetail');
         const vipOrderDetailBody = document.getElementById('vipOrderDetailBody');
         if (btnToggleOrderDetail && vipOrderDetailBody) {
           btnToggleOrderDetail.onclick = () => {
-            const open = vipOrderDetailBody.style.display !== 'none';
+            const open = isVisible(vipOrderDetailBody);
             vipOrderDetailBody.style.display = open ? 'none' : 'block';
             btnToggleOrderDetail.textContent = open ? '상세 옵션(펼치기)' : '상세 옵션(접기)';
           };
@@ -2615,7 +2627,7 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
         const vipAltMsgsBody = document.getElementById('vipAltMsgsBody');
         if (btnToggleAltMsgs && vipAltMsgsBody) {
           btnToggleAltMsgs.addEventListener('click', () => {
-            const open = vipAltMsgsBody.style.display !== 'none';
+            const open = isVisible(vipAltMsgsBody);
             vipAltMsgsBody.style.display = open ? 'none' : 'block';
             btnToggleAltMsgs.textContent = open
               ? `다른 멘트 보기(${altMsgs.length}개)`
@@ -2642,6 +2654,7 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
           clearState();
           clearStickyPadding();
           stepIdx = 0;
+          clearOnlyResultParam();
           showScreen('screenQuiz');
           renderStep();
         });
@@ -2717,6 +2730,7 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
           clearState();
           clearStickyPadding();
           stepIdx = 0;
+          clearOnlyResultParam();
           showScreen('screenQuiz');
           renderStep();
         };
