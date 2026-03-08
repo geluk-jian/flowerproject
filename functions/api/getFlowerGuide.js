@@ -158,51 +158,6 @@ export async function onRequest(context) {
     return json({ error: "vip_code_required_or_invalid" }, 403, cors);
   }
 
-  // ==============================
-  // ✅ Rate limit (IP당 3회/24h) + ✅ Admin bypass
-  // - 관리자(너): x-admin-key 헤더가 env.ADMIN_KEY와 같으면 제한 없음
-  // - 일반 유저: VIP 코드 통과 후에만 카운트(억울한 카운트 방지)
-  // ==============================
-  const adminKey = request.headers.get("x-admin-key") || "";
-  const isAdmin = !!env.ADMIN_KEY && adminKey === env.ADMIN_KEY;
-
-  if (!isAdmin) {
-    const ip =
-      request.headers.get("cf-connecting-ip") ||
-      (request.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
-      "unknown";
-
-    // IP 못 얻는 경우(드묾)는 통과. 원하면 여기서 차단으로 바꿀 수 있음.
-    if (ip !== "unknown") {
-      // ✅ KV 바인딩: env.RATE_LIMIT 필요
-      const limit = 3;
-      const windowSec = 60 * 60 * 24; // 24시간
-      const key = `rl:ip:${ip}`;
-
-      if (!env?.RATE_LIMIT) {
-        return json({ error: "missing_rate_limit_binding", hint: "KV binding name must be RATE_LIMIT" }, 500, cors);
-      }
-
-      const raw = await env.RATE_LIMIT.get(key);
-      const current = raw ? Number(raw) : 0;
-
-      if (!Number.isFinite(current) || current < 0) {
-        await env.RATE_LIMIT.put(key, "1", { expirationTtl: windowSec });
-      } else if (current >= limit) {
-        return json(
-          {
-            error: "rate_limited",
-            message: "오늘 무료 생성 횟수(3회)를 모두 사용했어요. 내일 다시 시도해줘!",
-          },
-          429,
-          cors
-        );
-      } else {
-        await env.RATE_LIMIT.put(key, String(current + 1), { expirationTtl: windowSec });
-      }
-    }
-  }
-
   const guide = await buildGuide(body, env);
   return json(guide, 200, cors);
 }

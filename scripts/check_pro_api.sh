@@ -54,25 +54,17 @@ status_403="$(
 )"
 report "403_forbidden_origin" "$status_403" "403" "${TMP_DIR}/403.json"
 
-# 3) 429: 레이트리밋 확인 (동일 클라이언트로 연속 호출)
-# 참고: 플랫폼 프록시가 헤더를 재작성할 수 있어 헤더 고정은 보조 용도입니다.
-for i in $(seq 1 21); do
+# 3) 연속 호출: 동일 클라이언트 반복 호출도 정상 응답(200)이어야 함
+for i in $(seq 1 5); do
   code="$(
-    curl -sS -o "${TMP_DIR}/429_${i}.json" -w "%{http_code}" \
+    curl -sS -o "${TMP_DIR}/repeat_${i}.json" -w "%{http_code}" \
       -X POST "${API_URL}" \
       -H "Content-Type: application/json" \
       -H "CF-Connecting-IP: 9.9.9.9" \
       -H "X-Forwarded-For: 9.9.9.9" \
-      --data "{\"prompt\":\"rate limit test ${i}\"}"
+      --data "{\"prompt\":\"repeat request test ${i}\"}"
   )"
-  if [[ "$i" -lt 21 && "$code" == "429" ]]; then
-    echo "FAIL 429_rate_limited: got 429 too early at call ${i}"
-    fail_count=$((fail_count + 1))
-    break
-  fi
-  if [[ "$i" -eq 21 ]]; then
-    report "429_rate_limited" "$code" "429" "${TMP_DIR}/429_${i}.json"
-  fi
+  report "200_repeat_${i}" "$code" "200" "${TMP_DIR}/repeat_${i}.json"
 done
 
 echo
@@ -86,4 +78,3 @@ echo "Summary: pass=${pass_count}, fail=${fail_count}"
 if [[ "$fail_count" -gt 0 ]]; then
   exit 1
 fi
-
