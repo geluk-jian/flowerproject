@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google-adsense-account" content="ca-pub-5488141368125579" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5488141368125579"
-     crossorigin="anonymous"></script>
   <title>꽃을 만지는 누나가 도와드림</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
@@ -1049,6 +1047,26 @@
   </div>
 
   <script>
+    function loadAdSense() {
+      const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      if (isLocalhost || window.location.protocol === 'file:') return;
+      if (document.querySelector('script[data-adsense-loader="true"]')) return;
+      if (!document.body) return;
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.dataset.adsenseLoader = 'true';
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5488141368125579';
+      document.head.appendChild(script);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadAdSense, { once: true });
+    } else {
+      loadAdSense();
+    }
+
     const $ = (id) => document.getElementById(id);
     const byId = (id) => document.getElementById(id);
     let startSliderControl = null;
@@ -2094,8 +2112,8 @@
       // ====== 주문문장(미리보기 구성) ======
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}${cautionTextForOrder ? `<br/>참고사항: ${escapeHtml(tabooShortList.join(' · '))}` : ''}`;
       const basicMsgList = [basicMessage];
-      const paidBadge = 'TONEART';
-      const paidBtnText = PG_READY ? '👉 3,900원으로 시크릿 가이드 열기' : '🎁 화이트데이 한정기간 무료 오픈! (꽃다발 이미지)';
+      const paidBadge = '꽃다발';
+      const paidBtnText = PG_READY ? '👉 3,900원으로 시크릿 가이드 열기' : '3,900원으로 꽃다발 받기';
       const paidPriceGuideHtml = PG_READY ? `
           <div style="text-align: center; margin: 10px 0 10px;">
             <div style="font-weight: 700; color: #111827; margin-bottom: 6px;">🔒 잠깐! 꽃집에 가기 전, 완벽한 주문서를 확인하세요</div>
@@ -2167,7 +2185,7 @@
         <!-- [PAID] 디테일 확장 -->
         <div class="box paidCard" id="paidUpsellBox">
           <div class="paidHead">
-            <div class="paidTitle">🎁 화이트데이 이벤트 보너스 (시크릿 가이드 4가지)</div>
+            <div class="paidTitle">🎁 TONE ART 톤아트 시크릿 가이드</div>
             <div class="paidPrice">${paidBadge}</div>
           </div>
           <p class="paidSub">지금은 이벤트로 누구나 열람가능, 종료 후 유료로 전환될 수 있어요</p>
