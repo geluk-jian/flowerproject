@@ -1019,33 +1019,6 @@
     <div id="toast" class="toast">복사했어!</div>
   </div><!-- /#app -->
 
-  <div id="vipGateModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; padding:16px;">
-    <div style="width:min(420px, 100%); background:#fff; border-radius:16px; padding:16px; box-shadow:0 20px 50px rgba(0,0,0,.18);">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <div style="font-weight:900; font-size:16px;">🔒 시크릿 코드 입력</div>
-        <button id="vipGateClose" class="secondary" type="button">닫기</button>
-      </div>
-
-      <div style="margin-top:10px; font-size:13px; color:#475569; font-weight:750; line-height:1.5;">
-        인스타 DM으로 받은 코드를 입력하면 시크릿 가이드가 열려요.
-      </div>
-
-      <input id="vipGateInput" type="text" placeholder="" autocomplete="off"
-        style="margin-top:12px; width:100%; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-weight:900; font-size:16px; letter-spacing:.5px; text-transform:uppercase;" />
-
-      <button id="vipGateSubmit" type="button" style="margin-top:10px; width:100%;">코드 확인</button>
-
-      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="vipGateCopyDm" class="secondary" type="button" style="flex:1;">DM 요청 문구 복사</button>
-        <button id="vipGateGoInsta" class="secondary" type="button" style="flex:1;">인스타로 가기</button>
-      </div>
-
-      <div id="vipGateError" style="margin-top:10px; display:none; color:#dc2626; font-weight:900; font-size:13px;">
-        코드가 맞지 않아요. DM으로 코드 받아서 입력해줘!
-      </div>
-    </div>
-  </div>
-
   <script>
     function loadAdSense() {
       const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
@@ -1071,9 +1044,6 @@
     const byId = (id) => document.getElementById(id);
     let startSliderControl = null;
     const PG_READY = false; // ✅ 나중에 PG 붙으면 true로
-    let enteredVipCode = "";       // ✅ 사용자가 입력한 시크릿 코드
-    const VIP_GATE_ENABLED = true; // ✅ 게이트 켤지 말지
-    let runVipFlow = null;
 
     function initStartSlider(){
       const frame = byId('flowerSlide');
@@ -1203,26 +1173,6 @@
       }catch(e){
         return false;
       }
-    }
-
-    function normalizeVipCode(v){
-      return String(v || '').trim().toUpperCase().replace(/\s+/g,'');
-    }
-
-    function openVipGate(){
-      const modal = document.getElementById('vipGateModal');
-      const input = document.getElementById('vipGateInput');
-      const err = document.getElementById('vipGateError');
-      if(!modal || !input) return;
-      if(err) err.style.display = 'none';
-      input.value = '';
-      modal.style.display = 'flex';
-      input.focus();
-    }
-
-    function closeVipGate(){
-      const modal = document.getElementById('vipGateModal');
-      if(modal) modal.style.display = 'none';
     }
 
     async function downloadImage(url, filename){
@@ -2247,21 +2197,15 @@
             occasion: userState.occasion,
             style: userState.style,
             palette: userState.palette,
-            photoHabit: userState.photoHabit,
-            cautions: userState.cautions,
-            mainFlower: mainAsset.name,
-            mainFlowerKey: flowerKeyFromText(mainAsset.name) || '',
-            instruction: `유저 선택 6가지 데이터를 반영해서, 플로리스트 관점의 ‘실전 주문/가이드’로 작성해줘.
+          photoHabit: userState.photoHabit,
+          cautions: userState.cautions,
+          mainFlower: mainAsset.name,
+          mainFlowerKey: flowerKeyFromText(mainAsset.name) || '',
+          instruction: `유저 선택 6가지 데이터를 반영해서, 플로리스트 관점의 ‘실전 주문/가이드’로 작성해줘.
 옵션 나열(/) 금지, 한 항목당 확정안 1개만 제시. 한글로.`,
-            vipCode: enteredVipCode,
           })
         });
         if (!response.ok) {
-          if(response.status === 403){
-            openVipGate();
-            document.getElementById('vipGateError')?.style.setProperty('display','block');
-            throw new Error('vip_code_invalid');
-          }
           throw new Error('API 응답 실패');
         }
         return await response.json();
@@ -2703,14 +2647,13 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
         if (overlay) overlay.style.display = 'none';
       }
 
-      runVipFlow = async function(){
+      const runVipFlow = async function(){
         showLoadingUI();
         try {
           const apiResult = await fetchToneArtAPI(state);
           renderVipResult(apiResult);
         } catch (error) {
           console.error('API 호출 에러:', error);
-          if (String(error?.message || '') === 'vip_code_invalid') return;
           alert('결과를 불러오는 중 문제가 발생했어요. 다시 시도해 주세요.');
         } finally {
           hideLoadingUI();
@@ -2719,12 +2662,6 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
 
       const openPaidGuide = async (e) => {
         if (e && e.stopPropagation) e.stopPropagation();
-
-        if(VIP_GATE_ENABLED){
-          openVipGate();
-          return;
-        }
-
         await runVipFlow();
       };
 
@@ -2778,46 +2715,6 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
       }
     }
 
-    function initVipGate(){
-      const closeBtn = document.getElementById('vipGateClose');
-      const submitBtn = document.getElementById('vipGateSubmit');
-      const input = document.getElementById('vipGateInput');
-      const err = document.getElementById('vipGateError');
-      const copyDm = document.getElementById('vipGateCopyDm');
-      const goInsta = document.getElementById('vipGateGoInsta');
-
-      if(closeBtn) closeBtn.onclick = closeVipGate;
-
-      async function submit(){
-        const code = normalizeVipCode(input?.value);
-        if(!code){
-          if(err) err.style.display = 'block';
-          return;
-        }
-
-        enteredVipCode = code;
-        closeVipGate();
-        if (typeof runVipFlow === 'function') {
-          await runVipFlow();
-        }
-      }
-
-      if(submitBtn) submitBtn.onclick = submit;
-      if(input) input.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter') submit();
-      });
-
-      if(copyDm) copyDm.onclick = async ()=>{
-        const msg = '시크릿 코드 부탁드려요! (꽃집 누나 PICK 테스트 했어요)';
-        const ok = await copyText(msg);
-        toast(ok ? 'DM 문구를 복사했어!' : '복사 실패');
-      };
-
-      if(goInsta) goInsta.onclick = ()=>{
-        window.open('https://instagram.com/tone_art', '_blank', 'noopener');
-      };
-    }
-
     async function onShareSite(){
       const shareUrl = `${location.origin}${location.pathname}`;
       const shareText = `남친에게 보내기(링크 복사): ${shareUrl}`;
@@ -2866,7 +2763,6 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
     function initApp(){
       initTopInfoPanel();
       initStartSlider();
-      initVipGate();
       initBindings();
       initFromUrl();
     }
