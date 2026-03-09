@@ -166,7 +166,7 @@ export async function onRequest(context) {
  * ✅ 프론트(renderVipResult)가 기대하는 키:
  * imageUrl, targetName, moodLabel, orderText, wrapGuide, flowerMix, palettes, messages, priceInfo, meaning
  */
-async function buildGuide(body, env) {
+export async function buildGuide(body, env) {
   const relationRaw = String(body?.relation ?? "상대").trim();
   const occasionRaw = String(body?.occasion ?? "선물").trim();
   const styleKey = String(body?.style ?? "chic_elegant").trim();

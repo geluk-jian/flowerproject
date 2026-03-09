@@ -1043,7 +1043,12 @@
     const $ = (id) => document.getElementById(id);
     const byId = (id) => document.getElementById(id);
     let startSliderControl = null;
-    const PG_READY = false; // ✅ 나중에 PG 붙으면 true로
+    const PG_READY = true;
+    const PORTONE_USER_CODE = '2MhMz5FPv6G1cuXcwtxuvX1__';
+    const PORTONE_CHANNEL_KEY = 'channel-key-3d9b6f89-2530-49c3-8338-7e2343f7f177';
+    const PAID_PRODUCT_AMOUNT = 3900;
+    const PAID_PRODUCT_NAME = 'TONE ART 톤아트 시크릿 가이드';
+    let portoneSdkPromise = null;
 
     function initStartSlider(){
       const frame = byId('flowerSlide');
@@ -1142,6 +1147,67 @@
       // #RGB 또는 #RRGGBB만 허용
       if(/^#([0-9a-fA-F]{3}){1,2}$/.test(h)) return h;
       return '#22c55e'; // fallback
+    }
+
+    function getPortOneReturnParams(){
+      const params = new URLSearchParams(location.search);
+      return {
+        hasReturn:
+          params.has('portone_return') ||
+          params.has('imp_uid') ||
+          params.has('merchant_uid') ||
+          params.has('error_code') ||
+          params.has('error_msg'),
+        impUid: String(params.get('imp_uid') || '').trim(),
+        merchantUid: String(params.get('merchant_uid') || '').trim(),
+        errorCode: String(params.get('error_code') || '').trim(),
+        errorMsg: String(params.get('error_msg') || '').trim(),
+        impSuccess: String(params.get('imp_success') || '').trim()
+      };
+    }
+
+    function clearPortOneReturnParams(){
+      const url = new URL(location.href);
+      ['portone_return','imp_uid','merchant_uid','error_code','error_msg','imp_success'].forEach((key)=>{
+        url.searchParams.delete(key);
+      });
+      history.replaceState(null, '', url.toString());
+    }
+
+    function createMerchantUid(){
+      return `toneart_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function loadPortOneSdk(){
+      if(window.IMP && typeof window.IMP.init === 'function'){
+        return Promise.resolve(window.IMP);
+      }
+      if(portoneSdkPromise) return portoneSdkPromise;
+
+      portoneSdkPromise = new Promise((resolve, reject)=>{
+        const existing = document.querySelector('script[data-portone-sdk="true"]');
+        if(existing){
+          existing.addEventListener('load', ()=> resolve(window.IMP), { once: true });
+          existing.addEventListener('error', ()=> reject(new Error('portone_sdk_load_failed')), { once: true });
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.iamport.kr/v1/iamport.js';
+        script.async = true;
+        script.dataset.portoneSdk = 'true';
+        script.onload = ()=> {
+          if(window.IMP && typeof window.IMP.init === 'function'){
+            resolve(window.IMP);
+            return;
+          }
+          reject(new Error('portone_sdk_unavailable'));
+        };
+        script.onerror = ()=> reject(new Error('portone_sdk_load_failed'));
+        document.head.appendChild(script);
+      });
+
+      return portoneSdkPromise;
     }
 
     function toast(msg){
@@ -2063,7 +2129,7 @@
       const orderPreviewHtml = `📢 주문문장: ${escapeHtml(basicOrderSentence)}${cautionTextForOrder ? `<br/>참고사항: ${escapeHtml(tabooShortList.join(' · '))}` : ''}`;
       const basicMsgList = [basicMessage];
       const paidBadge = '꽃다발';
-      const paidBtnText = PG_READY ? '👉 3,900원으로 시크릿 가이드 열기' : '3,900원으로 꽃다발 받기';
+      const paidBtnText = '3,900원으로 꽃다발 받기';
       const paidPriceGuideHtml = PG_READY ? `
           <div style="text-align: center; margin: 10px 0 10px;">
             <div style="font-weight: 700; color: #111827; margin-bottom: 6px;">🔒 잠깐! 꽃집에 가기 전, 완벽한 주문서를 확인하세요</div>
@@ -2184,29 +2250,39 @@
       const paidUpsellBoxEl = $('paidUpsellBox');
       const btnOpenPaidEl = $('btnOpenPaid');
 
-      async function fetchToneArtAPI(userState) {
-        const apiUrl = "/api/getFlowerGuide";
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-key': localStorage.getItem('ADMIN_KEY') || ''
-          },
-          body: JSON.stringify({
-            relation: userState.relation,
-            occasion: userState.occasion,
-            style: userState.style,
-            palette: userState.palette,
+      function buildPaidRequestPayload(userState){
+        return {
+          relation: userState.relation,
+          occasion: userState.occasion,
+          style: userState.style,
+          palette: userState.palette,
           photoHabit: userState.photoHabit,
           cautions: userState.cautions,
           mainFlower: mainAsset.name,
           mainFlowerKey: flowerKeyFromText(mainAsset.name) || '',
           instruction: `유저 선택 6가지 데이터를 반영해서, 플로리스트 관점의 ‘실전 주문/가이드’로 작성해줘.
-옵션 나열(/) 금지, 한 항목당 확정안 1개만 제시. 한글로.`,
+옵션 나열(/) 금지, 한 항목당 확정안 1개만 제시. 한글로.`
+        };
+      }
+
+      async function verifyPortOnePayment(impUid, merchantUid, userState) {
+        const apiUrl = "/api/verifyPortonePayment";
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...buildPaidRequestPayload(userState),
+            imp_uid: impUid,
+            merchant_uid: merchantUid,
+            expectedAmount: PAID_PRODUCT_AMOUNT
           })
         });
+
         if (!response.ok) {
-          throw new Error('API 응답 실패');
+          const errorData = await response.json().catch(()=> ({}));
+          throw new Error(errorData.error || 'payment_verify_failed');
         }
         return await response.json();
       }
@@ -2647,22 +2723,81 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
         if (overlay) overlay.style.display = 'none';
       }
 
-      const runVipFlow = async function(){
+      let paymentFlowRunning = false;
+
+      const runVipFlow = async function(impUid, merchantUid){
+        if(paymentFlowRunning) return;
+        paymentFlowRunning = true;
         showLoadingUI();
         try {
-          const apiResult = await fetchToneArtAPI(state);
-          renderVipResult(apiResult);
+          const apiResult = await verifyPortOnePayment(impUid, merchantUid, state);
+          renderVipResult(apiResult.result || apiResult);
+          clearPortOneReturnParams();
         } catch (error) {
           console.error('API 호출 에러:', error);
-          alert('결과를 불러오는 중 문제가 발생했어요. 다시 시도해 주세요.');
+          clearPortOneReturnParams();
+          alert('결제 확인 또는 결과 생성 중 문제가 발생했어요. 다시 시도해 주세요.');
         } finally {
+          paymentFlowRunning = false;
           hideLoadingUI();
         }
       };
 
       const openPaidGuide = async (e) => {
         if (e && e.stopPropagation) e.stopPropagation();
-        await runVipFlow();
+        const btn = $('btnOpenPaid');
+        const originalText = btn ? btn.textContent : '';
+        try{
+          if(btn){
+            btn.disabled = true;
+            btn.textContent = '결제창 여는 중...';
+          }
+
+          const IMP = await loadPortOneSdk();
+          if(!IMP) throw new Error('portone_sdk_unavailable');
+
+          IMP.init(PORTONE_USER_CODE);
+
+          const merchantUid = createMerchantUid();
+          const redirectUrl = new URL(location.href);
+          redirectUrl.searchParams.set('portone_return', '1');
+
+          const rsp = await new Promise((resolve, reject)=>{
+            IMP.request_pay({
+              pg: 'tosspayments',
+              channelKey: PORTONE_CHANNEL_KEY,
+              pay_method: 'card',
+              merchant_uid: merchantUid,
+              name: PAID_PRODUCT_NAME,
+              amount: PAID_PRODUCT_AMOUNT,
+              buyer_name: String(state.relation || '고객'),
+              m_redirect_url: redirectUrl.toString()
+            }, (response)=>{
+              const errorMsg = String(response?.error_msg || response?.errorMessage || '').trim();
+              if(errorMsg){
+                reject(new Error(errorMsg));
+                return;
+              }
+              if(!response?.imp_uid || !response?.merchant_uid){
+                reject(new Error('payment_response_invalid'));
+                return;
+              }
+              resolve(response);
+            });
+          });
+
+          await runVipFlow(rsp.imp_uid, rsp.merchant_uid);
+        }catch(error){
+          console.error('결제창 호출 에러:', error);
+          if(String(error?.message || '') !== 'payment_response_invalid'){
+            alert('결제가 취소되었거나 결제창을 열지 못했어요.');
+          }
+        }finally{
+          if(btn){
+            btn.disabled = false;
+            btn.textContent = originalText || '3,900원으로 꽃다발 받기';
+          }
+        }
       };
 
       if (btnOpenPaidEl) {
@@ -2694,6 +2829,20 @@ ${mainLine}포장/톤은 정돈된 느낌으로 부탁드립니다. 픽업/배�
       const btnHomeEl = $('btnHome');
       if(btnHomeEl){
         btnHomeEl.onclick = resetAll;
+      }
+
+      const paymentReturn = getPortOneReturnParams();
+      if(paymentReturn.hasReturn){
+        if(paymentReturn.errorCode || paymentReturn.errorMsg || paymentReturn.impSuccess === 'false'){
+          clearPortOneReturnParams();
+          setTimeout(()=> {
+            alert(paymentReturn.errorMsg || '결제가 취소되었어요.');
+          }, 0);
+        } else if(paymentReturn.impUid && paymentReturn.merchantUid){
+          setTimeout(()=> {
+            runVipFlow(paymentReturn.impUid, paymentReturn.merchantUid);
+          }, 0);
+        }
       }
 
       showScreen('screenResult');
