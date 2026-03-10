@@ -41,6 +41,10 @@ function createRid() {
   return `rid_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function getAccessToken(apiKey, apiSecret) {
   const res = await fetch("https://api.iamport.kr/users/getToken", {
     method: "POST",
@@ -77,6 +81,58 @@ async function getPayment(accessToken, impUid) {
   }
 
   return data.response;
+}
+
+async function getPaymentByMerchantUid(accessToken, merchantUid) {
+  const res = await fetch(
+    `https://api.iamport.kr/payments/find/${encodeURIComponent(merchantUid)}/paid`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: accessToken,
+      },
+    }
+  );
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok || data?.code !== 0 || !data?.response) {
+    throw new Error(
+      `portone_payment_lookup_by_merchant_uid_failed:${res.status}:${data?.message || data?.code || "unknown"}`
+    );
+  }
+
+  return data.response;
+}
+
+async function getPaymentWithFallback(accessToken, impUid, merchantUid) {
+  try {
+    return await getPayment(accessToken, impUid);
+  } catch (error) {
+    const message = String(error?.message || "");
+    if (!message.startsWith("portone_payment_lookup_failed:404:")) {
+      throw error;
+    }
+  }
+
+  // 결제 완료 직후에는 imp_uid 단건조회가 잠깐 404일 수 있어 merchant_uid 기준으로 재시도합니다.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (attempt > 0) {
+      await sleep(700);
+    }
+    try {
+      return await getPaymentByMerchantUid(accessToken, merchantUid);
+    } catch (fallbackError) {
+      const fallbackMessage = String(fallbackError?.message || "");
+      if (
+        attempt === 2 ||
+        !fallbackMessage.startsWith("portone_payment_lookup_by_merchant_uid_failed:404:")
+      ) {
+        throw fallbackError;
+      }
+    }
+  }
+
+  throw new Error("portone_payment_lookup_failed:404:payment_not_found_after_fallback");
 }
 
 export async function onRequest(context) {
@@ -116,7 +172,7 @@ export async function onRequest(context) {
 
   try {
     const accessToken = await getAccessToken(env.PORTONE_API_KEY, env.PORTONE_API_SECRET);
-    const payment = await getPayment(accessToken, impUid);
+    const payment = await getPaymentWithFallback(accessToken, impUid, merchantUid);
 
     if (String(payment?.merchant_uid || "").trim() !== merchantUid) {
       return json({ error: "merchant_uid_mismatch" }, 400, cors);
