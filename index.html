@@ -2043,11 +2043,7 @@
       }[state.palette] || '미선택';
 
       // ====== Hero 요약 데이터 만들기 ======
-      const mainAsset = getMainFlowerAsset({
-        personality,
-        state,
-        mainList: main
-      });
+      const mainAsset = getCurrentMainAsset(state);
 
       const msgs = buildMessages({
         relation: state.relation,
@@ -2250,7 +2246,20 @@
       const paidUpsellBoxEl = $('paidUpsellBox');
       const btnOpenPaidEl = $('btnOpenPaid');
 
+      function getCurrentMainAsset(userState){
+        const safeState = userState || {};
+        const personality = mapPersonality(safeState.style, safeState.palette, safeState.occasion, safeState.photoHabit);
+        const profile = profiles[personality];
+        const { main } = pickFlowers(profile, safeState);
+        return getMainFlowerAsset({
+          personality,
+          state: safeState,
+          mainList: main
+        });
+      }
+
       function buildPaidRequestPayload(userState){
+        const resolvedMainAsset = getCurrentMainAsset(userState);
         return {
           relation: userState.relation,
           occasion: userState.occasion,
@@ -2258,8 +2267,8 @@
           palette: userState.palette,
           photoHabit: userState.photoHabit,
           cautions: userState.cautions,
-          mainFlower: mainAsset.name,
-          mainFlowerKey: flowerKeyFromText(mainAsset.name) || '',
+          mainFlower: resolvedMainAsset.name,
+          mainFlowerKey: flowerKeyFromText(resolvedMainAsset.name) || '',
           instruction: `유저 선택 6가지 데이터를 반영해서, 플로리스트 관점의 ‘실전 주문/가이드’로 작성해줘.
 옵션 나열(/) 금지, 한 항목당 확정안 1개만 제시. 한글로.`
         };
@@ -2282,12 +2291,13 @@
 
         if (!response.ok) {
           const errorData = await response.json().catch(()=> ({}));
-          throw new Error(errorData.error || 'payment_verify_failed');
+          throw new Error(errorData.detail || errorData.error || 'payment_verify_failed');
         }
         return await response.json();
       }
 
       function renderVipResult(data) {
+        const mainAsset = getCurrentMainAsset(state);
         const messages = Array.isArray(data.messages) ? data.messages : [];
         const palettes = Array.isArray(data.palettes) ? data.palettes : [];
         const imageSource = String(data.imageSource || '').trim();
