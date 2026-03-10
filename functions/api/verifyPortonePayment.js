@@ -53,7 +53,9 @@ async function getAccessToken(apiKey, apiSecret) {
 
   const data = await res.json().catch(() => null);
   if (!res.ok || data?.code !== 0 || !data?.response?.access_token) {
-    throw new Error("portone_token_failed");
+    throw new Error(
+      `portone_token_failed:${res.status}:${data?.message || data?.code || "unknown"}`
+    );
   }
 
   return data.response.access_token;
@@ -69,7 +71,9 @@ async function getPayment(accessToken, impUid) {
 
   const data = await res.json().catch(() => null);
   if (!res.ok || data?.code !== 0 || !data?.response) {
-    throw new Error("portone_payment_lookup_failed");
+    throw new Error(
+      `portone_payment_lookup_failed:${res.status}:${data?.message || data?.code || "unknown"}`
+    );
   }
 
   return data.response;
